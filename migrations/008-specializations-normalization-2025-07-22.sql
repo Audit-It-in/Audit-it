@@ -89,7 +89,7 @@ BEGIN
     -- Insert GST Services
     INSERT INTO public.specializations (name, code, category_id, display_order) VALUES
         ('GST Registration', 'gst-registration', gst_cat_id, 1),
-        ('GST Filing', 'gst-filing', gst_cat_id, 2),
+        ('GST Filing', 'gst-filing', gst_cat_id, 2)
 
     ON CONFLICT (code) DO NOTHING;
 
