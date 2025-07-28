@@ -1,17 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/src/components/ui/button";
-import { Badge } from "@/src/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
 import { useAuth } from "@/src/hooks/useAuth";
 import { APP_CONFIG } from "@/src/constants/app.constants";
-import { UserRole } from "@/src/types/auth.type";
-import { ListIcon, XIcon, UserIcon, SignOutIcon, GearIcon } from "@phosphor-icons/react";
+import { SignOutIcon, ChartBarIcon, UserIcon, PiIcon } from "@phosphor-icons/react";
+import { Logo } from "@/src/components/common/Logo.component";
 
 export function Header() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, profile, isAuthenticated, signOut } = useAuth();
 
   const handleSignOut = async () => {
@@ -23,154 +19,76 @@ export function Header() {
   };
 
   return (
-    <header className='sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60'>
-      <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='flex h-16 items-center justify-between'>
-          {/* Logo and Brand */}
-          <div className='flex items-center space-x-4'>
-            <Link href='/' className='flex items-center space-x-2'>
-              <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600'>
-                <span className='text-sm font-bold text-white'>TF</span>
-              </div>
-              <div className='hidden sm:block'>
-                <h1 className='text-xl font-bold text-neutral-900'>{APP_CONFIG.name}</h1>
-                <p className='text-xs text-neutral-600'>{APP_CONFIG.tagline}</p>
-              </div>
-            </Link>
-          </div>
+    <header className='sticky top-0 z-50 w-full bg-gray-100'>
+      {/* Neumorphic header container */}
+      <div className='bg-gray-100 shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),inset_0_-2px_4px_rgba(0,0,0,0.1)] border-b border-gray-200/50'>
+        <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
+          <div className='flex h-16 items-center justify-between'>
+            {/* Logo and Brand - Neumorphic */}
+            <div className='flex items-center space-x-3'>
+              <Link href='/' className='flex items-center space-x-3 group'>
+                {/* Neumorphic logo container */}
+                <div className='p-2 bg-gray-100 rounded-xl shadow-[4px_4px_8px_rgba(0,0,0,0.15),-4px_-4px_8px_rgba(255,255,255,0.9)] group-hover:shadow-[2px_2px_4px_rgba(0,0,0,0.15),-2px_-2px_4px_rgba(255,255,255,0.9)] transition-all duration-200'>
+                  <Logo />
+                </div>
+                <span className='font-bold text-xl text-gray-900 drop-shadow-sm'>{APP_CONFIG.name.toLowerCase()}</span>
+              </Link>
+            </div>
 
-          {/* Desktop Navigation */}
-          <nav className='hidden md:flex items-center space-x-6'>
-            <Link
-              href='/accountants'
-              className='text-sm font-medium text-neutral-700 hover:text-primary-600 transition-colors'
-            >
-              Find CAs
-            </Link>
-            <Link
-              href='/services'
-              className='text-sm font-medium text-neutral-700 hover:text-primary-600 transition-colors'
-            >
-              Services
-            </Link>
-            <Link
-              href='/about'
-              className='text-sm font-medium text-neutral-700 hover:text-primary-600 transition-colors'
-            >
-              About
-            </Link>
-          </nav>
+            {/* Authentication Actions - Neumorphic */}
+            <div className='flex items-center space-x-4'>
+              {isAuthenticated ? (
+                <>
+                  {/* User Avatar - Neumorphic */}
+                  <div className='flex items-center space-x-3'>
+                    <div className='p-1 bg-gray-100 rounded-full shadow-[inset_2px_2px_4px_rgba(0,0,0,0.1),inset_-2px_-2px_4px_rgba(255,255,255,0.9)]'>
+                      <Avatar className='h-8 w-8 shadow-[2px_2px_4px_rgba(0,0,0,0.2)]'>
+                        <AvatarImage src={profile?.profile_picture_url} />
+                        <AvatarFallback className='bg-gray-200 text-gray-600'>
+                          <UserIcon className='h-4 w-4' />
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
+                    <span className='hidden sm:block text-sm font-medium text-gray-700 drop-shadow-sm'>
+                      {profile?.first_name || user?.email?.split("@")[0] || "User"}
+                    </span>
+                  </div>
 
-          {/* User Actions */}
-          <div className='flex items-center space-x-4'>
-            {isAuthenticated ? (
-              <div className='flex items-center space-x-3'>
-                {profile?.role === UserRole.ACCOUNTANT && (
-                  <Badge variant='secondary' className='hidden sm:inline-flex'>
-                    CA
-                  </Badge>
-                )}
+                  {/* Dashboard Button - Neumorphic */}
+                  <Link href='/dashboard'>
+                    <div className='bg-gray-100 rounded-lg shadow-[4px_4px_8px_rgba(0,0,0,0.15),-4px_-4px_8px_rgba(255,255,255,0.9)] hover:shadow-[2px_2px_4px_rgba(0,0,0,0.15),-2px_-2px_4px_rgba(255,255,255,0.9)] active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.2),inset_-2px_-2px_4px_rgba(255,255,255,0.7)] transition-all duration-200 cursor-pointer'>
+                      <div className='flex items-center space-x-2 px-4 py-2 text-gray-700'>
+                        <ChartBarIcon className='h-4 w-4' />
+                        <span className='hidden sm:inline text-sm font-medium'>Dashboard</span>
+                      </div>
+                    </div>
+                  </Link>
 
-                <div className='relative group'>
-                  <Button variant='ghost' size='sm' className='flex items-center space-x-2'>
-                    <Avatar className='h-8 w-8'>
-                      <AvatarImage src={profile?.profile_picture_url} />
-                      <AvatarFallback>{profile?.first_name?.[0] || user?.email?.[0] || "U"}</AvatarFallback>
-                    </Avatar>
-                    <span className='hidden sm:block text-sm'>{profile?.first_name || "Profile"}</span>
-                  </Button>
-
-                  {/* Dropdown Menu */}
-                  <div className='absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200'>
-                    <div className='py-1'>
-                      <Link
-                        href='/profile'
-                        className='flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50'
-                      >
-                        <UserIcon className='h-4 w-4 mr-2' />
-                        Profile
-                      </Link>
-                      <Link
-                        href='/settings'
-                        className='flex items-center px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50'
-                      >
-                        <GearIcon className='h-4 w-4 mr-2' />
-                        Settings
-                      </Link>
-                      <button
-                        onClick={handleSignOut}
-                        className='flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50'
-                      >
-                        <SignOutIcon className='h-4 w-4 mr-2' />
-                        Sign Out
-                      </button>
+                  {/* Sign Out Button - Neumorphic */}
+                  <div
+                    onClick={handleSignOut}
+                    className='bg-gray-100 rounded-lg shadow-[4px_4px_8px_rgba(0,0,0,0.15),-4px_-4px_8px_rgba(255,255,255,0.9)] hover:shadow-[2px_2px_4px_rgba(0,0,0,0.15),-2px_-2px_4px_rgba(255,255,255,0.9)] active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.2),inset_-2px_-2px_4px_rgba(255,255,255,0.7)] transition-all duration-200 cursor-pointer'
+                  >
+                    <div className='flex items-center space-x-2 px-4 py-2 text-red-600 hover:text-red-700'>
+                      <SignOutIcon className='h-4 w-4' />
+                      <span className='hidden sm:inline text-sm font-medium'>Sign Out</span>
                     </div>
                   </div>
-                </div>
-              </div>
-            ) : (
-              <div className='flex items-center space-x-2'>
+                </>
+              ) : (
                 <Link href='/auth'>
-                  <Button
-                    size='sm'
-                    className='bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-2 h-10 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-0 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2'
-                  >
-                    Sign In
-                  </Button>
+                  {/* Sign In Button - Raised Neumorphic like Logo */}
+                  <div className='bg-gray-100 rounded-2xl shadow-[4px_4px_8px_rgba(0,0,0,0.15),-4px_-4px_8px_rgba(255,255,255,0.9)] hover:shadow-[2px_2px_4px_rgba(0,0,0,0.15),-2px_-2px_4px_rgba(255,255,255,0.9)] active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.2),inset_-2px_-2px_4px_rgba(255,255,255,0.7)] transition-all duration-200 cursor-pointer'>
+                    <div className='flex items-center space-x-2 px-4 py-2'>
+                      <PiIcon className='h-5 w-5 text-blue-600' weight='bold' />
+                      <span className='text-gray-900 font-semibold text-md'>Sign In</span>
+                    </div>
+                  </div>
                 </Link>
-              </div>
-            )}
-
-            {/* Mobile Menu Button */}
-            <Button
-              variant='ghost'
-              size='sm'
-              className='md:hidden'
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <XIcon className='h-5 w-5' /> : <ListIcon className='h-5 w-5' />}
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className='md:hidden'>
-            <div className='px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t'>
-              <Link
-                href='/accountants'
-                className='block px-3 py-2 text-base font-medium text-neutral-700 hover:text-primary-600 hover:bg-neutral-50 rounded-md'
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Find CAs
-              </Link>
-              <Link
-                href='/services'
-                className='block px-3 py-2 text-base font-medium text-neutral-700 hover:text-primary-600 hover:bg-neutral-50 rounded-md'
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Services
-              </Link>
-              <Link
-                href='/about'
-                className='block px-3 py-2 text-base font-medium text-neutral-700 hover:text-primary-600 hover:bg-neutral-50 rounded-md'
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                About
-              </Link>
-
-              {!isAuthenticated && (
-                <div className='px-3 pt-4 pb-2'>
-                  <Link href='/auth' onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button className='w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-0'>
-                      Join Audit-it
-                    </Button>
-                  </Link>
-                </div>
               )}
             </div>
           </div>
-        )}
+        </div>
       </div>
     </header>
   );
