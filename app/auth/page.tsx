@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/src/components/ui/button";
 import { useGoogleSignIn } from "@/src/services/auth.service";
 import { GoogleLogoIcon } from "@phosphor-icons/react";
@@ -12,15 +13,44 @@ import { Footer } from "@/src/components/layout/Footer.component";
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
+  const [statusMessage, setStatusMessage] = useState<{ type: "error" | "info"; text: string } | null>(null);
+  const searchParams = useSearchParams();
 
   const googleSignInMutation = useGoogleSignIn();
 
+  useEffect(() => {
+    const error = searchParams.get("error");
+    const message = searchParams.get("message");
+
+    if (error) {
+      switch (error) {
+        case "access_denied":
+          setStatusMessage({ type: "info", text: "Sign in was cancelled. You can try again whenever you're ready." });
+          break;
+        case "callback_error":
+          setStatusMessage({ type: "error", text: "There was an error during sign in. Please try again." });
+          break;
+        default:
+          setStatusMessage({ type: "error", text: "An error occurred during sign in. Please try again." });
+      }
+    } else if (message === "cancelled") {
+      setStatusMessage({ type: "info", text: "Sign in was cancelled. You can try again whenever you're ready." });
+    }
+
+    // Clear the URL parameters after showing the message
+    if (error || message) {
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, "", newUrl);
+    }
+  }, [searchParams]);
+
   const onGoogleSignIn = async () => {
     try {
+      setStatusMessage(null); // Clear any previous messages
       await googleSignInMutation.mutateAsync();
     } catch (error: unknown) {
       console.error("Google sign in error:", error);
-      // Handle error (show toast, etc.)
+      setStatusMessage({ type: "error", text: "Failed to initiate Google sign in. Please try again." });
     }
   };
 
@@ -74,6 +104,19 @@ export default function AuthPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Status Message */}
+              {statusMessage && (
+                <div className='px-6 pb-2'>
+                  <div className={`p-4 rounded-xl text-sm ${
+                    statusMessage.type === "error" 
+                      ? "bg-red-50/80 border border-red-200/60 text-red-700" 
+                      : "bg-blue-50/80 border border-blue-200/60 text-blue-700"
+                  }`}>
+                    {statusMessage.text}
+                  </div>
+                </div>
+              )}
 
               {/* Form container with proper height and centering */}
               <div className='px-6'>

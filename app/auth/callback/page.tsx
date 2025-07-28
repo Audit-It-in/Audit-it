@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getCurrentSession } from "@/src/services/auth.service";
 import { useSetAtom } from "jotai";
 import { authUserAtom } from "@/src/store/auth.store";
@@ -9,10 +9,30 @@ import { CircleNotchIcon } from "@phosphor-icons/react";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const setUser = useSetAtom(authUserAtom);
 
   useEffect(() => {
     const handleAuthCallback = async () => {
+      // Check for OAuth errors in URL parameters
+      const error = searchParams.get("error");
+      const errorDescription = searchParams.get("error_description");
+
+      if (error) {
+        console.error("OAuth error:", error, errorDescription);
+
+        // Handle specific OAuth errors
+        if (error === "access_denied") {
+          // User cancelled the OAuth flow
+          router.push("/auth?message=cancelled");
+          return;
+        }
+
+        // Other OAuth errors
+        router.push(`/auth?error=${error}`);
+        return;
+      }
+
       try {
         const { user, session } = await getCurrentSession();
 
@@ -29,7 +49,7 @@ export default function AuthCallbackPage() {
     };
 
     handleAuthCallback();
-  }, [router, setUser]);
+  }, [router, setUser, searchParams]);
 
   return (
     <div className='min-h-screen bg-neutral-50 flex items-center justify-center'>
