@@ -1,6 +1,6 @@
 # Database Migrations
 
-This directory contains SQL migration scripts for the Xpertly CA Platform database.
+This directory contains SQL migration scripts for the Audit-it CA Platform database.
 
 ## Naming Convention
 

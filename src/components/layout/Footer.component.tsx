@@ -30,7 +30,7 @@ export function Footer() {
             <h4 className='text-sm font-semibold text-white mb-4'>Quick Links</h4>
             <ul className='space-y-2'>
               <li>
-                <Link href='/xperts' className='text-sm text-neutral-300 hover:text-white transition-colors'>
+                <Link href='/accountants' className='text-sm text-neutral-300 hover:text-white transition-colors'>
                   Find CAs
                 </Link>
               </li>
@@ -57,22 +57,22 @@ export function Footer() {
             <h4 className='text-sm font-semibold text-white mb-4'>For CAs</h4>
             <ul className='space-y-2'>
               <li>
-                <Link href='/xpert/register' className='text-sm text-neutral-300 hover:text-white transition-colors'>
+                <Link href='/accountant/register' className='text-sm text-neutral-300 hover:text-white transition-colors'>
                   Join as CA
                 </Link>
               </li>
               <li>
-                <Link href='/xpert/dashboard' className='text-sm text-neutral-300 hover:text-white transition-colors'>
+                <Link href='/accountant/dashboard' className='text-sm text-neutral-300 hover:text-white transition-colors'>
                   CA Dashboard
                 </Link>
               </li>
               <li>
-                <Link href='/xpert/pricing' className='text-sm text-neutral-300 hover:text-white transition-colors'>
+                <Link href='/accountant/pricing' className='text-sm text-neutral-300 hover:text-white transition-colors'>
                   Pricing
                 </Link>
               </li>
               <li>
-                <Link href='/xpert/help' className='text-sm text-neutral-300 hover:text-white transition-colors'>
+                <Link href='/accountant/help' className='text-sm text-neutral-300 hover:text-white transition-colors'>
                   Help Center
                 </Link>
               </li>

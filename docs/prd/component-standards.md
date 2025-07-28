@@ -592,4 +592,4 @@ Before submitting any component for review, ensure:
 
 ---
 
-_These standards ensure consistent, maintainable, and high-quality component development across the Xpertly CA Platform using modern best practices with shadcn/ui._
+_These standards ensure consistent, maintainable, and high-quality component development across the Audit-it CA Platform using modern best practices with shadcn/ui._

@@ -2,7 +2,7 @@ import { User as SupabaseUser } from "@supabase/supabase-js";
 import { Profile } from "./profile.type";
 
 export enum UserRole {
-  XPERT = "xpert",
+  ACCOUNTANT = "accountant",
   CUSTOMER = "customer",
   ADMIN = "admin",
 }

@@ -42,7 +42,7 @@ export function Header() {
           {/* Desktop Navigation */}
           <nav className='hidden md:flex items-center space-x-6'>
             <Link
-              href='/xperts'
+              href='/accountants'
               className='text-sm font-medium text-neutral-700 hover:text-primary-600 transition-colors'
             >
               Find CAs
@@ -65,7 +65,7 @@ export function Header() {
           <div className='flex items-center space-x-4'>
             {isAuthenticated ? (
               <div className='flex items-center space-x-3'>
-                {profile?.role === UserRole.XPERT && (
+                {profile?.role === UserRole.ACCOUNTANT && (
                   <Badge variant='secondary' className='hidden sm:inline-flex'>
                     CA
                   </Badge>
@@ -138,7 +138,7 @@ export function Header() {
           <div className='md:hidden'>
             <div className='px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t'>
               <Link
-                href='/xperts'
+                href='/accountants'
                 className='block px-3 py-2 text-base font-medium text-neutral-700 hover:text-primary-600 hover:bg-neutral-50 rounded-md'
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -163,7 +163,7 @@ export function Header() {
                 <div className='px-3 pt-4 pb-2'>
                   <Link href='/auth' onClick={() => setIsMobileMenuOpen(false)}>
                     <Button className='w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border-0'>
-                      Join TheFinXperts
+                      Join Audit-it
                     </Button>
                   </Link>
                 </div>

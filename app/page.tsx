@@ -70,7 +70,7 @@ export default function HomePage() {
                     </Button>
                   </div>
 
-                  <Link href='/xperts'>
+                  <Link href='/accountants'>
                     <Button className='w-full h-12 text-lg bg-primary-600 hover:bg-primary-700'>Search CAs</Button>
                   </Link>
                 </div>
@@ -162,12 +162,12 @@ export default function HomePage() {
               Join thousands who trust {APP_CONFIG.name} for their financial needs.
             </p>
             <div className='flex flex-col sm:flex-row gap-4 justify-center'>
-              <Link href='/xperts'>
+              <Link href='/accountants'>
                 <Button className='bg-white text-primary-900 hover:bg-neutral-50 shadow-lg hover:shadow-xl px-8 py-3'>
                   Find CAs Near Me
                 </Button>
               </Link>
-              <Link href='/xpert/register'>
+              <Link href='/accountant/register'>
                 <Button
                   variant='outline'
                   className='border-white text-white hover:bg-white hover:text-primary-900 px-8 py-3'
