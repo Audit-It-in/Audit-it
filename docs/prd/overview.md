@@ -1,12 +1,12 @@
-# TheFinXperts Platform Overview
+# Audit-it Platform Overview
 
 ## Quick Summary
 
-- **Project:** NoBroker-style Chartered Accountant listing platform (thefinxperts.com)
+- **Project:** NoBroker-style Chartered Accountant listing platform (audit-it.com)
 - **Objective:** Mobile-first, modular CA discovery and contact portal
 - **Key Constraint:** All components under 200 lines of code
 - **Status:** Active development with Contact Request and Profile systems
-- **SEO Strategy:** Display "CA" terminology for SEO, use "xpert" internally for flexibility
+- **SEO Strategy:** Display "CA" terminology for SEO, use "accountant" internally for consistency
 
 ## Detailed Sections
 
@@ -22,14 +22,14 @@
 
 ## Project Description
 
-**Project Name:** thefinxperts.com
+**Project Name:** audit-it.com
 **Description:** A NoBroker-style platform where users can discover, filter, and contact Chartered Accountants (CAs).  
 **Objective:** Build a mobile-first, modular, and maintainable CA listing portal from scratch. Every UI component must be kept under **200 lines of code** and all progress, context, and guidelines must be meticulously tracked via dedicated documents.
 
 ### SEO & Technical Strategy
 
 **Display Strategy:** All user-facing content uses "CA" and "Chartered Accountant" terminology for optimal SEO and user familiarity.
-**Internal Architecture:** Uses "xpert" terminology in code (URLs, enums, database) for future extensibility to other financial experts.
+**Internal Architecture:** Uses "accountant" terminology in code (URLs, enums, database) for clarity and consistency.
 
 ### Key Documentation Structure
 
@@ -122,28 +122,28 @@
 
 ### Hybrid Terminology Approach
 
-**Rationale:** Balance SEO optimization with technical flexibility for future platform expansion.
+**Rationale:** Balance SEO optimization with technical clarity and consistency.
 
 #### User-Facing Content (SEO Optimized)
 
 - **Display Text**: "CA", "Chartered Accountant", "Find CAs"
-- **URLs**: `/xperts` (clean, brandable)
+- **URLs**: `/accountants` (clean, descriptive)
 - **Meta Tags**: "chartered accountant", "CA", "tax filing"
 - **Content**: Focus on CA-specific terminology for search visibility
 
-#### Internal Architecture (Future-Proof)
+#### Internal Architecture (Consistent)
 
-- **Database Role**: `UserRole.XPERT = "xpert"`
-- **Code Variables**: `isXpert`, `xpertProfile`
-- **API Endpoints**: `/xpert/register`, `/xpert/dashboard`
-- **Storage**: `XPERT_CERTIFICATES` bucket
+- **Database Role**: `UserRole.ACCOUNTANT = "accountant"`
+- **Code Variables**: `isAccountant`, `accountantProfile`
+- **API Endpoints**: `/accountant/register`, `/accountant/dashboard`
+- **Storage**: `ACCOUNTANT_CERTIFICATES` bucket
 
 #### Benefits
 
 1. **SEO**: Optimized for "CA" searches (primary market demand)
-2. **Flexibility**: Easy expansion to other financial experts later
+2. **Clarity**: Clear and descriptive internal terminology
 3. **Consistency**: Clean internal code structure
-4. **Scalability**: Can add tax advisors, financial planners without breaking changes
+4. **Maintainability**: Easily understood by developers and stakeholders
 
 ---
 

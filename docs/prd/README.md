@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains comprehensive product requirements and development standards for the TheFinXperts CA Platform. These documents serve as the single source of truth for architecture decisions, coding standards, and design patterns.
+This directory contains comprehensive product requirements and development standards for the Audit-it CA Platform. These documents serve as the single source of truth for architecture decisions, coding standards, and design patterns.
 
 ## Quick Navigation
 
@@ -67,8 +67,8 @@ This directory contains comprehensive product requirements and development stand
 ### Project Terminology
 
 - **Display**: "CA", "Chartered Accountant" (for SEO)
-- **Internal**: "xpert" (for extensibility)
-- **Database**: `role: 'xpert'` (technical implementation)
+- **Internal**: "accountant" (for clarity)
+- **Database**: `role: 'accountant'` (technical implementation)
 
 ## Compliance Verification
 

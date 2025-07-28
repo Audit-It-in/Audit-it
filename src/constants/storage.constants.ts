@@ -1,5 +1,5 @@
 // Storage Configuration
 export const STORAGE_BUCKETS = {
   PROFILE_PICTURES: "profile-pictures",
-  XPERT_CERTIFICATES: "xpert-certificates",
+  ACCOUNTANT_CERTIFICATES: "accountant-certificates",
 } as const;

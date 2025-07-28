@@ -1,6 +1,6 @@
 # Scripts Directory
 
-This directory contains utility scripts for the Xpertly CA Platform.
+This directory contains utility scripts for the Audit-it CA Platform.
 
 ## Available Scripts
 

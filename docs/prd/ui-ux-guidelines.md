@@ -206,7 +206,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
       <SelectValue placeholder="Select role" />
     </SelectTrigger>
     <SelectContent>
-      <SelectItem value="xpert">CA</SelectItem>
+      <SelectItem value="accountant">CA</SelectItem>
       <SelectItem value="customer">Customer</SelectItem>
     </SelectContent>
   </Select>

@@ -61,7 +61,7 @@ export function useAuth() {
   useEffect(() => {
     if (profile) {
       setUserRole(profile.role || null);
-      setIsCA(profile.role === UserRole.XPERT);
+      setIsCA(profile.role === UserRole.ACCOUNTANT);
       setIsCustomer(profile.role === UserRole.CUSTOMER);
       setProfileCompletion(profile.profile_completion_percentage || 0);
     } else {

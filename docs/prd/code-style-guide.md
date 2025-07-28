@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the specific code formatting and style preferences for the TheFinXperts project, complementing the broader [Component Standards](./component-standards.md).
+This document outlines the specific code formatting and style preferences for the Audit-it project, complementing the broader [Component Standards](./component-standards.md).
 
 ## TypeScript & React Formatting
 

@@ -31,7 +31,7 @@ CREATE TABLE public.profiles (
   profile_picture_url text,
   bio text,
   gender text,
-  role text NOT NULL,                    -- 'xpert', 'customer', 'admin'
+  role text NOT NULL,                    -- 'accountant', 'customer', 'admin'
   country text DEFAULT 'India',
 
   -- Normalized location references
