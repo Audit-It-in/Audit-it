@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getCurrentSession } from "@/src/services/auth.service";
 import { useSetAtom } from "jotai";
 import { authUserAtom } from "@/src/store/auth.store";
 import { CircleNotchIcon } from "@phosphor-icons/react";
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const setUser = useSetAtom(authUserAtom);
@@ -59,5 +59,22 @@ export default function AuthCallbackPage() {
         <p className='text-neutral-600'>Please wait while we set up your account.</p>
       </div>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='min-h-screen bg-neutral-50 flex items-center justify-center'>
+          <div className='text-center'>
+            <CircleNotchIcon className='h-8 w-8 animate-spin mx-auto mb-4 text-primary-600' />
+            <h2 className='text-lg font-semibold text-neutral-900 mb-2'>Loading...</h2>
+          </div>
+        </div>
+      }
+    >
+      <AuthCallbackContent />
+    </Suspense>
   );
 }

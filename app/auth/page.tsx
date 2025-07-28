@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/src/components/ui/button";
 import { useGoogleSignIn } from "@/src/services/auth.service";
@@ -11,7 +11,7 @@ import { SignUpForm } from "@/src/components/auth/SignUpForm.component";
 import { Header } from "@/src/components/layout/Header.component";
 import { Footer } from "@/src/components/layout/Footer.component";
 
-export default function AuthPage() {
+function AuthPageContent() {
   const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
   const [statusMessage, setStatusMessage] = useState<{ type: "error" | "info"; text: string } | null>(null);
   const searchParams = useSearchParams();
@@ -108,11 +108,13 @@ export default function AuthPage() {
               {/* Status Message */}
               {statusMessage && (
                 <div className='px-6 pb-2'>
-                  <div className={`p-4 rounded-xl text-sm ${
-                    statusMessage.type === "error" 
-                      ? "bg-red-50/80 border border-red-200/60 text-red-700" 
-                      : "bg-blue-50/80 border border-blue-200/60 text-blue-700"
-                  }`}>
+                  <div
+                    className={`p-4 rounded-xl text-sm ${
+                      statusMessage.type === "error"
+                        ? "bg-red-50/80 border border-red-200/60 text-red-700"
+                        : "bg-blue-50/80 border border-blue-200/60 text-blue-700"
+                    }`}
+                  >
                     {statusMessage.text}
                   </div>
                 </div>
@@ -133,57 +135,65 @@ export default function AuthPage() {
                 {/* Beautiful divider */}
                 <div className='relative my-6'>
                   <div className='absolute inset-0 flex items-center'>
-                    <div className='w-full h-px bg-gradient-to-r from-transparent via-neutral-300/60 to-transparent'></div>
+                    <div className='w-full border-t border-neutral-200/60'></div>
                   </div>
-                  <div className='relative flex justify-center'>
-                    <span className='bg-white/95 backdrop-blur-sm px-6 py-2 text-xs font-medium text-neutral-500 rounded-full shadow-sm border border-white/70'>
-                      or continue with
+                  <div className='relative flex justify-center text-xs uppercase'>
+                    <span className='bg-white/90 px-4 text-neutral-500 font-medium tracking-wider'>
+                      Or continue with
                     </span>
                   </div>
                 </div>
 
-                {/* Beautiful unified Google button */}
+                {/* Premium Google button */}
                 <Button
-                  type='button'
                   onClick={onGoogleSignIn}
                   disabled={googleSignInMutation.isPending}
-                  className='w-full h-13 bg-white/90 backdrop-blur-sm border-2 border-neutral-200/40 text-neutral-700 font-semibold rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.08),-2px_-2px_8px_rgba(255,255,255,0.9),2px_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.06)] hover:bg-neutral-50/90 hover:border-neutral-300/50 active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1)] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 group'
+                  className='w-full bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.98] rounded-xl py-3 h-auto font-medium'
                 >
-                  <div className='flex items-center justify-center space-x-3'>
-                    <GoogleLogoIcon className='h-5 w-5 transition-transform duration-300 group-hover:scale-110' />
-                    <span>{googleSignInMutation.isPending ? "Connecting..." : `Continue with Google`}</span>
-                    {googleSignInMutation.isPending && (
-                      <div className='w-4 h-4 border-2 border-neutral-400/30 border-t-neutral-600 rounded-full animate-spin ml-2' />
-                    )}
-                  </div>
+                  <GoogleLogoIcon className='mr-3 h-5 w-5' />
+                  {googleSignInMutation.isPending
+                    ? "Connecting..."
+                    : `${activeTab === "signin" ? "Sign in" : "Sign up"} with Google`}
                 </Button>
               </div>
-
-              {/* Terms footer */}
-              <div className='px-6 pb-6'>
-                <p className='text-xs text-neutral-500 leading-relaxed text-center'>
-                  By continuing, you agree to our{" "}
-                  <Link
-                    href='/terms'
-                    className='text-primary-600 hover:text-primary-700 font-medium transition-colors underline-offset-2 hover:underline'
-                  >
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link
-                    href='/privacy'
-                    className='text-primary-600 hover:text-primary-700 font-medium transition-colors underline-offset-2 hover:underline'
-                  >
-                    Privacy Policy
-                  </Link>
-                </p>
-              </div>
             </div>
+          </div>
+
+          {/* Enhanced footer with better spacing */}
+          <div className='text-center mt-8 space-y-4'>
+            <p className='text-sm text-neutral-600'>
+              By continuing, you agree to our{" "}
+              <Link href='/terms' className='text-primary-600 hover:text-primary-700 font-medium transition-colors'>
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href='/privacy' className='text-primary-600 hover:text-primary-700 font-medium transition-colors'>
+                Privacy Policy
+              </Link>
+            </p>
+            <p className='text-xs text-neutral-500'>Secure authentication powered by Supabase</p>
           </div>
         </div>
       </main>
 
       <Footer />
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className='min-h-screen bg-gradient-to-br from-neutral-50 via-primary-50/20 to-accent-50/10 flex items-center justify-center'>
+          <div className='text-center'>
+            <div className='h-8 w-8 animate-spin mx-auto mb-4 border-2 border-primary-600 border-t-transparent rounded-full' />
+            <h2 className='text-lg font-semibold text-neutral-900 mb-2'>Loading...</h2>
+          </div>
+        </div>
+      }
+    >
+      <AuthPageContent />
+    </Suspense>
   );
 }
