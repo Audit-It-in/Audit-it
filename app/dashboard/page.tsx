@@ -81,7 +81,11 @@ export default function DashboardPage() {
             <Card className='p-6 hover:shadow-lg transition-shadow'>
               <h4 className='font-semibold text-neutral-900 mb-2'>Profile Setup</h4>
               <p className='text-sm text-neutral-600 mb-4'>Complete your profile to get better CA recommendations.</p>
-              <Button variant='outline' size='sm'>
+              <Button 
+                variant='outline' 
+                size='sm'
+                onClick={() => router.push('/profile')}
+              >
                 Complete Profile
               </Button>
             </Card>

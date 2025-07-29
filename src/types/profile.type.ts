@@ -1,5 +1,36 @@
 import { UserRole } from "./auth.type";
 
+// Profile Stepper Types
+export enum ProfileStep {
+  PERSONAL_INFO = "personal_info",
+  VERIFICATION = "verification",
+  PROFESSIONAL = "professional",
+  EDUCATION = "education",
+}
+
+export interface ProfileStepConfig {
+  step: ProfileStep;
+  title: string;
+  description: string;
+  icon: string;
+  required: boolean;
+  weight: number;
+}
+
+export interface ProfileStepValidation {
+  isValid: boolean;
+  completedFields: string[];
+  missingRequiredFields: string[];
+  errors: Record<string, string>;
+}
+
+export interface ProfileStepData {
+  step: ProfileStep;
+  data: Record<string, any>;
+  validation: ProfileStepValidation;
+  completedAt?: string;
+}
+
 // Location types
 export interface State {
   id: number;
@@ -195,6 +226,55 @@ export interface ProfileUpdateData {
   specialization_ids?: number[];
   phone?: string;
   whatsapp_available?: boolean;
+}
+
+// Step-specific form data interfaces
+export interface PersonalInfoFormData {
+  username: string;
+  first_name: string;
+  middle_name?: string;
+  last_name: string;
+  bio?: string;
+  profile_picture?: File;
+  state_id: number;
+  district_id: number;
+  language_ids: number[];
+  specialization_ids: number[];
+  phone: string;
+  whatsapp_available: boolean;
+}
+
+export interface VerificationFormData {
+  membership_number: string;
+  membership_certificate?: File;
+  professional_email?: string;
+  professional_phone?: string;
+}
+
+export interface ProfessionalFormData {
+  current_firm?: string;
+  years_of_experience?: number;
+  practice_areas?: string[];
+  professional_achievements?: string;
+  consultation_fee?: number;
+}
+
+export interface EducationFormData {
+  ca_qualification: {
+    institute_name: string;
+    completion_year: number;
+    rank?: string;
+  };
+  other_qualifications: Education[];
+  certifications?: string[];
+  professional_memberships?: string[];
+}
+
+// Username availability checking
+export interface UsernameAvailability {
+  isAvailable: boolean;
+  suggested?: string[];
+  profileUrl?: string;
 }
 
 export interface ProfileFormData extends ProfileUpdateData {
