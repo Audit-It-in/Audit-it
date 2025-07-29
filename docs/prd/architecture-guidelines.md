@@ -465,14 +465,29 @@ import { APP_CONFIG, STORAGE_BUCKETS } from "@/constants";
 
 #### Separation of Concerns
 
-The project maintains clear separation between authentication and profile types:
+The project maintains clear separation between common reusable types, domain-specific types, and UI component types:
+
+**Common Types** (`src/types/common.type.ts`):
+
+- `StatusMessageType` enum (ERROR, INFO, SUCCESS, WARNING) - reusable across app
+- `StatusMessage` interface for consistent message handling
+- `LoadingState` enum for generic UI states (IDLE, LOADING, SUCCESS, ERROR)
+- `AsyncState` enum for async operations (IDLE, PENDING, FULFILLED, REJECTED)
 
 **Authentication Types** (`src/types/auth.type.ts`):
 
+- `AuthTab` enum for sign-in/sign-up tab states
+- `AuthErrorType` enum for auth-specific error codes
+- `AuthLoadingState` enum for auth-specific loading messages
 - `UserRole` enum (shared across the application)
 - `AuthUser`, `AuthSession`, `AuthContextType` for authentication state
 - Form types for sign-in/sign-up operations
-- Auth-specific response and error types
+
+**UI Component Types** (`src/types/ui.type.ts`):
+
+- `LoadingAction` enum for contextual loading states
+- Component variant enums (spinners, buttons, etc.)
+- Size enums for consistent component sizing
 
 **Profile Types** (`src/types/profile.type.ts`):
 
@@ -507,12 +522,39 @@ export interface ProfileDetails extends Profile {
 }
 ```
 
+#### Enum-Driven Type Safety
+
+The project uses comprehensive enum patterns for maximum type safety:
+
+```typescript
+// ✅ Common reusable enums
+import { StatusMessageType, StatusMessage } from "@/src/types/common.type";
+
+const showSuccess = (text: string) => {
+  setMessage({ type: StatusMessageType.SUCCESS, text });
+};
+
+// ✅ Domain-specific enums  
+import { AuthTab, AuthErrorType } from "@/src/types/auth.type";
+
+const [activeTab, setActiveTab] = useState<AuthTab>(AuthTab.SIGNIN);
+const errorMessage = AUTH_ERROR_MESSAGES[AuthErrorType.ACCESS_DENIED];
+
+// ✅ UI component enums
+import { LoadingAction } from "@/src/types/ui.type";
+
+<Loader action={LoadingAction.SAVING} title="Saving..." />
+```
+
 #### Type Safety Benefits
 
 1. **Normalized Data**: Types enforce foreign key relationships
 2. **Extensibility**: Easy to add new languages/specializations via database
 3. **Performance**: Optimized queries using ID arrays instead of text matching
-4. **Maintainability**: Clear separation between auth and profile concerns
+4. **Maintainability**: Clear separation between common, domain, and UI concerns
+5. **Enum Safety**: Compile-time validation prevents magic strings and typos
+6. **Autocomplete**: Full IntelliSense support for all enum values
+7. **Refactoring**: Safe rename operations cascade through codebase
 
 ---
 

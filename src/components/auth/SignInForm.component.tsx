@@ -11,6 +11,8 @@ import { useSignIn } from "@/src/services/auth.service";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { InlineLoader } from "@/src/components/common/Loader.component";
+import { LoadingAction, SpinnerSize } from "@/src/types/ui.type";
 
 const signInSchema = z.object({
   email: z.string().pipe(z.email("Please enter a valid email")),
@@ -81,7 +83,11 @@ export function SignInForm() {
               onClick={() => setShowPassword(!showPassword)}
               className='absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-neutral-500 hover:text-neutral-700 transition-colors duration-200 rounded-lg hover:bg-white/60'
             >
-              {showPassword ? <EyeSlashIcon className='h-5 w-5' /> : <EyeIcon className='h-5 w-5' />}
+              {showPassword ? (
+                <EyeSlashIcon className='h-5 w-5' weight='bold' />
+              ) : (
+                <EyeIcon className='h-5 w-5' weight='bold' />
+              )}
             </button>
           </div>
           {form.formState.errors.password && (
@@ -108,7 +114,7 @@ export function SignInForm() {
           >
             {signInMutation.isPending ? (
               <div className='flex items-center justify-center space-x-2'>
-                <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
+                <InlineLoader action={LoadingAction.PROCESSING} size={SpinnerSize.SMALL} className='text-white' />
                 <span>Signing In...</span>
               </div>
             ) : (

@@ -5,7 +5,6 @@ import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/src/helpers/supabase.helper";
 import { useSetAtom } from "jotai";
 import { authUserAtom } from "@/src/store/auth.store";
-import { UserRole } from "@/src/types/auth.type";
 import type { AuthUser, SignUpFormData, SignInFormData } from "@/src/types/auth.type";
 import { Profile } from "@/src/types/profile.type";
 
@@ -75,9 +74,14 @@ export async function fetchUserProfile(userId: string): Promise<Profile | null> 
 }
 
 export async function createUserProfile(userId: string, userData: Partial<Profile>): Promise<Profile> {
+  // Ensure role is provided when creating profile
+  if (!userData.role) {
+    throw new Error("Role is required when creating a profile");
+  }
+
   const profileData = {
     auth_user_id: userId,
-    role: UserRole.CUSTOMER, // default role
+    role: userData.role,
     country: "India",
     language_ids: [],
     specialization_ids: [],
@@ -98,6 +102,16 @@ export async function updateUserProfile(userId: string, updates: Partial<Profile
 
   if (error) throw error;
   return data;
+}
+
+export async function checkIfUserNeedsRoleSelection(userId: string): Promise<boolean> {
+  try {
+    const profile = await fetchUserProfile(userId);
+    return !profile || !profile.role;
+  } catch {
+    // If profile doesn't exist or can't be fetched, user needs role selection
+    return true;
+  }
 }
 
 export async function getCurrentSession(): Promise<{ user: AuthUser | null; session: Session | null }> {
@@ -212,8 +226,18 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, updates }: { userId: string; updates: Partial<Profile> }) =>
-      updateUserProfile(userId, updates),
+    mutationFn: async ({ userId, updates }: { userId: string; updates: Partial<Profile> }) => {
+      // Check if profile exists first
+      const existingProfile = await fetchUserProfile(userId);
+      
+      if (!existingProfile) {
+        // Create profile if it doesn't exist
+        return createUserProfile(userId, updates);
+      } else {
+        // Update existing profile
+        return updateUserProfile(userId, updates);
+      }
+    },
     onSuccess: (data) => {
       queryClient.setQueryData(["profile", data.auth_user_id], data);
     },

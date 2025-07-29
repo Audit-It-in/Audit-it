@@ -9,6 +9,8 @@ import { APP_CONFIG } from "@/src/constants/app.constants";
 import { UserIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Loader } from "@/src/components/common/Loader.component";
+import { LoadingAction } from "@/src/types/ui.type";
 
 export default function DashboardPage() {
   const { user, profile, isAuthenticated, authLoading } = useAuth();
@@ -17,18 +19,16 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push("/auth");
+    } else if (!authLoading && isAuthenticated && profile !== undefined) {
+      // If user is authenticated but doesn't have a role, redirect to role selection
+      if (!profile || !profile.role) {
+        router.push("/role-selection");
+      }
     }
-  }, [authLoading, isAuthenticated, router]);
+  }, [authLoading, isAuthenticated, profile, router]);
 
   if (authLoading) {
-    return (
-      <div className='min-h-screen bg-neutral-50 flex items-center justify-center'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4'></div>
-          <p className='text-neutral-600'>Loading...</p>
-        </div>
-      </div>
-    );
+    return <Loader action={LoadingAction.LOADING} title="Loading Dashboard" subtitle="Preparing your personalized experience" />;
   }
 
   if (!isAuthenticated) {
@@ -54,7 +54,7 @@ export default function DashboardPage() {
           <Card className='p-6 mb-8'>
             <div className='flex items-center space-x-4'>
                               <div className='flex h-16 w-16 items-center justify-center rounded-full bg-primary-600'>
-                <UserIcon className='h-8 w-8 text-white' />
+                <UserIcon className='h-8 w-8 text-white' weight='bold' />
               </div>
               <div className='flex-1'>
                 <h3 className='text-xl font-semibold text-neutral-900'>
@@ -64,7 +64,7 @@ export default function DashboardPage() {
                 </h3>
                 <p className='text-neutral-600'>{user?.email}</p>
                 <div className='flex items-center space-x-2 mt-2'>
-                  <CheckCircleIcon className='h-4 w-4 text-green-500' />
+                  <CheckCircleIcon className='h-4 w-4 text-green-500' weight='bold' />
                   <span className='text-sm text-green-600'>Account verified</span>
                 </div>
               </div>

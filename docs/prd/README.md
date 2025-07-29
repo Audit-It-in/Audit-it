@@ -12,6 +12,7 @@ This directory contains comprehensive product requirements and development stand
 | [Architecture Guidelines](./architecture-guidelines.md) | Service layer, state management, type organization | Setting up services, data flow architecture |
 | [Component Standards](./component-standards.md)         | Component development, naming, folder structure    | Building any React component                |
 | [UI/UX Guidelines](./ui-ux-guidelines.md)               | Design system, shadcn/ui patterns, accessibility   | UI development, design implementation       |
+| [Type System Guide](./type-system-guide.md)             | Enum-driven types, organization, best practices    | Type definitions, enum usage, type safety  |
 | [Database Schema](./database-schema.md)                 | Complete database documentation                    | Database queries, type definitions          |
 | [Code Style Guide](./code-style-guide.md)               | Formatting, naming, and code organization          | Code formatting, PR reviews, tool setup     |
 
@@ -30,12 +31,14 @@ This directory contains comprehensive product requirements and development stand
 - [ ] Using shadcn/ui patterns? → [UI/UX Guidelines](./ui-ux-guidelines.md#shadcnui-design-system)
 - [ ] Proper file naming? → [Component Standards](./component-standards.md#file-naming-conventions)
 - [ ] Mobile-first design? → [UI/UX Guidelines](./ui-ux-guidelines.md#mobile-first-guidelines)
+- [ ] Using enums over strings? → [Component Standards](./component-standards.md#type-safety-standards)
 
 ### 🏗️ Architecture Decisions
 
 - [ ] Service vs Helper logic? → [Architecture Guidelines](./architecture-guidelines.md#service-layer-architecture)
 - [ ] State management choice? → [Architecture Guidelines](./architecture-guidelines.md#state-management-strategy)
 - [ ] Database schema alignment? → [Database Schema](./database-schema.md#typescript-integration)
+- [ ] Proper type organization? → [Architecture Guidelines](./architecture-guidelines.md#type-organization-strategy)
 
 ### 🎨 UI Development
 
@@ -62,6 +65,7 @@ This directory contains comprehensive product requirements and development stand
 - **Folder Structure**: Feature-based organization
 - **Import Style**: Explicit imports, no index files
 - **Quote Style**: Single quotes for JSX attributes
+- **Type Safety**: Enum-first approach, no magic strings
 - **Database**: Normalized schema with proper foreign keys
 
 ### Project Terminology

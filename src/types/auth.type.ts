@@ -69,3 +69,22 @@ export interface SignUpResponse {
   user: AuthUser;
   session: AuthSession | null;
 }
+
+export enum AuthTab {
+  SIGNIN = "signin",
+  SIGNUP = "signup",
+}
+
+export enum AuthErrorType {
+  ACCESS_DENIED = "access_denied",
+  CALLBACK_ERROR = "callback_error",
+  CANCELLED = "cancelled",
+  DEFAULT = "default",
+}
+
+export enum AuthLoadingState {
+  AUTHENTICATING = "authenticating",
+  REDIRECTING = "redirecting",
+  LOADING = "loading",
+  SETTING_UP = "settingUp",
+}

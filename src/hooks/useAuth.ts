@@ -11,6 +11,7 @@ import {
   useUpdateProfile,
   useCurrentSession,
   onAuthStateChange,
+  checkIfUserNeedsRoleSelection,
 } from "@/src/services/auth.service";
 import {
   authUserAtom,
@@ -113,6 +114,11 @@ export function useAuth() {
     return updateProfileMutation.mutateAsync({ userId: user.id, updates });
   };
 
+  const needsRoleSelection = async () => {
+    if (!user) return false;
+    return checkIfUserNeedsRoleSelection(user.id);
+  };
+
   return {
     // User data
     user,
@@ -134,6 +140,7 @@ export function useAuth() {
     signUp,
     signOut,
     updateProfile,
+    needsRoleSelection,
 
     // Mutation states for advanced usage
     signInMutation,

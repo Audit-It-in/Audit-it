@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getCurrentSession } from "@/src/services/auth.service";
 import { useSetAtom } from "jotai";
 import { authUserAtom } from "@/src/store/auth.store";
-import { CircleNotchIcon } from "@phosphor-icons/react";
+import { Loader } from "@/src/components/common/Loader.component";
+import { LoadingAction } from "@/src/types/ui.type";
 
 function AuthCallbackContent() {
   const router = useRouter();
@@ -38,7 +39,23 @@ function AuthCallbackContent() {
 
         if (user && session) {
           setUser(user);
-          router.push("/dashboard");
+
+          // Check if user has a profile and role set
+          try {
+            const { fetchUserProfile } = await import("@/src/services/auth.service");
+            const profile = await fetchUserProfile(user.id);
+
+            if (!profile || !profile.role) {
+              // Redirect to role selection if no profile or role
+              router.push("/role-selection");
+            } else {
+              // Redirect to dashboard if profile and role exist
+              router.push("/dashboard");
+            }
+          } catch {
+            console.log("No profile found, redirecting to role selection");
+            router.push("/role-selection");
+          }
         } else {
           router.push("/auth");
         }
@@ -52,27 +69,18 @@ function AuthCallbackContent() {
   }, [router, setUser, searchParams]);
 
   return (
-    <div className='min-h-screen bg-neutral-50 flex items-center justify-center'>
-      <div className='text-center'>
-        <CircleNotchIcon className='h-8 w-8 animate-spin mx-auto mb-4 text-primary-600' />
-        <h2 className='text-lg font-semibold text-neutral-900 mb-2'>Completing sign in...</h2>
-        <p className='text-neutral-600'>Please wait while we set up your account.</p>
-      </div>
-    </div>
+    <Loader
+      action={LoadingAction.PROCESSING}
+      title='Completing sign in...'
+      subtitle='Please wait while we set up your account.'
+    />
   );
 }
 
 export default function AuthCallbackPage() {
   return (
     <Suspense
-      fallback={
-        <div className='min-h-screen bg-neutral-50 flex items-center justify-center'>
-          <div className='text-center'>
-            <CircleNotchIcon className='h-8 w-8 animate-spin mx-auto mb-4 text-primary-600' />
-            <h2 className='text-lg font-semibold text-neutral-900 mb-2'>Loading...</h2>
-          </div>
-        </div>
-      }
+      fallback={<Loader action={LoadingAction.LOADING} title='Loading...' subtitle='Setting up authentication...' />}
     >
       <AuthCallbackContent />
     </Suspense>

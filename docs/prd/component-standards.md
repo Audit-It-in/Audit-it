@@ -14,8 +14,6 @@
 
 ### shadcn/ui Configuration
 
-The project uses **shadcn/ui** as the primary UI component library with the following configuration:
-
 ```json
 // components.json
 {
@@ -34,28 +32,15 @@ The project uses **shadcn/ui** as the primary UI component library with the foll
 }
 ```
 
-### UI Component Usage Patterns
-
-#### Import Standards for UI Components
+### Component Composition Patterns
 
 ```typescript
 // ✅ GOOD: Import shadcn/ui components
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
-import { Label } from "@/src/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
-
-// ✅ GOOD: Use cn utility for conditional styling
 import { cn } from "@/src/helpers/tailwind.helper";
 
-// ❌ BAD: Don't import from index files or external UI libraries
-import { Button } from "@/src/components/ui";
-import { Button } from "react-bootstrap";
-```
-
-#### Component Composition Patterns
-
-```typescript
 // ✅ GOOD: Proper shadcn component composition
 export const ContactRequestCard = ({ request, className, ...props }: Props) => {
   return (
@@ -76,22 +61,19 @@ export const ContactRequestCard = ({ request, className, ...props }: Props) => {
   );
 };
 
-// ❌ BAD: Custom styling that bypasses design system
-export const ContactRequestCard = ({ request }: Props) => {
-  return (
-    <div className='bg-white border border-gray-200 rounded-lg p-4 shadow-md'>
-      {/* Custom implementation instead of using Card component */}
-    </div>
-  );
-};
+// ❌ BAD: Don't import from index files or bypass design system
+import { Button } from "@/src/components/ui";
+import { Button } from "react-bootstrap";
+<div className='bg-white border border-gray-200 rounded-lg p-4 shadow-md'>
+  {/* Custom implementation instead of using Card component */}
+</div>
 ```
 
 ### Form Component Standards
 
-All forms must use **react-hook-form** with **zod** validation and shadcn form components:
+All forms must use **react-hook-form** with **zod** validation:
 
 ```typescript
-// ✅ GOOD: Standard form pattern
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -131,19 +113,19 @@ export const SignInForm = () => {
 };
 ```
 
-### Icon Standards
+## Icon Standards
 
-#### Primary: Phosphor Icons with "Icon" Suffix
+### Primary: Phosphor Icons with "Icon" Suffix
 
 ```typescript
 // ✅ GOOD: Phosphor icons (primary choice)
 import { UserIcon, CameraIcon, CheckCircleIcon } from "@phosphor-icons/react";
 
-<UserIcon className="h-5 w-5 text-muted-foreground" weight="duotone" />
+<UserIcon className="h-5 w-5 text-muted-foreground" weight="bold" />
 <CameraIcon className="h-4 w-4 text-primary" weight="bold" />
 ```
 
-#### Secondary: Lucide Icons (for shadcn compatibility)
+### Secondary: Lucide Icons (for shadcn compatibility)
 
 ```typescript
 // ✅ ACCEPTABLE: Lucide icons when needed for shadcn compatibility
@@ -153,12 +135,150 @@ import { User, Camera, CheckCircle } from "lucide-react";
 <Camera className="h-4 w-4 text-primary" />
 ```
 
-**Icon Usage Guidelines:**
+### Icon Usage Guidelines
 
-- Prefer Phosphor icons for consistency with existing codebase
-- Use Lucide icons only when required by shadcn components
-- Always use consistent sizing: `h-4 w-4` or `h-5 w-5`
-- Use semantic color classes: `text-muted-foreground`, `text-primary`
+- **Primary**: Phosphor icons with "Icon" suffix for consistency
+- **Secondary**: Lucide icons only when required by shadcn components
+- **Sizing**: Use consistent sizes (`h-4 w-4`, `h-5 w-5`)
+- **Weight**: Always use `weight="bold"` for Phosphor icons
+- **Colors**: Use semantic classes (`text-muted-foreground`, `text-primary`)
+
+## Contextual Loading System
+
+### Available Loading Actions
+
+```typescript
+import { Loader, InlineLoader } from "@/src/components/common/Loader.component";
+import { LoadingAction } from "@/src/types/ui.type";
+
+// Full-screen loading states
+<Loader action={LoadingAction.SAVING} title="Saving your work..." />
+<Loader action={LoadingAction.PROCESSING} title="Processing request..." />
+
+// Inline loading for buttons
+<InlineLoader action={LoadingAction.SEARCHING} size={SpinnerSize.SMALL} />
+<InlineLoader action={LoadingAction.SYNCING} size={SpinnerSize.MEDIUM} />
+```
+
+### Loading Action Types
+
+| Action | Icon | Animation | Use Case |
+|--------|------|-----------|----------|
+| `SAVING` | FloppyDiskIcon | Pulse | Saving data to server |
+| `UPLOADING` | CloudArrowUpIcon | Bounce | File uploads |
+| `SEARCHING` | MagnifyingGlassIcon | Scanning | Database searches |
+| `PROCESSING` | CpuIcon | Processing | Data processing |
+| `LOADING` | HourglassHighIcon | Flip | General loading |
+| `SYNCING` | ArrowsClockwiseIcon | Spin | Data synchronization |
+| `DOWNLOADING` | DownloadSimpleIcon | Bounce | File downloads |
+
+### Implementation Standards
+
+```typescript
+// ✅ GOOD: Contextual loading in forms
+export const ContactForm = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? (
+          <div className="flex items-center space-x-2">
+            <InlineLoader action={LoadingAction.SAVING} />
+            <span>Saving Contact...</span>
+          </div>
+        ) : (
+          "Save Contact"
+        )}
+      </Button>
+    </form>
+  );
+};
+
+// ✅ GOOD: Full-screen loading with context
+<Loader 
+  action={LoadingAction.PROCESSING}
+  title="Processing your audit request..."
+  subtitle="This may take a few moments"
+/>
+
+// ❌ BAD: Generic spinner without context
+<div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" />
+```
+
+### Accessibility Requirements
+
+```typescript
+// ✅ GOOD: Accessible loading state
+<InlineLoader 
+  action={LoadingAction.SAVING}
+  className="text-white"
+  // Icon automatically includes aria-label="Saving data" and role="img"
+/>
+
+<Button disabled={isLoading} aria-describedby="loading-message">
+  {isLoading ? (
+    <>
+      <InlineLoader action={LoadingAction.PROCESSING} />
+      <span id="loading-message">Processing your request...</span>
+    </>
+  ) : (
+    "Submit"
+  )}
+</Button>
+```
+
+## Type Safety Standards
+
+### Enum-First Approach
+
+All components must use enums instead of string literals:
+
+```typescript
+// ✅ GOOD: Enum-driven component props
+import { StatusMessageType } from "@/src/types/common.type";
+import { AuthTab } from "@/src/types/auth.type";
+import { LoadingAction } from "@/src/types/ui.type";
+
+const [activeTab, setActiveTab] = useState<AuthTab>(AuthTab.SIGNIN);
+const [message, setMessage] = useState<StatusMessage | null>(null);
+
+// Show success message
+setMessage({ type: StatusMessageType.SUCCESS, text: "Profile saved!" });
+
+// Contextual loading
+<Loader action={LoadingAction.SAVING} title="Saving changes..." />
+
+// ❌ BAD: String literals
+const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
+setMessage({ type: "success", text: "Profile saved!" });
+```
+
+### Type Import Organization
+
+```typescript
+// ✅ GOOD: Organize imports by type category
+import { StatusMessage, StatusMessageType } from "@/src/types/common.type";
+import { AuthTab, AuthErrorType } from "@/src/types/auth.type";
+import { LoadingAction } from "@/src/types/ui.type";
+
+// ✅ GOOD: Comprehensive component typing
+interface ContactRequestCardProps {
+  request: ContactRequest;
+  onStatusUpdate: (id: string, status: ContactRequestStatus) => void;
+  onNotesUpdate?: (id: string, notes: string) => void;
+  className?: string;
+}
+
+export const ContactRequestCard = ({ request, onStatusUpdate, onNotesUpdate, className }: ContactRequestCardProps) => {
+  // Implementation
+};
+
+// ❌ BAD: Missing or incomplete typing
+export const ContactRequestCard = ({ request, onStatusUpdate }: any) => {
+  // Implementation
+};
+```
 
 ## File Naming Conventions
 
@@ -172,31 +292,29 @@ import { User, Camera, CheckCircle } from "lucide-react";
 
 ```typescript
 // ✅ GOOD: Feature component naming
-src / components / auth / SignInForm.component.tsx;
-src / components / profile / ProfileCard.component.tsx;
-src / components / contact - requests / RequestCard.component.tsx;
+src/components/auth/SignInForm.component.tsx
+src/components/profile/ProfileCard.component.tsx
+src/components/contact-requests/RequestCard.component.tsx
 
 // ✅ GOOD: UI component naming (shadcn style)
-src / components / ui / button.tsx;
-src / components / ui / input.tsx;
-src / components / ui / card.tsx;
+src/components/ui/button.tsx
+src/components/ui/input.tsx
+src/components/ui/card.tsx
 
 // ✅ GOOD: Type files
-src / types / auth.type.ts;
-src / types / profile.type.ts;
+src/types/auth.type.ts
+src/types/profile.type.ts
 
 // ✅ GOOD: Service files
-src / services / auth.service.ts;
-src / services / profile.service.ts;
+src/services/auth.service.ts
+src/services/profile.service.ts
 
 // ✅ GOOD: Helper files
-src / helpers / tailwind.helper.ts;
-src / helpers / supabase.helper.ts;
+src/helpers/tailwind.helper.ts
+src/helpers/supabase.helper.ts
 ```
 
 ## Folder Structure Standards
-
-### Recommended Project Structure
 
 ```
 src/
@@ -204,17 +322,13 @@ src/
 │   ├── ui/                     # shadcn/ui components (kebab-case)
 │   │   ├── button.tsx
 │   │   ├── input.tsx
-│   │   ├── card.tsx
-│   │   └── form.tsx
+│   │   └── card.tsx
 │   ├── auth/                   # Feature-based grouping
 │   │   ├── SignInForm.component.tsx
 │   │   └── SignUpForm.component.tsx
 │   ├── profile/                # Feature-based grouping
 │   │   ├── ProfileCard.component.tsx
 │   │   └── ProfileForm.component.tsx
-│   ├── contact-requests/       # Feature-based grouping
-│   │   ├── RequestCard.component.tsx
-│   │   └── RequestList.component.tsx
 │   └── layout/                 # Layout components
 │       ├── Header.component.tsx
 │       └── Footer.component.tsx
@@ -224,8 +338,7 @@ src/
 │   └── location.type.ts
 ├── services/
 │   ├── auth.service.ts
-│   ├── profile.service.ts
-│   └── location.service.ts
+│   └── profile.service.ts
 ├── helpers/
 │   ├── tailwind.helper.ts
 │   └── supabase.helper.ts
@@ -238,7 +351,7 @@ src/
     └── storage.constants.ts
 ```
 
-### Folder Organization Principles
+### Organization Principles
 
 1. **Feature-Based Grouping**: Group components by domain/feature, not by type
 2. **UI Components Separate**: Keep shadcn/ui components in dedicated `ui/` folder
@@ -255,22 +368,6 @@ Every React component must be **under 200 lines** including imports, exports, an
 - **Reusability**: Focused components are more reusable
 - **Code Review**: Faster and more thorough reviews
 
-### Enforcement Strategy
-
-```typescript
-// ✅ GOOD: Focused component under 200 lines
-export const ContactRequestCard = ({ request, onStatusUpdate }: Props) => {
-  // Single responsibility: Display contact request information
-  // Implementation fits comfortably under 200 lines
-};
-
-// ❌ BAD: Large component exceeding 200 lines
-export const ContactRequestManagement = ({ requests }: Props) => {
-  // Multiple responsibilities: filtering, sorting, display, editing
-  // Needs decomposition into smaller components
-};
-```
-
 ### Decomposition Strategies
 
 When components exceed 200 lines:
@@ -280,15 +377,9 @@ When components exceed 200 lines:
 3. **Split by Responsibility**: Each component should have one clear purpose
 4. **Compose at Parent Level**: Build complex UIs from simple components
 
-> 💡 **Related**: See [Architecture Guidelines](../prd/architecture-guidelines.md#component-architecture) for composition patterns
-
 ## Mobile-First Requirements
 
-### Design Philosophy
-
 All components **must** be designed for mobile devices first, then enhanced for larger screens.
-
-### Implementation Pattern
 
 ```typescript
 // ✅ GOOD: Mobile-first responsive classes
@@ -313,44 +404,9 @@ All components **must** be designed for mobile devices first, then enhanced for 
 - **lg**: Laptops (1024px+)
 - **xl**: Desktops (1280px+)
 
-> 💡 **Related**: See [UI/UX Guidelines](./ui-ux-guidelines.md#responsive-design) for detailed responsive patterns
-
-## Type Safety Requirements
-
-### TypeScript Strict Mode
-
-All components must pass TypeScript strict mode compilation with zero errors.
-
-### Required Typing
-
-```typescript
-// ✅ GOOD: Domain-specific type imports
-import type { UserRole, AuthUser, SignInFormData } from "@/types/auth.type";
-import type { Profile, ProfileDetails, ContactRequest, ContactRequestStatus } from "@/types/profile.type";
-
-// ✅ GOOD: Comprehensive component typing
-interface ContactRequestCardProps {
-  request: ContactRequest;
-  onStatusUpdate: (id: string, status: ContactRequestStatus) => void;
-  onNotesUpdate?: (id: string, notes: string) => void;
-  className?: string;
-}
-
-export const ContactRequestCard = ({ request, onStatusUpdate, onNotesUpdate, className }: ContactRequestCardProps) => {
-  // Implementation
-};
-
-// ❌ BAD: Missing or incomplete typing
-export const ContactRequestCard = ({ request, onStatusUpdate }: any) => {
-  // Implementation
-};
-```
-
 ## Styling Standards
 
 ### Tailwind CSS with Design System
-
-Use the project's design system tokens defined in `tailwind.config.js`:
 
 ```typescript
 // ✅ GOOD: Using design system colors
@@ -395,9 +451,7 @@ import { cn } from "@/src/helpers/tailwind.helper";
 
 ## Services vs Helpers Architecture
 
-### Clear Separation of Concerns
-
-#### Services (`/src/services/`)
+### Services (`/src/services/`)
 
 **Purpose**: Handle all data fetching, API calls, and database operations
 
@@ -413,7 +467,7 @@ export const ContactRequestService = {
 };
 ```
 
-#### Helpers (`/src/helper/`)
+### Helpers (`/src/helpers/`)
 
 **Purpose**: Provide pure utility functions, formatting, and validation
 
@@ -436,65 +490,7 @@ export const contactRequestHelper = {
 3. **Helpers Are Testable**: All helper functions must be easily unit testable
 4. **Clear Dependencies**: Services may use helpers, helpers never use services
 
-> 💡 **Related**: See [Architecture Guidelines](./architecture-guidelines.md#service-layer-patterns) for detailed patterns
-
-## Performance Standards
-
-### Bundle Size Optimization
-
-- **Code Splitting**: Use dynamic imports for large components
-- **Tree Shaking**: Import only needed utilities and functions
-- **Image Optimization**: Use Next.js Image component with proper sizing
-
-### Rendering Performance
-
-```typescript
-// ✅ GOOD: Optimized rendering with shadcn components
-const ContactRequestCard = memo(({ request, onStatusUpdate }: Props) => {
-  const handleStatusUpdate = useCallback((status: ContactRequestStatus) => {
-    onStatusUpdate(request.id, status);
-  }, [request.id, onStatusUpdate]);
-
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{request.subject}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Button onClick={() => handleStatusUpdate('in_progress')}>
-          Update Status
-        </Button>
-      </CardContent>
-    </Card>
-  );
-});
-
-// ❌ BAD: Unoptimized rendering
-const ContactRequestCard = ({ request, onStatusUpdate }: Props) => {
-  const handleStatusUpdate = (status: ContactRequestStatus) => {
-    onStatusUpdate(request.id, status);
-  };
-
-  return (
-    // Component re-renders unnecessarily
-  );
-};
-```
-
-> 💡 **Related**: See [Architecture Guidelines](./architecture-guidelines.md#performance-optimization) for advanced patterns
-
 ## Error Handling Standards
-
-### Error Boundaries
-
-All major component sections must be wrapped in error boundaries:
-
-```typescript
-// ✅ GOOD: Proper error boundary usage
-<ErrorBoundary fallback={<ContactRequestErrorFallback />}>
-  <ContactRequestCard request={request} />
-</ErrorBoundary>
-```
 
 ### Error State Management
 
@@ -540,6 +536,46 @@ const ContactRequestCard = ({ request }: Props) => {
 };
 ```
 
+## Performance Standards
+
+### Rendering Performance
+
+```typescript
+// ✅ GOOD: Optimized rendering with shadcn components
+const ContactRequestCard = memo(({ request, onStatusUpdate }: Props) => {
+  const handleStatusUpdate = useCallback((status: ContactRequestStatus) => {
+    onStatusUpdate(request.id, status);
+  }, [request.id, onStatusUpdate]);
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>{request.subject}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Button onClick={() => handleStatusUpdate('in_progress')}>
+          Update Status
+        </Button>
+      </CardContent>
+    </Card>
+  );
+});
+
+// ❌ BAD: Unoptimized rendering
+const ContactRequestCard = ({ request, onStatusUpdate }: Props) => {
+  const handleStatusUpdate = (status: ContactRequestStatus) => {
+    onStatusUpdate(request.id, status);
+  };
+  // Component re-renders unnecessarily
+};
+```
+
+### Bundle Size Optimization
+
+- **Code Splitting**: Use dynamic imports for large components
+- **Tree Shaking**: Import only needed utilities and functions
+- **Image Optimization**: Use Next.js Image component with proper sizing
+
 ## Accessibility Requirements
 
 ### WCAG AA Compliance
@@ -550,8 +586,6 @@ All components must meet WCAG AA accessibility standards:
 - **Screen Reader Support**: Proper ARIA labels and semantic HTML
 - **Color Contrast**: Minimum 4.5:1 contrast ratio for text
 - **Focus Management**: Clear focus indicators and logical tab order
-
-### Implementation Standards
 
 ```typescript
 // ✅ GOOD: Accessible component with shadcn
@@ -569,10 +603,6 @@ All components must meet WCAG AA accessibility standards:
 </div>
 ```
 
-> 💡 **Related**: See [UI/UX Guidelines](./ui-ux-guidelines.md#accessibility-standards) for detailed accessibility requirements
-
----
-
 ## Compliance Checklist
 
 Before submitting any component for review, ensure:
@@ -583,6 +613,7 @@ Before submitting any component for review, ensure:
 - [ ] **Mobile-First**: Uses mobile-first responsive design
 - [ ] **TypeScript**: Passes strict mode compilation with proper type safety
 - [ ] **Icons**: Uses Phosphor icons with "Icon" suffix (or Lucide for shadcn compatibility)
+- [ ] **Loading States**: Uses contextual `Loader` or `InlineLoader` with appropriate `LoadingAction`
 - [ ] **Styling**: Uses design system tokens and `cn` utility
 - [ ] **Forms**: Uses react-hook-form with zod validation
 - [ ] **Performance**: Optimized for rendering and bundle size

@@ -2,57 +2,61 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Button } from "@/src/components/ui/button";
-import { useGoogleSignIn } from "@/src/services/auth.service";
-import { GoogleLogoIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { SignInForm } from "@/src/components/auth/SignInForm.component";
 import { SignUpForm } from "@/src/components/auth/SignUpForm.component";
+import { GoogleSignInButton } from "@/src/components/auth/GoogleSignInButton.component";
 import { Header } from "@/src/components/layout/Header.component";
 import { Footer } from "@/src/components/layout/Footer.component";
+import { Loader } from "@/src/components/common/Loader.component";
+import { StatusMessage } from "@/src/components/common/StatusMessage.component";
+import { TabButton } from "@/src/components/common/TabButton.component";
+import { useAuthRedirect } from "@/src/hooks/useAuthRedirect";
+import { AUTH_LOADING_MESSAGES } from "@/src/constants/auth.constants";
+import { AuthTab, AuthLoadingState } from "@/src/types/auth.type";
+import { StatusMessage as StatusMessageType, StatusMessageType as MessageType } from "@/src/types/common.type";
+import { LoadingAction } from "@/src/types/ui.type";
+import { getAuthErrorMessage } from "@/src/helpers/auth.helper";
 
 function AuthPageContent() {
-  const [activeTab, setActiveTab] = useState<"signin" | "signup">("signin");
-  const [statusMessage, setStatusMessage] = useState<{ type: "error" | "info"; text: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<AuthTab>(AuthTab.SIGNIN);
+  const [statusMessage, setStatusMessage] = useState<StatusMessageType | null>(null);
   const searchParams = useSearchParams();
+  const { shouldShowAuth, isLoading, isRedirecting } = useAuthRedirect();
 
-  const googleSignInMutation = useGoogleSignIn();
+  // Auth redirect logic is now handled by useAuthRedirect hook
 
   useEffect(() => {
     const error = searchParams.get("error");
     const message = searchParams.get("message");
 
-    if (error) {
-      switch (error) {
-        case "access_denied":
-          setStatusMessage({ type: "info", text: "Sign in was cancelled. You can try again whenever you're ready." });
-          break;
-        case "callback_error":
-          setStatusMessage({ type: "error", text: "There was an error during sign in. Please try again." });
-          break;
-        default:
-          setStatusMessage({ type: "error", text: "An error occurred during sign in. Please try again." });
-      }
-    } else if (message === "cancelled") {
-      setStatusMessage({ type: "info", text: "Sign in was cancelled. You can try again whenever you're ready." });
-    }
-
-    // Clear the URL parameters after showing the message
     if (error || message) {
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, "", newUrl);
+      setStatusMessage(getAuthErrorMessage(error || message));
+
+      // Clear URL parameters
+      window.history.replaceState({}, "", window.location.pathname);
     }
   }, [searchParams]);
 
-  const onGoogleSignIn = async () => {
-    try {
-      setStatusMessage(null); // Clear any previous messages
-      await googleSignInMutation.mutateAsync();
-    } catch (error: unknown) {
-      console.error("Google sign in error:", error);
-      setStatusMessage({ type: "error", text: "Failed to initiate Google sign in. Please try again." });
-    }
+  const handleGoogleSignInError = (message: string) => {
+    setStatusMessage({ type: MessageType.ERROR, text: message });
   };
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return <Loader action={LoadingAction.LOADING} title={AUTH_LOADING_MESSAGES[AuthLoadingState.LOADING]} />;
+  }
+
+  // Show redirecting state for authenticated users
+  if (isRedirecting) {
+    return (
+      <Loader
+        action={LoadingAction.LOADING}
+        title={AUTH_LOADING_MESSAGES[AuthLoadingState.REDIRECTING]}
+        subtitle='Taking you to your dashboard...'
+      />
+    );
+  }
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-neutral-50 via-primary-50/20 to-accent-50/10'>
@@ -74,58 +78,32 @@ function AuthPageContent() {
                     {/* Animated tab indicator */}
                     <div
                       className={`absolute top-0 h-full w-1/2 bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl shadow-[0_2px_8px_rgba(37,99,235,0.4)] transition-all duration-300 ease-out ${
-                        activeTab === "signup" ? "translate-x-full" : "translate-x-0"
+                        activeTab === AuthTab.SIGNUP ? "translate-x-full" : "translate-x-0"
                       }`}
                     />
 
                     {/* Tab buttons */}
                     <div className='relative flex'>
-                      <button
-                        onClick={() => setActiveTab("signin")}
-                        className={`flex-1 py-3 px-6 text-sm font-semibold rounded-xl transition-all duration-300 ${
-                          activeTab === "signin"
-                            ? "text-white relative z-10"
-                            : "text-neutral-600 hover:text-neutral-800"
-                        }`}
-                      >
+                      <TabButton isActive={activeTab === AuthTab.SIGNIN} onClick={() => setActiveTab(AuthTab.SIGNIN)}>
                         Sign In
-                      </button>
-                      <button
-                        onClick={() => setActiveTab("signup")}
-                        className={`flex-1 py-3 px-6 text-sm font-semibold rounded-xl transition-all duration-300 ${
-                          activeTab === "signup"
-                            ? "text-white relative z-10"
-                            : "text-neutral-600 hover:text-neutral-800"
-                        }`}
-                      >
+                      </TabButton>
+                      <TabButton isActive={activeTab === AuthTab.SIGNUP} onClick={() => setActiveTab(AuthTab.SIGNUP)}>
                         Sign Up
-                      </button>
+                      </TabButton>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Status Message */}
-              {statusMessage && (
-                <div className='px-6 pb-2'>
-                  <div
-                    className={`p-4 rounded-xl text-sm ${
-                      statusMessage.type === "error"
-                        ? "bg-red-50/80 border border-red-200/60 text-red-700"
-                        : "bg-blue-50/80 border border-blue-200/60 text-blue-700"
-                    }`}
-                  >
-                    {statusMessage.text}
-                  </div>
-                </div>
-              )}
+              {statusMessage && <StatusMessage message={statusMessage} />}
 
               {/* Form container with proper height and centering */}
               <div className='px-6'>
                 <div className='bg-neutral-50/60 rounded-2xl p-5 shadow-[inset_2px_2px_6px_rgba(0,0,0,0.06),inset_-2px_-2px_6px_rgba(255,255,255,0.95)] border border-white/50'>
                   {/* Fixed height container - same height for both forms */}
                   <div className='h-[400px] flex flex-col justify-center'>
-                    {activeTab === "signin" ? <SignInForm /> : <SignUpForm />}
+                    {activeTab === AuthTab.SIGNIN ? <SignInForm /> : <SignUpForm />}
                   </div>
                 </div>
               </div>
@@ -144,17 +122,7 @@ function AuthPageContent() {
                   </div>
                 </div>
 
-                {/* Premium Google button */}
-                <Button
-                  onClick={onGoogleSignIn}
-                  disabled={googleSignInMutation.isPending}
-                  className='w-full bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.12)] transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.98] rounded-xl py-3 h-auto font-medium'
-                >
-                  <GoogleLogoIcon className='mr-3 h-5 w-5' />
-                  {googleSignInMutation.isPending
-                    ? "Connecting..."
-                    : `${activeTab === "signin" ? "Sign in" : "Sign up"} with Google`}
-                </Button>
+                <GoogleSignInButton mode={activeTab} onError={handleGoogleSignInError} />
               </div>
             </div>
           </div>
@@ -185,12 +153,7 @@ export default function AuthPage() {
   return (
     <Suspense
       fallback={
-        <div className='min-h-screen bg-gradient-to-br from-neutral-50 via-primary-50/20 to-accent-50/10 flex items-center justify-center'>
-          <div className='text-center'>
-            <div className='h-8 w-8 animate-spin mx-auto mb-4 border-2 border-primary-600 border-t-transparent rounded-full' />
-            <h2 className='text-lg font-semibold text-neutral-900 mb-2'>Loading...</h2>
-          </div>
-        </div>
+        <Loader action={LoadingAction.LOADING} title={AUTH_LOADING_MESSAGES[AuthLoadingState.LOADING]} />
       }
     >
       <AuthPageContent />

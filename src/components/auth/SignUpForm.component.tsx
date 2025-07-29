@@ -10,6 +10,8 @@ import { Label } from "@/src/components/ui/label";
 import { useSignUp } from "@/src/services/auth.service";
 import { EyeIcon, EyeSlashIcon } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
+import { InlineLoader } from "@/src/components/common/Loader.component";
+import { LoadingAction, SpinnerSize } from "@/src/types/ui.type";
 
 const signUpSchema = z
   .object({
@@ -127,7 +129,11 @@ export function SignUpForm() {
               onClick={() => setShowPassword(!showPassword)}
               className='absolute right-2 top-1/2 -translate-y-1/2 p-1 text-neutral-500 hover:text-neutral-700 transition-colors duration-200 rounded-lg hover:bg-white/60'
             >
-              {showPassword ? <EyeSlashIcon className='h-4 w-4' /> : <EyeIcon className='h-4 w-4' />}
+              {showPassword ? (
+                <EyeSlashIcon className='h-4 w-4' weight='bold' />
+              ) : (
+                <EyeIcon className='h-4 w-4' weight='bold' />
+              )}
             </button>
           </div>
           {form.formState.errors.password && (
@@ -153,7 +159,11 @@ export function SignUpForm() {
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className='absolute right-2 top-1/2 -translate-y-1/2 p-1 text-neutral-500 hover:text-neutral-700 transition-colors duration-200 rounded-lg hover:bg-white/60'
             >
-              {showConfirmPassword ? <EyeSlashIcon className='h-4 w-4' /> : <EyeIcon className='h-4 w-4' />}
+              {showConfirmPassword ? (
+                <EyeSlashIcon className='h-4 w-4' weight='bold' />
+              ) : (
+                <EyeIcon className='h-4 w-4' weight='bold' />
+              )}
             </button>
           </div>
           {form.formState.errors.confirmPassword && (
@@ -172,7 +182,7 @@ export function SignUpForm() {
           >
             {signUpMutation.isPending ? (
               <div className='flex items-center justify-center space-x-2'>
-                <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
+                <InlineLoader action={LoadingAction.PROCESSING} size={SpinnerSize.SMALL} className='text-white' />
                 <span>Creating Account...</span>
               </div>
             ) : (

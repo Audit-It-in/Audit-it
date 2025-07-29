@@ -47,7 +47,7 @@ export default function HomePage() {
                 <div className='space-y-4'>
                   {/* Main search input */}
                   <div className='relative'>
-                    <MagnifyingGlassIcon className='absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400' />
+                    <MagnifyingGlassIcon className='absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400' weight='bold' />
                     <Input
                       className='pl-12 h-14 text-lg rounded-xl border-neutral-200 focus:border-primary-500'
                       placeholder='Search by location, specialization, or CA name...'
@@ -78,17 +78,17 @@ export default function HomePage() {
 
               <div className='flex flex-col sm:flex-row gap-4 justify-center items-center text-white/80'>
                 <div className='flex items-center space-x-1'>
-                  <StarIcon className='h-5 w-5 text-accent-400' />
+                  <StarIcon className='h-5 w-5 text-accent-400' weight='bold' />
                   <span>4.8/5 Average Rating</span>
                 </div>
                 <div className='hidden sm:block text-white/40'>•</div>
                 <div className='flex items-center space-x-1'>
-                  <UsersIcon className='h-5 w-5 text-accent-400' />
+                  <UsersIcon className='h-5 w-5 text-accent-400' weight='bold' />
                   <span>500+ Verified CAs</span>
                 </div>
                 <div className='hidden sm:block text-white/40'>•</div>
                 <div className='flex items-center space-x-1'>
-                  <ShieldCheckIcon className='h-5 w-5 text-accent-400' />
+                  <ShieldCheckIcon className='h-5 w-5 text-accent-400' weight='bold' />
                   <span>100% Verified</span>
                 </div>
               </div>
@@ -113,7 +113,7 @@ export default function HomePage() {
                 <div className='h-2 bg-primary-600' />
                 <div className='p-6'>
                   <div className='mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg'>
-                    <ShieldCheckIcon className='h-8 w-8 text-primary-600 group-hover:rotate-6 transition-transform' />
+                    <ShieldCheckIcon className='h-8 w-8 text-primary-600 group-hover:rotate-6 transition-transform' weight='bold' />
                   </div>
                   <h3 className='text-xl font-semibold text-neutral-800 mb-2'>Verified Professionals</h3>
                   <p className='text-neutral-600'>
@@ -127,7 +127,7 @@ export default function HomePage() {
                 <div className='h-2 bg-accent-500' />
                 <div className='p-6'>
                   <div className='mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg'>
-                    <MapPinIcon className='h-8 w-8 text-accent-600 group-hover:rotate-6 transition-transform' />
+                    <MapPinIcon className='h-8 w-8 text-accent-600 group-hover:rotate-6 transition-transform' weight='bold' />
                   </div>
                   <h3 className='text-xl font-semibold text-neutral-800 mb-2'>Location-Based Search</h3>
                   <p className='text-neutral-600'>
@@ -141,7 +141,7 @@ export default function HomePage() {
                 <div className='h-2 bg-primary-600' />
                 <div className='p-6'>
                   <div className='mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg'>
-                    <ClockIcon className='h-8 w-8 text-primary-600 group-hover:rotate-6 transition-transform' />
+                    <ClockIcon className='h-8 w-8 text-primary-600 group-hover:rotate-6 transition-transform' weight='bold' />
                   </div>
                   <h3 className='text-xl font-semibold text-neutral-800 mb-2'>Quick Response</h3>
                   <p className='text-neutral-600'>
