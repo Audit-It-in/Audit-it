@@ -2,34 +2,73 @@
 
 ## Quick Summary
 
-- **Design System**: Clean, modern design with shadcn/ui components
+- **Design Philosophy**: **Neumorphic design** with brand colors for depth and visual appeal
 - **Color Palette**: Brand-focused system with blue primary and emerald accent colors
 - **Mobile-First**: Responsive design with progressive enhancement for larger screens
-- **Component Library**: shadcn/ui as the primary UI component system
-- **Design Philosophy**: Accessible, performant, and maintainable design patterns
+- **Component Library**: Custom neumorphic UI components with brand color integration
+- **Visual Style**: Soft shadows, subtle depth, and brand-consistent color schemes
 
-## Design System Configuration
+## Neumorphic Design System
 
-The project uses **shadcn/ui** with the **New York** style variant and **brand colors**:
+The project uses a **neumorphic design philosophy** with custom components that integrate **brand colors** for depth and visual appeal:
 
-```json
-// components.json
-{
-  "style": "new-york",
-  "rsc": true,
-  "tsx": true,
-  "tailwind": {
-    "config": "tailwind.config.js",
-    "css": "app/globals.css",
-    "baseColor": "blue",
-    "cssVariables": true
-  },
-  "aliases": {
-    "components": "@/src/components",
-    "utils": "@/src/helpers/tailwind.helper",
-    "ui": "@/src/components/ui"
-  }
-}
+### Design Principles
+- **Soft Depth**: Subtle shadows and raised/inset effects that create visual hierarchy
+- **Brand Color Integration**: Primary blue and accent emerald colors used throughout the depth effects
+- **Consistent Typography**: Clear text hierarchy with brand-appropriate colors
+- **Accessibility**: Maintains WCAG standards while achieving neumorphic aesthetics
+- **Responsive**: Neumorphic effects scale appropriately across devices
+
+### Component Configuration
+```typescript
+// All components located in: @/src/components/ui/
+// Examples: button.tsx, card.tsx, input.tsx, etc.
+// Each component implements neumorphic design with brand colors
+
+import { Button } from "@/src/components/ui/button";
+import { Card } from "@/src/components/ui/card";
+import { Input } from "@/src/components/ui/input";
+```
+
+### Neumorphic Shadow System
+
+**Custom Tailwind utilities for consistent neumorphic effects:**
+
+```css
+/* Raised effects (for buttons, cards) */
+.shadow-neumorphic-sm     /* Subtle elevation */
+.shadow-neumorphic-md     /* Standard elevation */
+.shadow-neumorphic-lg     /* High elevation */
+.shadow-neumorphic-xl     /* Maximum elevation */
+
+/* Inset effects (for inputs, pressed states) */
+.shadow-neumorphic-inset          /* Standard inset */
+.shadow-neumorphic-inset-deep     /* Deep inset */
+
+/* Interactive states */
+.shadow-neumorphic-focus          /* Focus state with brand colors */
+.shadow-neumorphic-hover          /* Hover enhancement */
+.shadow-neumorphic-active         /* Active/pressed state */
+
+/* Error states */
+.shadow-neumorphic-error          /* Error focus state */
+.shadow-neumorphic-inset-error    /* Error inset state */
+```
+
+**Usage Examples:**
+```typescript
+// Standard raised button
+<Button className="shadow-neumorphic-md hover:shadow-neumorphic-lg">
+  Click me
+</Button>
+
+// Input field with inset appearance
+<Input className="shadow-neumorphic-inset focus:shadow-neumorphic-focus" />
+
+// Interactive card
+<Card className="shadow-neumorphic-md hover:shadow-neumorphic-lg active:shadow-neumorphic-sm transition-all duration-200">
+  Content
+</Card>
 ```
 
 ## Brand Color System
@@ -68,25 +107,39 @@ colors: {
 }
 ```
 
-## Core Component Patterns
+## Neumorphic Component Patterns
 
-### Button Usage
+### Neumorphic Button Usage
 
 ```typescript
 import { Button } from "@/src/components/ui/button";
 
-// Variants
-<Button variant="default">Primary Action</Button>
-<Button variant="secondary">Secondary Action</Button>
-<Button variant="outline">Outline Button</Button>
-<Button variant="ghost">Ghost Button</Button>
-<Button variant="destructive">Delete Action</Button>
+// Neumorphic variants with brand colors
+<Button variant="default">Primary Action</Button>        // Raised effect with primary colors
+<Button variant="secondary">Secondary Action</Button>    // Subtle raised effect
+<Button variant="outline">Outline Button</Button>        // Inset border effect
+<Button variant="ghost">Ghost Button</Button>            // Minimal hover effects
+<Button variant="destructive">Delete Action</Button>     // Red-tinted neumorphic style
 
-// Sizes
+// Sizes maintain neumorphic proportions
 <Button size="sm|default|lg|icon">Content</Button>
+
+// Custom neumorphic styling
+<Button className="shadow-neumorphic-md hover:shadow-neumorphic-lg transition-all duration-200">
+  Enhanced Depth
+</Button>
 ```
 
-### Form Components
+### Neumorphic Design Principles
+
+**Key Visual Elements:**
+- **Raised Effects**: Primary buttons and cards appear to float above the surface
+- **Inset Effects**: Input fields and selected states appear pressed into the surface
+- **Brand Color Integration**: Shadows and highlights use variations of primary/accent colors
+- **Soft Transitions**: Smooth animations between states enhance the tactile feel
+- **Consistent Depth**: Layered hierarchy through varying shadow intensities
+
+### Neumorphic Form Components
 
 ```typescript
 import { Button } from "@/src/components/ui/button";
@@ -94,81 +147,150 @@ import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 
+// Neumorphic input with inset appearance
 <div className="space-y-2">
-  <Label htmlFor="email">Email</Label>
+  <Label htmlFor="email" className="text-primary-700 font-medium">Email</Label>
   <Input
     id="email"
     type="email"
     placeholder="Enter your email"
-    className="w-full"
+    className="w-full shadow-neumorphic-inset focus:shadow-neumorphic-focus"
   />
 </div>
 
+// Neumorphic select with brand color integration
 <div className="space-y-2">
-  <Label htmlFor="role">Role</Label>
+  <Label htmlFor="role" className="text-primary-700 font-medium">Role</Label>
   <Select>
-    <SelectTrigger>
+    <SelectTrigger className="shadow-neumorphic-sm hover:shadow-neumorphic-md">
       <SelectValue placeholder="Select role" />
     </SelectTrigger>
-    <SelectContent>
+    <SelectContent className="shadow-neumorphic-lg border border-primary-200/50">
       <SelectItem value="accountant">CA</SelectItem>
       <SelectItem value="customer">Customer</SelectItem>
     </SelectContent>
   </Select>
 </div>
+
+// Form validation with neumorphic error styling
+<div className="space-y-2">
+  <Label htmlFor="password" className="text-primary-700 font-medium">Password</Label>
+  <Input
+    id="password"
+    type="password"
+    className={cn(
+      "w-full transition-all duration-200",
+      hasError 
+        ? "shadow-neumorphic-inset-error border-red-300 focus:shadow-neumorphic-error" 
+        : "shadow-neumorphic-inset focus:shadow-neumorphic-focus"
+    )}
+  />
+  {hasError && (
+    <p className="text-red-600/90 text-sm font-medium flex items-center gap-1">
+      <AlertTriangleIcon className="h-4 w-4" />
+      Password is required
+    </p>
+  )}
+</div>
 ```
 
-### Card Components
+### Neumorphic Card Components
 
 ```typescript
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 
-<Card className="w-full">
-  <CardHeader>
-    <CardTitle className="flex items-center gap-2">
-      <UserIcon className="h-5 w-5" />
+// Standard neumorphic card with soft elevation
+<Card className="w-full shadow-neumorphic-md hover:shadow-neumorphic-lg transition-all duration-300">
+  <CardHeader className="border-b border-primary-100/50">
+    <CardTitle className="flex items-center gap-2 text-primary-800">
+      <UserIcon className="h-5 w-5 text-primary-600" weight="bold" />
       Profile Information
     </CardTitle>
   </CardHeader>
-  <CardContent className="space-y-4">
-    <p className="text-muted-foreground">Profile details here</p>
+  <CardContent className="space-y-4 pt-6">
+    <p className="text-primary-600/70">Profile details here</p>
+  </CardContent>
+</Card>
+
+// Interactive card with pressed state
+<Card className="w-full cursor-pointer group shadow-neumorphic-md hover:shadow-neumorphic-sm active:shadow-neumorphic-inset transition-all duration-200">
+  <CardContent className="p-6">
+    <div className="flex items-center justify-between">
+      <span className="text-primary-700 font-medium group-hover:text-primary-800">
+        Interactive Card
+      </span>
+      <ArrowRightIcon className="h-4 w-4 text-primary-500 group-hover:text-primary-600" weight="bold" />
+    </div>
+  </CardContent>
+</Card>
+
+// Status card with accent color integration
+<Card className="w-full shadow-neumorphic-md border border-accent-200/50">
+  <CardContent className="p-4">
+    <div className="flex items-center gap-3">
+      <div className="p-2 rounded-lg shadow-neumorphic-inset bg-accent-50">
+        <CheckCircleIcon className="h-5 w-5 text-accent-600" weight="bold" />
+      </div>
+      <div>
+        <h3 className="text-primary-800 font-medium">Success</h3>
+        <p className="text-primary-600/70 text-sm">Operation completed</p>
+      </div>
+    </div>
   </CardContent>
 </Card>
 ```
 
-## Brand Color Applications
+## Neumorphic Brand Color Applications
 
-### Primary Brand Usage
+### Primary Brand Colors in Neumorphic Design
 
 ```typescript
-// Buttons and CTAs
-<Button className="bg-primary-600 hover:bg-primary-700 text-white">Primary Action</Button>
+// Neumorphic buttons with brand color depth
+<Button className="bg-primary-600 hover:bg-primary-700 text-white shadow-neumorphic-md hover:shadow-neumorphic-lg active:shadow-neumorphic-sm transition-all duration-200">
+  Primary Action
+</Button>
 
-// Badges and highlights
-<Badge className="bg-primary-100 text-primary-900 border-primary-200">Featured</Badge>
+// Neumorphic badges with soft depth
+<Badge className="bg-primary-100 text-primary-900 border border-primary-200/50 shadow-neumorphic-sm">
+  Featured
+</Badge>
 
-// Focus states
-<Input className="focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+// Neumorphic focus states with brand colors
+<Input className="focus:shadow-neumorphic-focus focus:border-primary-400 transition-all duration-200" />
 
-// Borders and accents
-<div className="border-l-4 border-primary-500 bg-primary-50 p-4">
-  <h3 className="text-primary-900">Important Notice</h3>
+// Neumorphic notification panels
+<div className="border-l-4 border-primary-500 bg-primary-50 p-4 shadow-neumorphic-inset rounded-r-lg">
+  <h3 className="text-primary-900 font-medium">Important Notice</h3>
+  <p className="text-primary-700/80 text-sm mt-1">With subtle neumorphic depth</p>
 </div>
 ```
 
-### Accent Color Usage
+### Accent Colors in Neumorphic Components
 
 ```typescript
-// Success states and positive actions
-<Button className="bg-accent-600 hover:bg-accent-700 text-white">Confirm</Button>
-<Badge className="bg-accent-100 text-accent-900 border-accent-200">Success</Badge>
+// Success states with neumorphic depth
+<Button className="bg-accent-600 hover:bg-accent-700 text-white shadow-neumorphic-md hover:shadow-neumorphic-lg active:shadow-neumorphic-sm transition-all duration-200">
+  Confirm
+</Button>
 
-// Success feedback
-<div className="bg-accent-50 border border-accent-200 rounded-lg p-4">
+<Badge className="bg-accent-100 text-accent-900 border border-accent-200/50 shadow-neumorphic-sm">
+  Success
+</Badge>
+
+// Neumorphic success feedback cards
+<div className="bg-accent-50 border border-accent-200/50 rounded-lg p-4 shadow-neumorphic-md">
   <div className="flex items-center gap-2 text-accent-700">
-    <CheckCircleIcon className="h-5 w-5" />
+    <div className="p-1 rounded-full shadow-neumorphic-inset bg-accent-100">
+      <CheckCircleIcon className="h-4 w-4 text-accent-600" weight="bold" />
+    </div>
     <span className="font-medium">Operation completed successfully</span>
   </div>
+</div>
+
+// Neumorphic status indicators
+<div className="flex items-center gap-2 p-3 bg-accent-50 rounded-lg shadow-neumorphic-inset border border-accent-200/30">
+  <div className="w-2 h-2 bg-accent-500 rounded-full shadow-neumorphic-sm"></div>
+  <span className="text-accent-800 text-sm font-medium">Active Status</span>
 </div>
 ```
 

@@ -1,18 +1,73 @@
-import * as React from "react"
+"use client";
 
-import { cn } from "@/src/helpers/tailwind.helper"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/src/helpers/tailwind.helper";
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
-  return (
-    <textarea
-      data-slot="textarea"
-      className={cn(
-        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        className
-      )}
-      {...props}
-    />
-  )
+const textareaVariants = cva(
+  [
+    "flex w-full rounded-lg border px-3 py-2 text-base transition-all duration-200 resize-none",
+    "placeholder:text-neutral-500 disabled:cursor-not-allowed disabled:opacity-50",
+    "focus:outline-none",
+  ],
+  {
+    variants: {
+      variant: {
+        default: [
+          "bg-white border-neutral-300",
+          "shadow-[inset_2px_2px_6px_rgba(0,0,0,0.1),inset_-2px_-2px_6px_rgba(255,255,255,0.9)]",
+          "focus:border-primary-400 focus:ring-2 focus:ring-primary-500/20",
+          "focus:shadow-[inset_3px_3px_8px_rgba(0,0,0,0.15),inset_-3px_-3px_8px_rgba(255,255,255,0.95)]",
+        ],
+        error: [
+          "bg-white border-red-400",
+          "shadow-[inset_2px_2px_6px_rgba(0,0,0,0.1),inset_-2px_-2px_6px_rgba(255,255,255,0.9)]",
+          "focus:border-red-400 focus:ring-2 focus:ring-red-500/20",
+          "focus:shadow-[inset_3px_3px_8px_rgba(0,0,0,0.15),inset_-3px_-3px_8px_rgba(255,255,255,0.95)]",
+        ],
+        subtle: [
+          "bg-white border-neutral-300",
+          "shadow-[inset_1px_1px_3px_rgba(0,0,0,0.08),inset_-1px_-1px_3px_rgba(255,255,255,0.9)]",
+          "focus:border-primary-400 focus:ring-1 focus:ring-primary-500/20",
+          "focus:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.12),inset_-2px_-2px_6px_rgba(255,255,255,0.95)]",
+        ],
+      },
+      size: {
+        sm: "min-h-[80px] px-2 py-2 text-sm",
+        default: "min-h-[100px] px-3 py-2",
+        lg: "min-h-[120px] px-4 py-3 text-lg",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
+
+export interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+    VariantProps<typeof textareaVariants> {
+  /**
+   * Whether the textarea has an error state
+   */
+  hasError?: boolean;
 }
 
-export { Textarea }
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+  ({ className, variant, size, hasError, ...props }, ref) => {
+    const effectiveVariant = hasError ? "error" : variant;
+    
+    return (
+      <textarea
+        className={cn(textareaVariants({ variant: effectiveVariant, size }), className)}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+
+Textarea.displayName = "Textarea";
+
+export { Textarea, textareaVariants };

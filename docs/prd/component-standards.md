@@ -8,45 +8,63 @@
 | **Naming**         | `ComponentName.component.tsx` | [File Naming Conventions](#file-naming-conventions)     |
 | **Mobile-First**   | Always required               | [Mobile-First Requirements](#mobile-first-requirements) |
 | **TypeScript**     | Strict mode                   | [Type Safety Requirements](#type-safety-requirements)   |
-| **UI Components**  | shadcn/ui required            | [UI Component Standards](#ui-component-standards)       |
+| **UI Components**  | Neumorphic design required    | [UI Component Standards](#ui-component-standards)       |
 
 ## UI Component Standards
 
-### shadcn/ui Configuration
+### Neumorphic Design Philosophy
 
-```json
-// components.json
-{
-  "style": "new-york",
-  "rsc": true,
-  "tsx": true,
-  "tailwind": {
-    "baseColor": "neutral",
-    "cssVariables": true
-  },
-  "aliases": {
-    "components": "@/src/components",
-    "utils": "@/src/helpers/tailwind.helper",
-    "ui": "@/src/components/ui"
-  }
-}
+The project uses **neumorphic design** with custom components that integrate **brand colors**:
+
+```typescript
+// Component imports from unified UI directory
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { cn } from "@/src/helpers/tailwind.helper";
 ```
+
+### Design Requirements
+
+**All components MUST follow neumorphic design principles:**
+- **Soft depth effects** using custom shadow utilities (shadow-neumorphic-*)
+- **Brand color integration** in shadows, highlights, and text colors
+- **Consistent visual hierarchy** through layered depth (sm → md → lg → xl)
+- **Smooth transitions** between interactive states (200-300ms duration)
+- **Accessibility compliance** while maintaining neumorphic aesthetics
+- **Error state integration** using red-tinted neumorphic effects
+- **Form validation** with neumorphic error styling
+
+### Neumorphic Component Requirements
+
+**Visual State Hierarchy:**
+1. **Default State**: Base neumorphic shadow (shadow-neumorphic-md)
+2. **Hover State**: Enhanced elevation (shadow-neumorphic-lg) 
+3. **Active State**: Reduced shadow (shadow-neumorphic-sm) or inset (shadow-neumorphic-inset)
+4. **Focus State**: Brand-colored focus ring (shadow-neumorphic-focus)
+5. **Error State**: Red-tinted shadows (shadow-neumorphic-error)
+
+**Color Integration:**
+- **Text**: Use brand colors (text-primary-700, text-primary-600/70)
+- **Borders**: Subtle brand borders (border-primary-200/50)
+- **Backgrounds**: Light brand tints (bg-primary-50, bg-accent-50)
+- **Icons**: Consistent weight="bold" with brand colors
 
 ### Component Composition Patterns
 
 ```typescript
-// ✅ GOOD: Import shadcn/ui components
+// ✅ GOOD: Import neumorphic UI components
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { cn } from "@/src/helpers/tailwind.helper";
 
-// ✅ GOOD: Proper shadcn component composition
+// ✅ GOOD: Proper neumorphic component composition with brand colors
 export const ContactRequestCard = ({ request, className, ...props }: Props) => {
   return (
-    <Card className={cn("w-full", className)} {...props}>
-      <CardHeader>
-        <CardTitle className='flex items-center justify-between'>
+    <Card className={cn("w-full shadow-neumorphic-md hover:shadow-neumorphic-lg transition-all duration-300", className)} {...props}>
+      <CardHeader className="border-b border-primary-100/50">
+        <CardTitle className='flex items-center justify-between text-primary-800'>
           <span>{request.subject}</span>
           <Badge variant={getStatusVariant(request.status)}>{request.status}</Badge>
         </CardTitle>

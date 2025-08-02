@@ -4,7 +4,7 @@ import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/src/hooks/useAuth";
 import { Header } from "@/src/components/layout/Header.component";
-import { ProfileStepper } from "@/src/components/profile/ProfileStepper.component";
+import { ProfileStepper } from "@/src/components/profile/accountant/ProfileStepper.component";
 import { Loader } from "@/src/components/common/Loader.component";
 import { LoadingAction } from "@/src/types/ui.type";
 import { ProfileStep } from "@/src/types/profile.type";

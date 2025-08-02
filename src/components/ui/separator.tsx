@@ -1,9 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as SeparatorPrimitive from "@radix-ui/react-separator"
-
-import { cn } from "@/src/helpers/tailwind.helper"
+import * as React from "react";
+import * as SeparatorPrimitive from "@radix-ui/react-separator";
+import { cn } from "@/src/helpers/tailwind.helper";
 
 function Separator({
   className,
@@ -13,16 +12,21 @@ function Separator({
 }: React.ComponentProps<typeof SeparatorPrimitive.Root>) {
   return (
     <SeparatorPrimitive.Root
-      data-slot="separator"
+      data-slot='separator'
       decorative={decorative}
       orientation={orientation}
       className={cn(
-        "bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px",
+        "shrink-0",
+        // Neumorphic separator with brand colors
+        "data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full",
+        "data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px",
+        "bg-gradient-to-r from-transparent via-primary-200/60 to-transparent",
+        "shadow-[0_1px_2px_rgba(37,99,235,0.1)]",
         className
       )}
       {...props}
     />
-  )
+  );
 }
 
-export { Separator }
+export { Separator };
