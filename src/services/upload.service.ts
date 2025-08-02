@@ -86,7 +86,7 @@ export async function uploadProfilePicture(file: File, userId: string): Promise<
     await supabase.storage.from(STORAGE_BUCKETS.PROFILE_PICTURES).remove([filePath]);
 
     // Upload new file
-    const { data, error } = await supabase.storage.from(STORAGE_BUCKETS.PROFILE_PICTURES).upload(filePath, file, {
+    const { error } = await supabase.storage.from(STORAGE_BUCKETS.PROFILE_PICTURES).upload(filePath, file, {
       upsert: true,
       contentType: file.type,
     });
@@ -127,12 +127,10 @@ export async function uploadCertificate(
     const filePath = `${userId}/${certificateType}.${fileExtension}`;
 
     // Upload file
-    const { data, error } = await supabase.storage
-      .from(STORAGE_BUCKETS.ACCOUNTANT_CERTIFICATES)
-      .upload(filePath, file, {
-        upsert: true,
-        contentType: file.type,
-      });
+    const { error } = await supabase.storage.from(STORAGE_BUCKETS.ACCOUNTANT_CERTIFICATES).upload(filePath, file, {
+      upsert: true,
+      contentType: file.type,
+    });
 
     if (error) {
       console.error("Certificate upload error:", error);

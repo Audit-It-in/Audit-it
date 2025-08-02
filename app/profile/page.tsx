@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/src/hooks/useAuth";
 import { Header } from "@/src/components/layout/Header.component";
 import { ProfileStepper } from "@/src/components/profile/accountant/ProfileStepper.component";
+import { CustomerOnboarding } from "@/src/components/profile/customer/CustomerOnboarding.component";
 import { Loader } from "@/src/components/common/Loader.component";
 import { LoadingAction } from "@/src/types/ui.type";
 import { ProfileStep } from "@/src/types/profile.type";
@@ -22,8 +23,8 @@ function ProfilePageContent() {
     if (!authLoading && !isAuthenticated) {
       router.push("/auth");
     } else if (!authLoading && isAuthenticated && profile !== undefined) {
-      // If user is authenticated but doesn't have a role or not an accountant, redirect
-      if (!profile || profile.role !== UserRole.ACCOUNTANT) {
+      // If user is authenticated but doesn't have a role, redirect to role selection
+      if (!profile || !profile.role) {
         router.push("/role-selection");
       }
     }
@@ -31,18 +32,20 @@ function ProfilePageContent() {
 
   if (authLoading) {
     return (
-      <Loader
-        action={LoadingAction.LOADING}
-        title='Loading Profile Setup'
-        subtitle='Preparing your CA profile builder'
-      />
+      <Loader action={LoadingAction.LOADING} title='Loading Profile Setup' subtitle='Preparing your profile builder' />
     );
   }
 
-  if (!isAuthenticated || !profile || profile.role !== UserRole.ACCOUNTANT) {
+  if (!isAuthenticated || !profile || !profile.role) {
     return null;
   }
 
+  // Customer onboarding (simplified, no header)
+  if (profile.role === UserRole.CUSTOMER) {
+    return <CustomerOnboarding />;
+  }
+
+  // Accountant profile setup (existing flow)
   return (
     <div className='min-h-screen bg-background'>
       <Header />

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/src/components/ui/button";
+import { SaveContinueButton } from "@/src/components/profile/accountant/SaveContinueButton.component";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Card as NeumorphicCard } from "@/src/components/ui/card";
@@ -11,8 +11,8 @@ import { IconBadge } from "@/src/components/ui/icon-badge";
 import { Badge } from "@/src/components/ui/badge";
 import { ProfileStep, Profile } from "@/src/types/profile.type";
 import { StatusMessage, StatusMessageType } from "@/src/types/common.type";
-import { ShieldCheckIcon, InfoIcon } from "@phosphor-icons/react";
-import { useSaveProfileStep } from "@/src/services/profile.service";
+import { ShieldCheckIcon, InfoIcon, CheckCircleIcon } from "@phosphor-icons/react";
+import { useSaveProfileStep, useVerification } from "@/src/services/profile.service";
 import FileUpload from "@/src/components/common/FileUpload.component";
 import { uploadCertificate, FILE_VALIDATION } from "@/src/services/upload.service";
 import { verificationSchema, VerificationFormData } from "@/src/helpers/profile-validation.helper";
@@ -28,21 +28,33 @@ export function VerificationStep({ userId, onStepComplete, onMessage, existingPr
   const [certificateFile, setCertificateFile] = useState<File | null>(null);
   const [isUploadingCertificate, setIsUploadingCertificate] = useState(false);
 
+  // Fetch existing verification data
+  const { data: existingVerification, isLoading: isLoadingVerification } = useVerification(existingProfile?.id);
+
   // Form setup
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     setValue,
+    reset,
   } = useForm<VerificationFormData>({
     resolver: zodResolver(verificationSchema),
     defaultValues: {
       membership_number: "",
-      certificate_url: "",
-      professional_email: existingProfile?.email || "",
-      professional_phone: existingProfile?.phone || "",
+      membership_certificate_url: "",
     },
   });
+
+  // Populate form with existing verification data
+  React.useEffect(() => {
+    if (existingVerification) {
+      reset({
+        membership_number: existingVerification.membership_number || "",
+        membership_certificate_url: existingVerification.membership_certificate_url || "",
+      });
+    }
+  }, [existingVerification, reset]);
 
   // Mutations
   const saveProfileStepMutation = useSaveProfileStep();
@@ -54,8 +66,8 @@ export function VerificationStep({ userId, onStepComplete, onMessage, existingPr
 
   const onSubmit = async (data: VerificationFormData) => {
     try {
-      // Validate that certificate is uploaded
-      if (!certificateFile && !data.certificate_url) {
+      // Validate that certificate is uploaded or already exists
+      if (!certificateFile && !data.membership_certificate_url && !existingVerification?.membership_certificate_url) {
         onMessage({
           type: StatusMessageType.ERROR,
           text: "Please upload your CA membership certificate",
@@ -64,7 +76,7 @@ export function VerificationStep({ userId, onStepComplete, onMessage, existingPr
       }
 
       // Handle certificate upload if there's a new file
-      let certificateUrl = data.certificate_url;
+      let certificateUrl = data.membership_certificate_url || existingVerification?.membership_certificate_url;
       if (certificateFile) {
         setIsUploadingCertificate(true);
         const uploadResult = await uploadCertificate(certificateFile, userId, "membership");
@@ -88,8 +100,6 @@ export function VerificationStep({ userId, onStepComplete, onMessage, existingPr
         stepData: {
           membership_number: data.membership_number,
           membership_certificate_url: certificateUrl,
-          professional_email: data.professional_email || null,
-          professional_phone: data.professional_phone || null,
         },
       });
 
@@ -102,18 +112,22 @@ export function VerificationStep({ userId, onStepComplete, onMessage, existingPr
     }
   };
 
+  // Show loading state while fetching verification data
+  if (isLoadingVerification) {
+    return (
+      <div className='space-y-6'>
+        <div className='text-center py-8'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto'></div>
+          <p className='text-sm text-gray-600 mt-2'>Loading verification data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
       {/* CA Verification - Neumorphic Card */}
       <NeumorphicCard variant='default' size='default' overlay='primary' overflow>
-        <div className='flex items-center gap-3 mb-6'>
-          <IconBadge variant='accent' size='default' icon={ShieldCheckIcon} />
-          <h3 className='text-lg font-bold text-primary-900'>CA Verification</h3>
-          <Badge variant='destructive' className='ml-auto text-xs font-semibold'>
-            Required
-          </Badge>
-        </div>
-
         <div className='space-y-6'>
           {/* Membership Number */}
           <div className='space-y-2'>
@@ -138,56 +152,50 @@ export function VerificationStep({ userId, onStepComplete, onMessage, existingPr
           {/* Certificate Upload */}
           <div className='space-y-3'>
             <Label className='text-sm font-medium text-primary-800'>Membership Certificate *</Label>
+
+            {/* Show existing certificate if available */}
+            {existingVerification?.membership_certificate_url && (
+              <div className='bg-green-50 border border-green-200 rounded-lg p-3 mb-3'>
+                <div className='flex items-center gap-2'>
+                  <CheckCircleIcon className='h-5 w-5 text-green-600' weight='fill' />
+                  <span className='text-sm font-medium text-green-800'>Certificate uploaded</span>
+                </div>
+                <p className='text-xs text-green-700 mt-1'>
+                  Your membership certificate is already on file. Upload a new file below to replace it.
+                </p>
+              </div>
+            )}
+
             <FileUpload
               value={certificateFile}
               onChange={setCertificateFile}
               accept='.pdf,.jpg,.jpeg,.png'
               maxSize={FILE_VALIDATION.CERTIFICATE.maxSize}
               allowedTypes={[...FILE_VALIDATION.CERTIFICATE.allowedTypes]}
-              placeholder='Upload your ICAI membership certificate'
-              helperText='PDF, JPEG, or PNG files. Max 5MB.'
+              placeholder={
+                existingVerification?.membership_certificate_url
+                  ? "Replace your ICAI membership certificate"
+                  : "Upload your ICAI membership certificate"
+              }
+              helperText={
+                existingVerification?.membership_certificate_url
+                  ? "Certificate already uploaded. You can upload a new one to replace it. PDF, JPEG, or PNG files. Max 5MB."
+                  : "PDF, JPEG, or PNG files. Max 5MB."
+              }
               showPreview={true}
               isUploading={isUploadingCertificate}
-              required={true}
+              required={!existingVerification?.membership_certificate_url}
             />
-          </div>
-
-          {/* Professional Contact (Optional) */}
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='professional_email' className='text-sm font-medium text-primary-800'>
-                Professional Email
-              </Label>
-              <Input
-                id='professional_email'
-                type='email'
-                {...register("professional_email")}
-                placeholder='Optional professional email'
-                hasError={!!errors.professional_email}
-              />
-              {errors.professional_email && (
-                <p className='text-xs text-red-600 font-medium'>{errors.professional_email.message}</p>
-              )}
-            </div>
-
-            <div className='space-y-2'>
-              <Label htmlFor='professional_phone' className='text-sm font-medium text-primary-800'>
-                Professional Phone
-              </Label>
-              <Input
-                id='professional_phone'
-                {...register("professional_phone")}
-                placeholder='Optional professional phone'
-                hasError={!!errors.professional_phone}
-              />
-              {errors.professional_phone && (
-                <p className='text-xs text-red-600 font-medium'>{errors.professional_phone.message}</p>
-              )}
-            </div>
           </div>
         </div>
       </NeumorphicCard>
 
+      {/* Submit Button */}
+      <SaveContinueButton
+        isSubmitting={isSubmitting || isUploadingCertificate}
+        submittingText={isUploadingCertificate ? "Uploading..." : "Saving..."}
+        submitText='Save & Continue to Professional Details'
+      />
       {/* Verification Notice */}
       <NeumorphicCard variant='subtle' size='sm'>
         <div className='flex items-start gap-3'>
@@ -197,32 +205,12 @@ export function VerificationStep({ userId, onStepComplete, onMessage, existingPr
             <ul className='text-xs text-blue-800 space-y-1'>
               <li>• Your membership certificate will be verified against ICAI records</li>
               <li>• Verification typically takes 1-2 business days</li>
-              <li>• You'll receive an email notification once verified</li>
+              <li>• You&apos;ll receive an email notification once verified</li>
               <li>• Professional details are visible only to verified clients</li>
             </ul>
           </div>
         </div>
       </NeumorphicCard>
-
-      {/* Submit Button */}
-      <div className='flex justify-end'>
-        <Button
-          type='submit'
-          disabled={isSubmitting || isUploadingCertificate}
-          variant='accent'
-          size='lg'
-          className='px-8'
-        >
-          {isSubmitting || isUploadingCertificate ? (
-            <div className='flex items-center gap-2'>
-              <div className='h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin' />
-              {isUploadingCertificate ? "Uploading..." : "Saving..."}
-            </div>
-          ) : (
-            "Save & Continue to Professional Details"
-          )}
-        </Button>
-      </div>
     </form>
   );
 }

@@ -47,7 +47,10 @@ export default function HomePage() {
                 <div className='space-y-4'>
                   {/* Main search input */}
                   <div className='relative'>
-                    <MagnifyingGlassIcon className='absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400' weight='bold' />
+                    <MagnifyingGlassIcon
+                      className='absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400'
+                      weight='bold'
+                    />
                     <Input
                       className='pl-12 h-14 text-lg rounded-xl border-neutral-200 focus:border-primary-500'
                       placeholder='Search by location, specialization, or CA name...'
@@ -56,16 +59,16 @@ export default function HomePage() {
 
                   {/* Quick filter pills */}
                   <div className='flex flex-wrap gap-2 justify-center'>
-                    <Button variant='secondary' className='rounded-full px-4 py-2 text-sm'>
+                    <Button variant='outline' className='rounded-full px-4 py-2 text-sm'>
                       Tax Filing
                     </Button>
-                    <Button variant='secondary' className='rounded-full px-4 py-2 text-sm'>
+                    <Button variant='outline' className='rounded-full px-4 py-2 text-sm'>
                       GST Services
                     </Button>
-                    <Button variant='secondary' className='rounded-full px-4 py-2 text-sm'>
+                    <Button variant='outline' className='rounded-full px-4 py-2 text-sm'>
                       Audit Services
                     </Button>
-                    <Button variant='secondary' className='rounded-full px-4 py-2 text-sm'>
+                    <Button variant='outline' className='rounded-full px-4 py-2 text-sm'>
                       Business Setup
                     </Button>
                   </div>
@@ -113,7 +116,10 @@ export default function HomePage() {
                 <div className='h-2 bg-primary-600' />
                 <div className='p-6'>
                   <div className='mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg'>
-                    <ShieldCheckIcon className='h-8 w-8 text-primary-600 group-hover:rotate-6 transition-transform' weight='bold' />
+                    <ShieldCheckIcon
+                      className='h-8 w-8 text-primary-600 group-hover:rotate-6 transition-transform'
+                      weight='bold'
+                    />
                   </div>
                   <h3 className='text-xl font-semibold text-neutral-800 mb-2'>Verified Professionals</h3>
                   <p className='text-neutral-600'>
@@ -127,7 +133,10 @@ export default function HomePage() {
                 <div className='h-2 bg-accent-500' />
                 <div className='p-6'>
                   <div className='mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg'>
-                    <MapPinIcon className='h-8 w-8 text-accent-600 group-hover:rotate-6 transition-transform' weight='bold' />
+                    <MapPinIcon
+                      className='h-8 w-8 text-accent-600 group-hover:rotate-6 transition-transform'
+                      weight='bold'
+                    />
                   </div>
                   <h3 className='text-xl font-semibold text-neutral-800 mb-2'>Location-Based Search</h3>
                   <p className='text-neutral-600'>
@@ -141,7 +150,10 @@ export default function HomePage() {
                 <div className='h-2 bg-primary-600' />
                 <div className='p-6'>
                   <div className='mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg'>
-                    <ClockIcon className='h-8 w-8 text-primary-600 group-hover:rotate-6 transition-transform' weight='bold' />
+                    <ClockIcon
+                      className='h-8 w-8 text-primary-600 group-hover:rotate-6 transition-transform'
+                      weight='bold'
+                    />
                   </div>
                   <h3 className='text-xl font-semibold text-neutral-800 mb-2'>Quick Response</h3>
                   <p className='text-neutral-600'>

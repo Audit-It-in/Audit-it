@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { Card } from "@/src/components/ui/card";
 import { CheckCircleIcon, SparkleIcon } from "@phosphor-icons/react";
 import { cn } from "@/src/helpers/tailwind.helper";
 import { UserRole } from "@/src/types/auth.type";
@@ -71,12 +71,15 @@ export const RoleOptionCard = ({
       {/* Sparkle decoration for selected state */}
       {isSelected && (
         <div className='absolute top-3 left-3 z-10'>
-          <SparkleIcon className={cn("h-3 w-3 animate-pulse", isCA ? "text-primary-500" : "text-accent-500")} weight='bold' />
+          <SparkleIcon
+            className={cn("h-3 w-3 animate-pulse", isCA ? "text-primary-500" : "text-accent-500")}
+            weight='bold'
+          />
         </div>
       )}
 
-      <CardHeader className='pb-4 pt-6 px-6 relative z-10'>
-        <CardTitle className='flex items-center gap-4'>
+      <div className='pb-4 pt-6 px-6 relative z-10'>
+        <div className='flex items-center gap-4'>
           <div
             className={cn(
               "relative flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-500 shadow-lg flex-shrink-0",
@@ -123,10 +126,10 @@ export const RoleOptionCard = ({
             </h3>
             <p className='text-sm text-neutral-600 font-medium'>{description}</p>
           </div>
-        </CardTitle>
-      </CardHeader>
+        </div>
+      </div>
 
-      <CardContent className='pt-0 pb-6 px-6 relative z-10 flex-1'>
+      <div className='pt-0 pb-6 px-6 relative z-10 flex-1'>
         <div
           className={cn(
             "rounded-xl p-4 transition-all duration-300 border h-full",
@@ -189,7 +192,7 @@ export const RoleOptionCard = ({
             <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent animate-pulse'></div>
           )}
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };

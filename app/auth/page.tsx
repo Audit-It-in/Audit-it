@@ -22,7 +22,7 @@ function AuthPageContent() {
   const [activeTab, setActiveTab] = useState<AuthTab>(AuthTab.SIGNIN);
   const [statusMessage, setStatusMessage] = useState<StatusMessageType | null>(null);
   const searchParams = useSearchParams();
-  const { shouldShowAuth, isLoading, isRedirecting } = useAuthRedirect();
+  const { isLoading, isRedirecting } = useAuthRedirect();
 
   // Auth redirect logic is now handled by useAuthRedirect hook
 

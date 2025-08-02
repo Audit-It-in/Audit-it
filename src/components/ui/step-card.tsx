@@ -75,7 +75,7 @@ const stepIconVariants = cva(
 
 const stepNumberVariants = cva(
   [
-    "absolute -top-2 -right-2 w-6 h-6 rounded-full border-2 border-white z-20",
+    "absolute -top-1 -right-1 w-6 h-6 rounded-full border-2 border-white z-20",
     "flex items-center justify-center text-xs font-bold transition-all duration-500",
     "shadow-[2px_2px_6px_rgba(0,0,0,0.2),-1px_-1px_3px_rgba(255,255,255,0.8)]",
   ],
@@ -127,7 +127,10 @@ export interface StepCardProps
   /**
    * The icon component to render
    */
-  icon?: React.ComponentType<any>;
+  icon?: React.ComponentType<{
+    className?: string;
+    weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
+  }>;
   /**
    * Whether this step is required
    */

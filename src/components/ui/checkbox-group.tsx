@@ -129,7 +129,7 @@ const CheckboxGroup = React.forwardRef<HTMLDivElement, CheckboxGroupProps>(
               key={item.id}
               className={cn(
                 checkboxCardVariants({ variant }),
-                isChecked ? checkboxCardVariants({ variant })?.checked : checkboxCardVariants({ variant })?.unchecked,
+                isChecked ? "ring-2 ring-primary-500 bg-primary-50" : "",
                 isItemDisabled && "opacity-50 cursor-not-allowed"
               )}
             >
@@ -145,14 +145,7 @@ const CheckboxGroup = React.forwardRef<HTMLDivElement, CheckboxGroupProps>(
                 )}
                 {...checkboxProps}
               />
-              <span
-                className={cn(
-                  checkboxLabelVariants({ variant }),
-                  isChecked
-                    ? checkboxLabelVariants({ variant })?.checked
-                    : checkboxLabelVariants({ variant })?.unchecked
-                )}
-              >
+              <span className={cn(checkboxLabelVariants({ variant }), isChecked ? "text-primary-700 font-medium" : "")}>
                 {item.label}
               </span>
             </label>

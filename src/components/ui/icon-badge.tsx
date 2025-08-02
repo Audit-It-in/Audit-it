@@ -59,7 +59,10 @@ export interface IconBadgeProps extends React.HTMLAttributes<HTMLDivElement>, Va
   /**
    * The icon component to render
    */
-  icon?: React.ComponentType<any>;
+  icon?: React.ComponentType<{
+    className?: string;
+    weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
+  }>;
   /**
    * Whether to show a glow effect
    */

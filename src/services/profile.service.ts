@@ -6,21 +6,11 @@ import { ProfileStep } from "@/src/types/profile.type";
 import type {
   Profile,
   ProfileDetails,
-  ProfileStepData,
-  PersonalInfoFormData,
-  VerificationFormData,
-  ProfessionalFormData,
-  EducationFormData,
   UsernameAvailability,
   Language,
-  Specialization,
   SpecializationWithCategory,
-  State,
-  District,
-  Experience,
   Education,
-  CAVerification,
-  SocialProfile,
+  Verification,
 } from "@/src/types/profile.type";
 
 // === CORE SERVICE FUNCTIONS ===
@@ -136,16 +126,227 @@ async function generateUsernameSuggestions(
   return suggestions;
 }
 
-export async function saveProfileStep(
+// === EDUCATION SERVICE FUNCTIONS ===
+
+export async function fetchVerification(profileId: string): Promise<Verification | null> {
+  try {
+    const { data, error } = await supabase.from("ca_verifications").select("*").eq("profile_id", profileId).single();
+
+    if (error && error.code !== "PGRST116") {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch verification:", error);
+    return null;
+  }
+}
+
+export async function fetchEducation(profileId: string): Promise<Education | null> {
+  try {
+    const { data, error } = await supabase.from("educations").select("*").eq("profile_id", profileId).single();
+
+    if (error && error.code !== "PGRST116") {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch education:", error);
+    return null;
+  }
+}
+
+export async function saveVerificationStep(
   userId: string,
-  step: ProfileStep,
-  stepData: Record<string, any>
+  stepData: Record<string, unknown>,
+  currentProfile: Profile | null
 ): Promise<Profile> {
+  try {
+    // Ensure we have a profile first
+    let profile = currentProfile;
+    if (!profile) {
+      // Create profile if it doesn't exist
+      const profileData = {
+        auth_user_id: userId,
+        role: "accountant",
+        country: "India",
+        language_ids: [],
+        specialization_ids: [],
+        whatsapp_available: false,
+        is_active: true,
+        last_completed_section: ProfileStep.VERIFICATION,
+        completion_updated_at: new Date().toISOString(),
+        profile_completion_percentage: 30, // Verification step weight
+      };
+
+      const { data, error } = await supabase.from("profiles").insert([profileData]).select().single();
+      if (error) throw error;
+      profile = data;
+    }
+
+    // At this point profile should never be null due to the creation logic above
+    if (!profile) {
+      throw new Error("Profile creation failed");
+    }
+
+    // Extract verification data for ca_verifications table
+    const verificationData = {
+      profile_id: profile.id,
+      membership_number: stepData.membership_number as string,
+      membership_certificate_url: stepData.membership_certificate_url as string,
+    };
+
+    // Check if verification record already exists
+    const { data: existingVerification } = await supabase
+      .from("ca_verifications")
+      .select("*")
+      .eq("profile_id", profile.id)
+      .single();
+
+    if (existingVerification) {
+      // Update existing verification record
+      const { error } = await supabase.from("ca_verifications").update(verificationData).eq("profile_id", profile.id);
+
+      if (error) throw error;
+    } else {
+      // Create new verification record
+      const { error } = await supabase.from("ca_verifications").insert([verificationData]);
+
+      if (error) throw error;
+    }
+
+    // Update profile completion status
+    const profileUpdateData = {
+      last_completed_section: ProfileStep.VERIFICATION,
+      completion_updated_at: new Date().toISOString(),
+      profile_completion_percentage: calculateCompletionPercentage(ProfileStep.VERIFICATION, stepData, profile),
+    };
+
+    const updatedProfile = await supabase
+      .from("profiles")
+      .update(profileUpdateData)
+      .eq("id", profile.id)
+      .select()
+      .single();
+
+    if (updatedProfile.error) throw updatedProfile.error;
+
+    return updatedProfile.data;
+  } catch (error) {
+    console.error("Failed to save verification step:", error);
+    throw new Error("Unable to save verification information. Please try again.");
+  }
+}
+
+export async function saveEducationStep(
+  userId: string,
+  stepData: Record<string, unknown>,
+  currentProfile: Profile | null
+): Promise<Profile> {
+  try {
+    // Ensure we have a profile first
+    let profile = currentProfile;
+    if (!profile) {
+      // Create profile if it doesn't exist
+      const profileData = {
+        auth_user_id: userId,
+        role: "accountant",
+        country: "India",
+        language_ids: [],
+        specialization_ids: [],
+        whatsapp_available: false,
+        is_active: true,
+        last_completed_section: ProfileStep.EDUCATION,
+        completion_updated_at: new Date().toISOString(),
+        profile_completion_percentage: 10, // Education step weight
+      };
+
+      const { data, error } = await supabase.from("profiles").insert([profileData]).select().single();
+      if (error) throw error;
+      profile = data;
+    }
+
+    // At this point profile should never be null due to the creation logic above
+    if (!profile) {
+      throw new Error("Profile creation failed");
+    }
+
+    // Extract education data (excluding certifications and professional_memberships which aren't in Education table)
+    const educationData = {
+      profile_id: profile.id,
+      institute_name: stepData.institute_name as string,
+      degree: stepData.degree as string,
+      field_of_study: stepData.field_of_study as string,
+      start_date: stepData.start_date as string,
+      end_date: stepData.end_date as string,
+      grade: stepData.grade as string,
+      description: stepData.description as string,
+    };
+
+    // Check if education record already exists
+    const existingEducation = await fetchEducation(profile.id);
+
+    if (existingEducation) {
+      // Update existing education record
+      const { error } = await supabase.from("educations").update(educationData).eq("profile_id", profile.id);
+
+      if (error) throw error;
+    } else {
+      // Create new education record
+      const { error } = await supabase.from("educations").insert([educationData]);
+
+      if (error) throw error;
+    }
+
+    // Update profile completion status and save certifications/memberships
+    const profileUpdateData: any = {
+      last_completed_section: ProfileStep.EDUCATION,
+      completion_updated_at: new Date().toISOString(),
+      profile_completion_percentage: calculateCompletionPercentage(ProfileStep.EDUCATION, stepData, profile),
+    };
+
+    // Add certifications and professional_memberships if they exist in stepData
+    if (stepData.certifications) {
+      profileUpdateData.certifications = stepData.certifications;
+    }
+    if (stepData.professional_memberships) {
+      profileUpdateData.professional_memberships = stepData.professional_memberships;
+    }
+
+    const updatedProfile = await supabase
+      .from("profiles")
+      .update(profileUpdateData)
+      .eq("id", profile.id)
+      .select()
+      .single();
+
+    if (updatedProfile.error) throw updatedProfile.error;
+
+    return updatedProfile.data;
+  } catch (error) {
+    console.error("Failed to save education step:", error);
+    throw new Error("Unable to save education information. Please try again.");
+  }
+}
+
+export async function saveProfileStep(userId: string, step: ProfileStep, stepData: Record<string, unknown>): Promise<Profile> {
   try {
     // Get current profile
     const currentProfile = await fetchProfile(userId);
 
-    // Merge step data with current profile
+    // Handle verification step separately since it goes to the ca_verifications table
+    if (step === ProfileStep.VERIFICATION) {
+      return await saveVerificationStep(userId, stepData, currentProfile);
+    }
+
+    // Handle education step separately since it goes to the educations table
+    if (step === ProfileStep.EDUCATION) {
+      return await saveEducationStep(userId, stepData, currentProfile);
+    }
+
+    // Merge step data with current profile for other steps
     const updates = {
       ...stepData,
       last_completed_section: step,
@@ -193,7 +394,7 @@ export async function saveProfileStep(
 
 function calculateCompletionPercentage(
   completedStep: ProfileStep,
-  stepData: Record<string, any>,
+  stepData: Record<string, unknown>,
   currentProfile: Profile | null
 ): number {
   const stepWeights = {
@@ -210,7 +411,6 @@ function calculateCompletionPercentage(
 
   // Add weights for previously completed steps
   if (currentProfile) {
-    const lastCompleted = currentProfile.last_completed_section as ProfileStep;
     const stepOrder = [
       ProfileStep.PERSONAL_INFO,
       ProfileStep.VERIFICATION,
@@ -323,12 +523,37 @@ export function useSaveProfileStep() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, step, stepData }: { userId: string; step: ProfileStep; stepData: Record<string, any> }) =>
-      saveProfileStep(userId, step, stepData),
+    mutationFn: ({
+      userId,
+      step,
+      stepData,
+    }: {
+      userId: string;
+      step: ProfileStep;
+      stepData: Record<string, unknown>;
+    }) => saveProfileStep(userId, step, stepData),
     onSuccess: (data) => {
       queryClient.setQueryData(["profile", data.auth_user_id], data);
       queryClient.invalidateQueries({ queryKey: ["profile-details", data.auth_user_id] });
+      queryClient.invalidateQueries({ queryKey: ["verification", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["education", data.id] });
     },
+  });
+}
+
+export function useVerification(profileId?: string) {
+  return useQuery({
+    queryKey: ["verification", profileId],
+    queryFn: () => (profileId ? fetchVerification(profileId) : Promise.resolve(null)),
+    enabled: !!profileId,
+  });
+}
+
+export function useEducation(profileId?: string) {
+  return useQuery({
+    queryKey: ["education", profileId],
+    queryFn: () => (profileId ? fetchEducation(profileId) : Promise.resolve(null)),
+    enabled: !!profileId,
   });
 }
 

@@ -11,7 +11,7 @@ interface ProfileFormFieldProps {
   label: string;
   error?: string;
   required?: boolean;
-  type?: "input" | "textarea" | "number" | "email" | "tel" | "month";
+  type?: "input" | "textarea" | "number" | "email" | "tel" | "month" | "date";
   placeholder?: string;
   description?: string;
   className?: string;
@@ -56,7 +56,7 @@ export const ProfileFormField = forwardRef<
             placeholder={placeholder}
             hasError={!!error}
             className={inputClassName}
-            {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
+            {...(props as any)} // eslint-disable-line @typescript-eslint/no-explicit-any
             ref={ref as React.Ref<HTMLInputElement>}
           />
         )}

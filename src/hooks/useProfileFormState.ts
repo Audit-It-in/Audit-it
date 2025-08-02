@@ -15,7 +15,7 @@ export function useProfileFormState({ userId, step, onStepComplete, onMessage }:
   const saveProfileMutation = useSaveProfileStep();
 
   const handleSubmit = useCallback(
-    async (stepData: any) => {
+    async (stepData: Record<string, unknown>) => {
       setIsSubmitting(true);
       try {
         await saveProfileMutation.mutateAsync({

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useState } from "react";
+import Image from "next/image";
 import { UploadIcon, FileIcon, ImageIcon, XIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import { cn } from "@/src/helpers/tailwind.helper";
 import { Button } from "@/src/components/ui/button";
@@ -195,7 +196,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
               <div className='flex items-center justify-center'>
                 {showPreview && previewUrl ? (
                   <div className='relative'>
-                    <img src={previewUrl} alt='Preview' className='w-16 h-16 object-cover rounded-lg shadow-md' />
+                    <Image
+                      src={previewUrl}
+                      alt='Preview'
+                      width={64}
+                      height={64}
+                      className='object-cover rounded-lg shadow-md'
+                    />
                     {!isUploading && (
                       <Button
                         type='button'

@@ -1,18 +1,19 @@
 "use client";
 import { Badge } from "@/src/components/ui/badge";
-import { Button } from "@/src/components/ui/button";
 import { Card } from "@/src/components/ui/card";
-import { CertificateIcon, CheckCircleIcon, GraduationCapIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { CertificateIcon, CheckCircleIcon, GraduationCapIcon } from "@phosphor-icons/react";
 import { DynamicArrayField } from "../shared/DynamicArrayField.component";
 import { EducationFormData, educationSchema, ProfileDefaults } from "@/src/helpers/profile-validation.helper";
-import { FormSubmitButton } from "../shared/FormSubmitButton.component";
+import { SaveContinueButton } from "./SaveContinueButton.component";
 import { Profile, ProfileStep } from "@/src/types/profile.type";
 import { ProfileFormField } from "../shared/ProfileFormField.component";
 import { ProfileFormSection } from "../shared/ProfileFormSection.component";
 import { StatusMessage } from "@/src/types/common.type";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useEducation } from "@/src/services/profile.service";
+import { useForm } from "react-hook-form";
 import { useProfileFormState } from "@/src/hooks/useProfileFormState";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 
 interface EducationStepProps {
   userId: string;
@@ -29,42 +30,52 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
     onMessage,
   });
 
+  // Fetch existing education data
+  const { data: existingEducation } = useEducation(existingProfile?.id);
+
   const {
     register,
     handleSubmit,
     control,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<EducationFormData>({
     resolver: zodResolver(educationSchema),
     defaultValues: ProfileDefaults.education,
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "other_qualifications",
-  });
-
   const watchedCertifications = watch("certifications") || [];
   const watchedMemberships = watch("professional_memberships") || [];
 
-  const addEducation = () => {
-    append({
-      institute_name: "",
-      degree: "",
-      field_of_study: "",
-      start_date: "",
-      end_date: "",
-      grade: "",
-      description: "",
-    });
-  };
+  // Load existing education data into form
+  useEffect(() => {
+    if (existingEducation || existingProfile) {
+      reset({
+        institute_name: existingEducation?.institute_name || ProfileDefaults.education.institute_name,
+        degree: existingEducation?.degree || ProfileDefaults.education.degree,
+        field_of_study: existingEducation?.field_of_study || ProfileDefaults.education.field_of_study,
+        start_date: existingEducation?.start_date || "",
+        end_date: existingEducation?.end_date || "",
+        grade: existingEducation?.grade || "",
+        description: existingEducation?.description || "",
+        // Load certifications and memberships from profile
+        certifications: [],
+        professional_memberships: [],
+      });
+    }
+  }, [existingEducation, existingProfile, reset]);
 
   const onSubmit = async (data: EducationFormData) => {
     const stepData = {
-      ca_qualification: data.ca_qualification,
-      other_qualifications: data.other_qualifications?.filter((edu) => edu.institute_name && edu.degree) || [],
+      institute_name: data.institute_name,
+      degree: data.degree,
+      field_of_study: data.field_of_study,
+      start_date: data.start_date,
+      end_date: data.end_date,
+      grade: data.grade,
+      description: data.description,
       certifications: data.certifications || [],
       professional_memberships: data.professional_memberships || [],
     };
@@ -85,114 +96,59 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
           <div className='bg-white rounded-lg p-4 border border-primary-200'>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
               <ProfileFormField
-                label='Institute'
+                label='Institute Name'
                 required
-                placeholder='ICAI'
-                error={errors.ca_qualification?.institute_name?.message}
-                {...register("ca_qualification.institute_name")}
+                placeholder='Institute of Chartered Accountants of India (ICAI)'
+                error={errors.institute_name?.message}
+                {...register("institute_name")}
               />
 
               <ProfileFormField
-                label='Completion Year'
-                type='number'
-                required
-                min={1980}
-                max={new Date().getFullYear()}
-                error={errors.ca_qualification?.completion_year?.message}
-                {...register("ca_qualification.completion_year", { valueAsNumber: true })}
+                label='Degree'
+                placeholder='Chartered Accountant'
+                error={errors.degree?.message}
+                {...register("degree")}
               />
 
               <ProfileFormField
-                label='Rank/Position'
+                label='Field of Study'
+                placeholder='Accounting and Finance'
+                error={errors.field_of_study?.message}
+                {...register("field_of_study")}
+              />
+
+              <ProfileFormField
+                label='Grade/Rank'
                 placeholder='e.g., All India Rank 50, First Class'
                 description='If you achieved any notable rank or distinction'
+                error={errors.grade?.message}
+                {...register("grade")}
+              />
+
+              <ProfileFormField
+                label='Start Date'
+                type='date'
+                error={errors.start_date?.message}
+                {...register("start_date")}
+              />
+
+              <ProfileFormField
+                label='End Date'
+                type='date'
+                error={errors.end_date?.message}
+                {...register("end_date")}
+              />
+
+              <ProfileFormField
+                label='Description'
+                placeholder='Additional details about your education'
                 className='sm:col-span-2'
-                {...register("ca_qualification.rank")}
+                error={errors.description?.message}
+                {...register("description")}
               />
             </div>
           </div>
         </Card>
-      </ProfileFormSection>
-
-      {/* Other Qualifications */}
-      <ProfileFormSection title='Other Qualifications' icon={GraduationCapIcon}>
-        <div className='flex items-center justify-between mb-4'>
-          <h4 className='text-md font-medium text-primary-800'>Additional Education</h4>
-          <Button type='button' variant='outline' size='sm' onClick={addEducation}>
-            <PlusIcon className='h-4 w-4 mr-2' weight='bold' />
-            Add Education
-          </Button>
-        </div>
-
-        <div className='space-y-6'>
-          {fields.map((field, index) => (
-            <Card key={field.id} variant='inset' size='sm'>
-              <div className='flex items-center justify-between mb-4'>
-                <h5 className='text-md font-medium text-primary-800'>Education {index + 1}</h5>
-                {fields.length > 1 && (
-                  <Button
-                    type='button'
-                    variant='ghost'
-                    size='sm'
-                    onClick={() => remove(index)}
-                    className='text-destructive hover:text-destructive'
-                  >
-                    <TrashIcon className='h-4 w-4' weight='bold' />
-                  </Button>
-                )}
-              </div>
-
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                <ProfileFormField
-                  label='Institute/University'
-                  placeholder='e.g., Mumbai University'
-                  error={errors.other_qualifications?.[index]?.institute_name?.message}
-                  {...register(`other_qualifications.${index}.institute_name`)}
-                />
-
-                <ProfileFormField
-                  label='Degree'
-                  placeholder='e.g., Bachelor of Commerce, MBA'
-                  error={errors.other_qualifications?.[index]?.degree?.message}
-                  {...register(`other_qualifications.${index}.degree`)}
-                />
-
-                <ProfileFormField
-                  label='Field of Study'
-                  placeholder='e.g., Accounting & Finance'
-                  {...register(`other_qualifications.${index}.field_of_study`)}
-                />
-
-                <ProfileFormField
-                  label='Grade/CGPA'
-                  placeholder='e.g., First Class, 8.5 CGPA'
-                  {...register(`other_qualifications.${index}.grade`)}
-                />
-
-                <ProfileFormField
-                  label='Start Date'
-                  type='month'
-                  {...register(`other_qualifications.${index}.start_date`)}
-                />
-
-                <ProfileFormField
-                  label='End Date'
-                  type='month'
-                  {...register(`other_qualifications.${index}.end_date`)}
-                />
-              </div>
-
-              <div className='mt-4'>
-                <ProfileFormField
-                  label='Description'
-                  type='textarea'
-                  placeholder='Describe relevant coursework, projects, or achievements...'
-                  {...register(`other_qualifications.${index}.description`)}
-                />
-              </div>
-            </Card>
-          ))}
-        </div>
       </ProfileFormSection>
 
       {/* Certifications */}
@@ -222,15 +178,15 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
           <div>
             <h4 className='text-sm font-medium text-accent-900 mb-1'>Profile Completion</h4>
             <p className='text-sm text-accent-800'>
-              Congratulations! You're completing your CA profile. After submitting this step, your profile will be ready
-              and you can start receiving client inquiries.
+              Congratulations! You&apos;re completing your CA profile. After submitting this step, your profile will be
+              ready and you can start receiving client inquiries.
             </p>
           </div>
         </div>
       </Card>
 
       {/* Submit Button */}
-      <FormSubmitButton
+      <SaveContinueButton
         isSubmitting={isSubmitting}
         submittingText='Completing Profile...'
         submitText='Complete Profile Setup'

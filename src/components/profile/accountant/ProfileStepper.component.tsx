@@ -35,7 +35,10 @@ interface StepConfig {
   step: ProfileStep;
   title: string;
   description: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{
+    className?: string;
+    weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
+  }>;
   required: boolean;
   weight: number;
 }
@@ -250,13 +253,6 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
 
       {/* Current Step Content */}
       <Card variant='default' size='default'>
-        <div className='mb-4'>
-          <h2 className='text-xl font-bold text-primary-900 mb-1'>{currentStepConfig.title}</h2>
-          <p className='text-sm text-neutral-600'>{currentStepConfig.description}</p>
-        </div>
-
-        <Separator className='mb-6' />
-
         {renderStepContent()}
 
         {renderStepActions()}

@@ -9,7 +9,9 @@ import { WarningIcon } from "@phosphor-icons/react";
 import { useStates, useDistricts } from "@/src/services/profile.service";
 
 interface LocationFieldsProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: FieldErrors<any>;
   stateValue: number;
   onStateChange: (stateId: number) => void;
@@ -25,7 +27,7 @@ export function LocationFields({ control, errors, stateValue, onStateChange, cla
   } = useDistricts(stateValue || undefined);
 
   return (
-    <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${className}`}>
+    <div className={`space-y-4 ${className}`}>
       {/* State Field */}
       <div className='space-y-2'>
         <Label htmlFor='state_id' className='text-sm font-medium text-primary-800'>
@@ -70,7 +72,7 @@ export function LocationFields({ control, errors, stateValue, onStateChange, cla
         {errors.state_id && (
           <p className='text-xs text-red-600 font-medium flex items-center gap-1'>
             <WarningIcon className='h-3 w-3' />
-            {errors.state_id.message}
+            {errors.state_id.message?.toString() || "Invalid state"}
           </p>
         )}
       </div>
@@ -122,7 +124,7 @@ export function LocationFields({ control, errors, stateValue, onStateChange, cla
         {errors.district_id && (
           <p className='text-xs text-red-600 font-medium flex items-center gap-1'>
             <WarningIcon className='h-3 w-3' />
-            {errors.district_id.message}
+            {errors.district_id.message?.toString() || "Invalid district"}
           </p>
         )}
       </div>

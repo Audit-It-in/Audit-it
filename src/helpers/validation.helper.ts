@@ -156,9 +156,9 @@ export const CommonSchemas = {
 // Form-specific refinements
 export const FormRefinements = {
   // Experience refinement - end date required if not current
-  experienceEndDate: (data: any) => {
+  experienceEndDate: (data: { experiences?: Array<{ is_current?: boolean; end_date?: string }> }) => {
     if (data.experiences) {
-      return data.experiences.every((exp: any) => exp.is_current || exp.end_date);
+      return data.experiences.every((exp) => exp.is_current || exp.end_date);
     }
     return true;
   },

@@ -1,17 +1,17 @@
 "use client";
 import AvatarUpload from "@/src/components/common/AvatarUpload.component";
 import { Card as NeumorphicCard } from "@/src/components/ui/card";
-import { Checkbox } from "@/src/components/ui/checkbox";
+import { Switch } from "@/src/components/ui/switch";
 import { CheckboxGroup } from "@/src/components/ui/checkbox-group";
 import { FILE_VALIDATION, uploadProfilePicture } from "@/src/services/upload.service";
-import { FormSubmitButton } from "../shared/FormSubmitButton.component";
+import { SaveContinueButton } from "./SaveContinueButton.component";
 import { IconBadge } from "@/src/components/ui/icon-badge";
 import { InlineLoader } from "@/src/components/common/Loader.component";
 import { Label } from "@/src/components/ui/label";
 import { LoadingAction, SpinnerSize } from "@/src/types/ui.type";
 import { LocationFields } from "../shared/LocationFields.component";
 import { PersonalInfoFormData, personalInfoSchema, ProfileDefaults } from "@/src/helpers/profile-validation.helper";
-import { Profile, ProfileStep } from "@/src/types/profile.type";
+import { Profile, ProfileStep, UsernameAvailability } from "@/src/types/profile.type";
 import { ProfileFormField } from "../shared/ProfileFormField.component";
 import { StatusMessage } from "@/src/types/common.type";
 import { useAuth } from "@/src/hooks/useAuth";
@@ -41,7 +41,7 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
   const [usernameCheckTimeout, setUsernameCheckTimeout] = useState<NodeJS.Timeout | null>(null);
   const [usernameAvailability, setUsernameAvailability] = useState<{
     isChecking: boolean;
-    result: any;
+    result: UsernameAvailability | null;
   }>({ isChecking: false, result: null });
   const [hasInitialized, setHasInitialized] = useState(false);
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
@@ -125,6 +125,7 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
           user?.user_metadata?.full_name?.split(" ").slice(1).join(" ") ||
           user?.user_metadata?.family_name ||
           "",
+        profile_picture_url: existingProfile?.profile_picture_url || "",
         bio: existingProfile?.bio || "",
         state_id: existingProfile?.state_id || 0,
         district_id: existingProfile?.district_id || 0,
@@ -141,7 +142,7 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
   const checkUsernameMutation = useUsernameAvailability();
 
   // Reset district when state changes
-  const handleStateChange = (stateId: number) => {
+  const handleStateChange = () => {
     setValue("district_id", 0);
   };
 
@@ -233,6 +234,8 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
 
         if (uploadResult.success && uploadResult.url) {
           profilePictureUrl = uploadResult.url;
+          // Update the form field to reflect the new URL
+          setValue("profile_picture_url", uploadResult.url);
         } else {
           showError(uploadResult.error || "Failed to upload profile picture");
           setIsUploadingPicture(false);
@@ -262,55 +265,51 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
     }
   };
 
-  const handleLanguageToggle = (languageId: number) => {
-    const currentIds = watchedLanguageIds || [];
-    const newIds = currentIds.includes(languageId)
-      ? currentIds.filter((id) => id !== languageId)
-      : [...currentIds, languageId];
-    setValue("language_ids", newIds);
-    trigger("language_ids");
-  };
-
-  const handleSpecializationToggle = (specializationId: number) => {
-    const currentIds = watchedSpecializationIds || [];
-    const newIds = currentIds.includes(specializationId)
-      ? currentIds.filter((id) => id !== specializationId)
-      : [...currentIds, specializationId];
-    setValue("specialization_ids", newIds);
-    trigger("specialization_ids");
-  };
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
       {/* Mobile-first Layout: Split into separate cards */}
-      <div className='md:flex md:gap-6'>
+      <div className='space-y-6 md:space-y-0 md:flex md:items-stretch'>
         {/* Left Card - Your Info */}
-        <NeumorphicCard variant='default' size='sm' overlay='primary' overflow className='md:w-[40%]'>
+        <NeumorphicCard
+          variant='default'
+          size='sm'
+          overlay='primary'
+          overflow
+          className='md:w-[48%] md:flex-shrink-0 flex flex-col md:mr-[4%]'
+        >
           {/* Header */}
           <div className='flex items-center gap-3 mb-4'>
             <IconBadge variant='default' size='sm' icon={UserIcon} />
             <h3 className='text-base font-bold text-primary-900'>Your Info</h3>
           </div>
 
-          {/* Profile Picture - Neumorphic Design */}
-          <div className='flex flex-col items-center space-y-3 mb-6'>
-            <div className='relative w-20 h-20 rounded-full bg-gradient-to-br from-neutral-50 to-neutral-100 shadow-[6px_6px_16px_rgba(0,0,0,0.12),-6px_-6px_16px_rgba(255,255,255,0.9)] border border-neutral-200/50'>
-              <AvatarUpload
-                value={profilePictureFile}
-                onChange={setProfilePictureFile}
-                currentImageUrl={watch("profile_picture_url")}
-                maxSize={FILE_VALIDATION.PROFILE_PICTURE.maxSize}
-                allowedTypes={[...FILE_VALIDATION.PROFILE_PICTURE.allowedTypes]}
-                isUploading={isUploadingPicture}
-                size='md'
-                showRemove={true}
-              />
-            </div>
-            <Label className='text-xs font-medium text-primary-700 text-center'>Profile Picture</Label>
+          {/* Profile Picture - Larger Size */}
+          <div className='flex flex-col items-center space-y-4 mb-8'>
+            <AvatarUpload
+              value={profilePictureFile}
+              onChange={(file) => {
+                setProfilePictureFile(file);
+                // Clear the URL when a new file is selected or removed
+                if (file) {
+                  setValue("profile_picture_url", "");
+                } else {
+                  // File was removed, clear the URL as well
+                  setValue("profile_picture_url", "");
+                }
+              }}
+              currentImageUrl={watch("profile_picture_url")}
+              maxSize={FILE_VALIDATION.PROFILE_PICTURE.maxSize}
+              allowedTypes={[...FILE_VALIDATION.PROFILE_PICTURE.allowedTypes]}
+              isUploading={isUploadingPicture}
+              size='2xl'
+              showRemove={true}
+              className='transition-all duration-300 hover:scale-[1.02]'
+            />
+            <Label className='text-sm font-semibold text-primary-700 text-center tracking-wide'>Profile Picture</Label>
           </div>
 
-          {/* Form Fields */}
-          <div className='space-y-4'>
+          {/* Form Fields - Flex grow to fill remaining space */}
+          <div className='space-y-4 flex-grow flex flex-col'>
             <ProfileFormField
               label='First Name'
               required
@@ -333,38 +332,43 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
               label='Phone Number'
               type='tel'
               required
-              placeholder='+91 98765 43210'
+              placeholder='98765 43210'
               error={errors.phone?.message}
               {...register("phone")}
             />
 
+            {/* Hidden field for profile picture URL */}
+            <input type='hidden' {...register("profile_picture_url")} />
+
             {/* WhatsApp Available */}
-            <div className='space-y-2'>
-              <Label className='text-sm font-medium text-primary-800'>
-                <ChatCircleIcon className='h-4 w-4 inline mr-1' />
-                WhatsApp
-              </Label>
-              <div className='flex items-center gap-3 h-11 px-4 bg-white border border-neutral-300 rounded-lg shadow-[inset_1px_1px_3px_rgba(0,0,0,0.08),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]'>
-                <Checkbox
-                  checked={watch("whatsapp_available") || false}
-                  onCheckedChange={(checked) => setValue("whatsapp_available", !!checked)}
-                  className='data-[state=checked]:bg-primary-600 data-[state=checked]:border-primary-600'
-                />
-                <span className='text-sm text-neutral-700 font-medium'>Available on WhatsApp</span>
-              </div>
+            <div className='space-y-2 pl-2'>
+              <Switch
+                checked={watch("whatsapp_available") || false}
+                onCheckedChange={(checked: boolean) => setValue("whatsapp_available", checked)}
+                id='whatsapp-toggle'
+                showLabel={true}
+                label='Available on WhatsApp'
+                labelPosition='left'
+              />
             </div>
           </div>
         </NeumorphicCard>
 
         {/* Right Card - Other Details */}
-        <NeumorphicCard variant='default' size='sm' overlay='primary' overflow className='mt-6 md:mt-0 md:w-[60%]'>
+        <NeumorphicCard
+          variant='default'
+          size='sm'
+          overlay='primary'
+          overflow
+          className='md:w-[48%] md:flex-shrink-0 flex flex-col'
+        >
           {/* Header */}
           <div className='flex items-center gap-3 mb-4'>
             <IconBadge variant='default' size='sm' icon={MapPinIcon} />
             <h3 className='text-base font-bold text-primary-900'>Other Details</h3>
           </div>
 
-          <div className='space-y-4'>
+          <div className='space-y-4 flex-grow flex flex-col'>
             {/* Location Section */}
             <LocationFields
               control={control}
@@ -374,58 +378,64 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
             />
 
             {/* Username */}
-            <div className='space-y-2'>
-              <ProfileFormField
-                label='Username'
-                required
-                placeholder='Your username'
-                error={errors.username?.message}
-                {...register("username")}
-              />
-              {usernameAvailability.isChecking && (
-                <div className='flex items-center gap-2 text-xs text-primary-600 bg-primary-50/60 p-2 rounded-lg border border-primary-200/60'>
-                  <InlineLoader action={LoadingAction.LOADING} size={SpinnerSize.SMALL} />
-                  <span className='font-medium'>Checking availability...</span>
-                </div>
-              )}
-              {usernameAvailability.result && (
-                <div className='text-xs'>
-                  {usernameAvailability.result.isAvailable ? (
-                    <div className='flex items-center gap-2 text-accent-700 bg-accent-50/60 p-2 rounded-lg border border-accent-200/60'>
-                      <CheckCircleIcon className='h-4 w-4' />
-                      <span className='font-medium'>Available</span>
-                    </div>
-                  ) : (
-                    <div className='text-red-700 bg-red-50/60 p-2 rounded-lg border border-red-200/60'>
-                      <div className='flex items-center gap-2 mb-1'>
-                        <WarningIcon className='h-4 w-4' />
-                        <span className='font-medium'>Not available</span>
+            <div className='flex flex-col justify-start'>
+              <div className='space-y-2'>
+                <ProfileFormField
+                  label='Username'
+                  required
+                  placeholder='Your username'
+                  error={errors.username?.message}
+                  {...register("username")}
+                />
+                {usernameAvailability.isChecking && (
+                  <div className='flex items-center gap-2 text-xs text-primary-600 bg-primary-50/60 p-2 rounded-lg border border-primary-200/60'>
+                    <InlineLoader action={LoadingAction.LOADING} size={SpinnerSize.SMALL} />
+                    <span className='font-medium'>Checking availability...</span>
+                  </div>
+                )}
+                {usernameAvailability.result && (
+                  <div className='text-xs'>
+                    {usernameAvailability.result.isAvailable ? (
+                      <div className='flex items-center gap-2 text-accent-700 bg-accent-50/60 p-2 rounded-lg border border-accent-200/60'>
+                        <CheckCircleIcon className='h-4 w-4' />
+                        <span className='font-medium'>Available</span>
                       </div>
-                      {usernameAvailability.result.suggested && (
-                        <div className='text-neutral-600'>
-                          <span>Try: {usernameAvailability.result.suggested.join(", ")}</span>
+                    ) : (
+                      <div className='text-red-700 bg-red-50/60 p-2 rounded-lg border border-red-200/60'>
+                        <div className='flex items-center gap-2 mb-1'>
+                          <WarningIcon className='h-4 w-4' />
+                          <span className='font-medium'>Not available</span>
                         </div>
-                      )}
-                    </div>
-                  )}
-                  {usernameAvailability.result.profileUrl && (
-                    <div className='flex items-center gap-2 text-primary-600 bg-primary-50/40 p-2 rounded-lg border border-primary-200/40 mt-2'>
-                      <LinkIcon className='h-4 w-4' />
-                      <span className='font-medium'>audit-it.com/{usernameAvailability.result.profileUrl}</span>
-                    </div>
-                  )}
-                </div>
-              )}
+                        {usernameAvailability.result.suggested && (
+                          <div className='text-neutral-600'>
+                            <span>Try: {usernameAvailability.result.suggested.join(", ")}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {usernameAvailability.result.profileUrl && (
+                      <div className='flex items-center gap-2 text-primary-600 bg-primary-50/40 p-2 rounded-lg border border-primary-200/40 mt-2'>
+                        <LinkIcon className='h-4 w-4' />
+                        <span className='font-medium'>audit-it.com/{usernameAvailability.result.profileUrl}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Bio */}
-            <ProfileFormField
-              label='Bio'
-              type='textarea'
-              placeholder='Tell us about yourself and your expertise...'
-              error={errors.bio?.message}
-              {...register("bio")}
-            />
+            {/* Bio - Flex grow to fill remaining space */}
+            <div className='flex-grow flex flex-col'>
+              <ProfileFormField
+                label='Bio'
+                type='textarea'
+                placeholder='Tell us about yourself and your expertise...'
+                error={errors.bio?.message}
+                {...register("bio")}
+                className='flex-grow flex flex-col'
+                inputClassName='flex-grow h-full min-h-[14rem]'
+              />
+            </div>
           </div>
         </NeumorphicCard>
       </div>
@@ -489,7 +499,7 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
       </NeumorphicCard>
 
       {/* Submit Button - Neumorphic Design */}
-      <FormSubmitButton
+      <SaveContinueButton
         isSubmitting={isSubmitting}
         disabled={usernameAvailability.isChecking}
         submittingText='Saving your information...'

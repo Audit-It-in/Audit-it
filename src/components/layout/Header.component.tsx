@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
 import { useAuth } from "@/src/hooks/useAuth";
 import { APP_CONFIG } from "@/src/constants/app.constants";
-import { ChartBarIcon, UserIcon, MathOperationsIcon, NotEqualsIcon, PiIcon } from "@phosphor-icons/react";
+import { UserIcon, MathOperationsIcon, NotEqualsIcon, PiIcon } from "@phosphor-icons/react";
 import { Logo } from "@/src/components/common/Logo.component";
 
 export function Header() {

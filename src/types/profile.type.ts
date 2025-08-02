@@ -26,7 +26,7 @@ export interface ProfileStepValidation {
 
 export interface ProfileStepData {
   step: ProfileStep;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   validation: ProfileStepValidation;
   completedAt?: string;
 }
@@ -246,9 +246,15 @@ export interface PersonalInfoFormData {
 
 export interface VerificationFormData {
   membership_number: string;
-  membership_certificate?: File;
-  professional_email?: string;
-  professional_phone?: string;
+  membership_certificate_url?: string;
+}
+
+export interface Verification {
+  profile_id: string;
+  membership_number: string;
+  membership_certificate_url: string;
+  verified_at?: string;
+  verified_by?: string;
 }
 
 export interface ProfessionalFormData {
@@ -260,6 +266,19 @@ export interface ProfessionalFormData {
 }
 
 export interface EducationFormData {
+  institute_name: string;
+  degree?: string;
+  field_of_study?: string;
+  start_date?: string;
+  end_date?: string;
+  grade?: string;
+  description?: string;
+  certifications?: string[];
+  professional_memberships?: string[];
+}
+
+// Legacy interface - will be removed
+export interface LegacyEducationFormData {
   ca_qualification: {
     institute_name: string;
     completion_year: number;
@@ -268,6 +287,15 @@ export interface EducationFormData {
   other_qualifications: Education[];
   certifications?: string[];
   professional_memberships?: string[];
+}
+
+// Customer onboarding form interface (simplified)
+export interface CustomerOnboardingFormData {
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  state_id?: number;
+  district_id?: number;
 }
 
 // Username availability checking

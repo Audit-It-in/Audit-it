@@ -1,16 +1,19 @@
 "use client";
 
 import { Card } from "@/src/components/ui/card";
-import { IconBadge } from "@/src/components/ui/icon-badge";
+// IconBadge - removing unused import
 import { cn } from "@/src/helpers/tailwind.helper";
 
 interface ProfileFormSectionProps {
   title: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{
+    className?: string;
+    weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
+  }>;
   children: React.ReactNode;
   className?: string;
   variant?: "default" | "inset";
-  overlay?: "primary" | "secondary";
+  overlay?: "primary" | "accent";
 }
 
 export function ProfileFormSection({
