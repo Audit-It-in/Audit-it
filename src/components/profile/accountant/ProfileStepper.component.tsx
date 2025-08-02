@@ -7,7 +7,6 @@ import { PersonalInfoStep } from "./PersonalInfoStep.component";
 import { ProfessionalStep } from "./ProfessionalStep.component";
 import { Profile, ProfileStep } from "@/src/types/profile.type";
 import { Progress } from "@/src/components/ui/progress";
-import { Separator } from "@/src/components/ui/separator";
 import { StatusMessage, StatusMessageType } from "@/src/types/common.type";
 import { StatusMessage as StatusMessageComponent } from "@/src/components/common/StatusMessage.component";
 import { StepCard } from "@/src/components/ui/step-card";
@@ -85,9 +84,7 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
     new Set(existingProfile?.last_completed_section ? getCompletedStepsFromProfile(existingProfile) : [])
   );
   const [message, setMessage] = useState<StatusMessage | null>(null);
-
   const currentStepIndex = STEP_CONFIG.findIndex((config) => config.step === currentStep);
-  const currentStepConfig = STEP_CONFIG[currentStepIndex];
 
   // Calculate progress
   const totalWeight = STEP_CONFIG.reduce((sum, config) => sum + config.weight, 0);

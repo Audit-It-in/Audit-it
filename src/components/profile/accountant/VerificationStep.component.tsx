@@ -7,11 +7,9 @@ import { SaveContinueButton } from "@/src/components/profile/accountant/SaveCont
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { Card as NeumorphicCard } from "@/src/components/ui/card";
-import { IconBadge } from "@/src/components/ui/icon-badge";
-import { Badge } from "@/src/components/ui/badge";
 import { ProfileStep, Profile } from "@/src/types/profile.type";
 import { StatusMessage, StatusMessageType } from "@/src/types/common.type";
-import { ShieldCheckIcon, InfoIcon, CheckCircleIcon } from "@phosphor-icons/react";
+import { InfoIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import { useSaveProfileStep, useVerification } from "@/src/services/profile.service";
 import FileUpload from "@/src/components/common/FileUpload.component";
 import { uploadCertificate, FILE_VALIDATION } from "@/src/services/upload.service";

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ValidationFields, CommonSchemas, FormRefinements } from "./validation.helper";
+import { ValidationFields, CommonSchemas } from "./validation.helper";
 import { Profile } from "@/src/types/profile.type";
 
 /**
@@ -73,7 +73,7 @@ export const ProfileValidation = {
 
   // Check if verification step is complete
   // Note: Verification data is stored in ca_verifications table
-  isVerificationComplete: (profile: Profile | null): boolean => {
+  isVerificationComplete: (): boolean => {
     // Verification step completion is tracked separately via ca_verifications table
     // For now, consider it incomplete by default since it requires manual verification
     return false;
@@ -89,7 +89,7 @@ export const ProfileValidation = {
 
   // Check if education step is complete
   // Note: Education data is stored in educations table
-  isEducationComplete: (profile: Profile | null): boolean => {
+  isEducationComplete: (): boolean => {
     // Education step completion is tracked via educations table
     // This step is required for CAs, so we'll need proper validation
     return false;
@@ -114,9 +114,9 @@ export const ProfileValidation = {
   // Get next incomplete step
   getNextIncompleteStep: (profile: Profile | null): string | null => {
     if (!ProfileValidation.isPersonalInfoComplete(profile)) return "PERSONAL_INFO";
-    if (!ProfileValidation.isVerificationComplete(profile)) return "VERIFICATION";
+    if (!ProfileValidation.isVerificationComplete()) return "VERIFICATION";
     if (!ProfileValidation.isProfessionalComplete(profile)) return "PROFESSIONAL";
-    if (!ProfileValidation.isEducationComplete(profile)) return "EDUCATION";
+    if (!ProfileValidation.isEducationComplete()) return "EDUCATION";
     return null; // All complete
   },
 

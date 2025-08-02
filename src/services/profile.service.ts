@@ -301,7 +301,7 @@ export async function saveEducationStep(
     }
 
     // Update profile completion status and save certifications/memberships
-    const profileUpdateData: any = {
+    const profileUpdateData: Record<string, unknown> = {
       last_completed_section: ProfileStep.EDUCATION,
       completion_updated_at: new Date().toISOString(),
       profile_completion_percentage: calculateCompletionPercentage(ProfileStep.EDUCATION, stepData, profile),
