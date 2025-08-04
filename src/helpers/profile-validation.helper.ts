@@ -2,11 +2,6 @@ import { z } from "zod";
 import { ValidationFields, CommonSchemas } from "./validation.helper";
 import { Profile } from "@/src/types/profile.type";
 
-/**
- * Profile-specific validation schemas
- * These use the common validation utilities for consistency
- */
-
 // Personal Information Step Schema
 export const personalInfoSchema = z.object({
   username: ValidationFields.username(),
@@ -160,9 +155,9 @@ export const ProfileDefaults = {
   },
 
   education: {
-    institute_name: "Institute of Chartered Accountants of India (ICAI)",
-    degree: "Chartered Accountant",
-    field_of_study: "Accounting and Finance",
+    institute_name: "",
+    degree: "",
+    field_of_study: "",
     start_date: "",
     end_date: "",
     grade: "",

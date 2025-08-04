@@ -400,7 +400,7 @@ function calculateCompletionPercentage(
   const stepWeights = {
     [ProfileStep.PERSONAL_INFO]: 40,
     [ProfileStep.VERIFICATION]: 30,
-    [ProfileStep.PROFESSIONAL]: 20,
+    [ProfileStep.EXPERIENCE]: 20,
     [ProfileStep.EDUCATION]: 10,
   };
 
@@ -414,7 +414,7 @@ function calculateCompletionPercentage(
     const stepOrder = [
       ProfileStep.PERSONAL_INFO,
       ProfileStep.VERIFICATION,
-      ProfileStep.PROFESSIONAL,
+      ProfileStep.EXPERIENCE,
       ProfileStep.EDUCATION,
     ];
 

@@ -4,7 +4,7 @@ import { UserRole } from "./auth.type";
 export enum ProfileStep {
   PERSONAL_INFO = "personal_info",
   VERIFICATION = "verification",
-  PROFESSIONAL = "professional",
+  EXPERIENCE = "experience",
   EDUCATION = "education",
 }
 

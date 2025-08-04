@@ -25,7 +25,7 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage }: Professi
     showSuccess,
   } = useProfileFormState({
     userId,
-    step: ProfileStep.PROFESSIONAL,
+    step: ProfileStep.EXPERIENCE,
     onStepComplete,
     onMessage,
   });

@@ -60,7 +60,7 @@ const STEP_CONFIG: StepConfig[] = [
     weight: 30,
   },
   {
-    step: ProfileStep.PROFESSIONAL,
+    step: ProfileStep.EXPERIENCE,
     title: "Professional Details",
     description: "Work experience and expertise",
     icon: BriefcaseIcon,
@@ -193,7 +193,7 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
         return <PersonalInfoStep {...commonProps} />;
       case ProfileStep.VERIFICATION:
         return <VerificationStep {...commonProps} />;
-      case ProfileStep.PROFESSIONAL:
+      case ProfileStep.EXPERIENCE:
         return <ProfessionalStep {...commonProps} />;
       case ProfileStep.EDUCATION:
         return <EducationStep {...commonProps} />;
@@ -277,7 +277,7 @@ function getStepTitle(step: ProfileStep): string {
   const stepTitles = {
     [ProfileStep.PERSONAL_INFO]: "Personal Info",
     [ProfileStep.VERIFICATION]: "CA Verification",
-    [ProfileStep.PROFESSIONAL]: "Professional",
+    [ProfileStep.EXPERIENCE]: "Professional",
     [ProfileStep.EDUCATION]: "Education",
   };
   return stepTitles[step] || step.replace("_", " ");
@@ -287,7 +287,7 @@ function getStepDescription(step: ProfileStep): string {
   const stepDescriptions = {
     [ProfileStep.PERSONAL_INFO]: "Basic details",
     [ProfileStep.VERIFICATION]: "ICAI credentials",
-    [ProfileStep.PROFESSIONAL]: "Work experience",
+    [ProfileStep.EXPERIENCE]: "Work experience",
     [ProfileStep.EDUCATION]: "Academic background",
   };
   return stepDescriptions[step] || "";
