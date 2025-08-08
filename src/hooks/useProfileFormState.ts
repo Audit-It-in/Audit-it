@@ -14,6 +14,15 @@ export function useProfileFormState({ userId, step, onStepComplete, onMessage }:
   const [isSubmitting, setIsSubmitting] = useState(false);
   const saveProfileMutation = useSaveProfileStep();
 
+  const withSubmitting = useCallback(async (fn: () => Promise<void>) => {
+    setIsSubmitting(true);
+    try {
+      await fn();
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, []);
+
   const handleSubmit = useCallback(
     async (stepData: Record<string, unknown>) => {
       setIsSubmitting(true);
@@ -64,6 +73,7 @@ export function useProfileFormState({ userId, step, onStepComplete, onMessage }:
 
   return {
     isSubmitting,
+    withSubmitting,
     handleSubmit,
     showError,
     showSuccess,

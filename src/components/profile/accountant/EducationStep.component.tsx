@@ -31,6 +31,7 @@ interface EducationStepProps {
 export function EducationStep({ userId, onStepComplete, onMessage, existingProfile }: EducationStepProps) {
   const {
     isSubmitting,
+    withSubmitting,
     handleSubmit: handleFormSubmit,
     showError,
     showSuccess,
@@ -81,33 +82,43 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
   }, [existingEducations, reset]);
 
   const onSubmit = async (data: EducationListFormInput) => {
-    try {
-      // Save each education row
-      for (const ed of data.educations) {
-        await saveEducation({
-          id: ed.id,
-          profile_id: existingProfile?.id as string,
-          institute_name: ed.institute_name,
-          degree: ed.degree,
-          field_of_study: ed.field_of_study,
-          start_date: ed.start_date,
-          end_date: ed.end_date,
-          grade: ed.grade,
-          description: ed.description,
-        } as any);
-      }
+    await withSubmitting(async () => {
+      try {
+        // Save each education row
+        for (const ed of data.educations) {
+          await saveEducation({
+            id: ed.id,
+            profile_id: existingProfile?.id as string,
+            institute_name: ed.institute_name,
+            degree: ed.degree,
+            field_of_study: ed.field_of_study,
+            start_date: ed.start_date,
+            end_date: ed.end_date,
+            grade: ed.grade,
+            description: ed.description,
+          } as any);
+        }
 
-      await handleFormSubmit({});
-      showSuccess("Education saved successfully!");
-    } catch (err) {
-      showError(err instanceof Error ? err.message : "Failed to save education");
-    }
+        await handleFormSubmit({});
+        showSuccess("Education saved successfully!");
+      } catch (err) {
+        showError(err instanceof Error ? err.message : "Failed to save education");
+      }
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+    <form
+      onSubmit={handleSubmit(onSubmit, () =>
+        showError("Please add at least one education and fill the required fields")
+      )}
+      className='space-y-6'
+    >
       <ProfileFormSection title='Education' icon={GraduationCapIcon}>
         <div className='space-y-2'>
+          {(errors as any)?.educations?.message && (
+            <p className='text-xs text-red-500 font-medium px-1'>{(errors as any).educations.message}</p>
+          )}
           {fields.map((field, index) => (
             <div key={field.id} className='py-4'>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>

@@ -36,6 +36,7 @@ type ExperienceListFormInput = z.input<typeof experienceListSchema>;
 export function ProfessionalStep({ userId, onStepComplete, onMessage, existingProfile }: ProfessionalStepProps) {
   const {
     isSubmitting,
+    withSubmitting,
     handleSubmit: handleFormSubmit,
     showSuccess,
     showError,
@@ -93,26 +94,28 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage, existingPr
   }, [existingExperiences, reset]);
 
   const onSubmit = async (data: ExperienceListFormInput) => {
-    try {
-      for (const exp of data.experiences) {
-        await saveExperience({
-          id: exp.id,
-          profile_id: existingProfile?.id as string,
-          title: exp.title,
-          company_name: exp.company_name,
-          location: exp.location || null,
-          is_current: !!exp.is_current,
-          start_date: exp.start_date,
-          end_date: exp.end_date || null,
-          description: exp.description || null,
-        } as any);
-      }
+    await withSubmitting(async () => {
+      try {
+        for (const exp of data.experiences) {
+          await saveExperience({
+            id: exp.id,
+            profile_id: existingProfile?.id as string,
+            title: exp.title,
+            company_name: exp.company_name,
+            location: exp.location || null,
+            is_current: !!exp.is_current,
+            start_date: exp.start_date,
+            end_date: exp.end_date || null,
+            description: exp.description || null,
+          } as any);
+        }
 
-      await handleFormSubmit({});
-      showSuccess("Experiences saved successfully!");
-    } catch (err) {
-      showError(err instanceof Error ? err.message : "Failed to save experiences");
-    }
+        await handleFormSubmit({});
+        showSuccess("Experiences saved successfully!");
+      } catch (err) {
+        showError(err instanceof Error ? err.message : "Failed to save experiences");
+      }
+    });
   };
 
   const handleDelete = async (index: number) => {
@@ -145,6 +148,9 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage, existingPr
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
       <ProfileFormSection title='Professional Experience' icon={BriefcaseIcon} variant='default'>
         <div className='space-y-2'>
+          {(errors as any)?.experiences?.message && (
+            <p className='text-xs text-red-500 font-medium px-1'>{(errors as any).experiences.message}</p>
+          )}
           {fields.map((field, index) => (
             <div key={field.id} className='py-4'>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>

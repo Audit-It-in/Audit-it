@@ -115,7 +115,7 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
         }, 0);
         // Only show success toast when 100% completed
         if (Math.round((completedWeight / totalWeight) * 100) >= 100) {
-          setMessage({ type: StatusMessageType.SUCCESS, text: "Profile completed!" });
+          setMessage({ type: StatusMessageType.SUCCESS, text: "Woohoo! profile saved successfully" });
         } else {
           setMessage(null);
         }
@@ -129,7 +129,10 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
           navigateToStep(STEP_CONFIG[nextStepIndex].step);
         }, 1500);
       } else {
-        // 100% reached handled above
+        // Finished last step – navigate to dashboard
+        setTimeout(() => {
+          router.push("/dashboard?completed=profile");
+        }, 1500);
       }
     },
     [router, navigateToStep]

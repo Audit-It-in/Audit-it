@@ -52,13 +52,27 @@ export const experienceListSchema = z
   })
   .refine(
     (data) => {
+      const keys = new Set<string>();
+      for (const e of data.experiences) {
+        const key = [
+          (e.title ?? "").trim().toLowerCase(),
+          (e.company_name ?? "").trim().toLowerCase(),
+          e.start_date ?? "",
+          e.end_date ?? "",
+        ].join("|");
+        if (keys.has(key)) return false;
+        keys.add(key);
+      }
+      return true;
+    },
+    { path: ["experiences"], message: "Duplicate experience entries are not allowed" }
+  )
+  .refine(
+    (data) => {
       const currentCount = data.experiences.filter((e) => !!e.is_current).length;
       return currentCount <= 1;
     },
-    {
-      path: ["experiences"],
-      message: "Only one experience can be marked as currently working",
-    }
+    { path: ["experiences"], message: "Only one experience can be marked as currently working" }
   );
 export type ExperienceListFormData = z.infer<typeof experienceListSchema>;
 
@@ -77,9 +91,28 @@ export const educationSchema = z.object({
 export type EducationFormData = z.infer<typeof educationSchema>;
 
 // Education list schema (support multiple entries similar to experiences)
-export const educationListSchema = z.object({
-  educations: z.array(educationSchema).min(1, "Add at least one education"),
-});
+export const educationListSchema = z
+  .object({
+    educations: z.array(educationSchema).min(1, "Add at least one education"),
+  })
+  .refine(
+    (data) => {
+      const keys = new Set<string>();
+      for (const ed of data.educations) {
+        const key = [
+          (ed.institute_name ?? "").trim().toLowerCase(),
+          (ed.degree ?? "").trim().toLowerCase(),
+          (ed.field_of_study ?? "").trim().toLowerCase(),
+          ed.start_date ?? "",
+          ed.end_date ?? "",
+        ].join("|");
+        if (keys.has(key)) return false;
+        keys.add(key);
+      }
+      return true;
+    },
+    { path: ["educations"], message: "Duplicate education entries are not allowed" }
+  );
 export type EducationListFormData = z.infer<typeof educationListSchema>;
 
 // Profile completion validation helpers

@@ -7,14 +7,18 @@ import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { APP_CONFIG } from "@/src/constants/app.constants";
 import { UserIcon, CheckCircleIcon } from "@phosphor-icons/react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect } from "react";
 import { Loader } from "@/src/components/common/Loader.component";
 import { LoadingAction } from "@/src/types/ui.type";
+import { StatusMessage as StatusMessageComponent } from "@/src/components/common/StatusMessage.component";
+import { StatusMessageType } from "@/src/types/common.type";
 
 export default function DashboardPage() {
   const { user, profile, isAuthenticated, authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [showCompletion, setShowCompletion] = React.useState(false);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -27,8 +31,22 @@ export default function DashboardPage() {
     }
   }, [authLoading, isAuthenticated, profile, router]);
 
+  useEffect(() => {
+    if (searchParams.get("completed") === "profile") {
+      setShowCompletion(true);
+      // Clean the URL param after showing
+      router.replace("/dashboard");
+    }
+  }, [searchParams, router]);
+
   if (authLoading) {
-    return <Loader action={LoadingAction.LOADING} title="Loading Dashboard" subtitle="Preparing your personalized experience" />;
+    return (
+      <Loader
+        action={LoadingAction.LOADING}
+        title='Loading Dashboard'
+        subtitle='Preparing your personalized experience'
+      />
+    );
   }
 
   if (!isAuthenticated) {
@@ -41,6 +59,11 @@ export default function DashboardPage() {
 
       <main className='container mx-auto px-4 py-8 sm:px-6 lg:px-8'>
         <div className='max-w-4xl mx-auto'>
+          {showCompletion && (
+            <StatusMessageComponent
+              message={{ type: StatusMessageType.SUCCESS, text: "Woohoo! profile saved successfully" }}
+            />
+          )}
           {/* Welcome Section */}
           <div className='mb-8'>
             <Badge className='mb-4'>Welcome to {APP_CONFIG.name}</Badge>
@@ -53,7 +76,7 @@ export default function DashboardPage() {
           {/* User Info Card */}
           <Card className='p-6 mb-8'>
             <div className='flex items-center space-x-4'>
-                              <div className='flex h-16 w-16 items-center justify-center rounded-full bg-primary-600'>
+              <div className='flex h-16 w-16 items-center justify-center rounded-full bg-primary-600'>
                 <UserIcon className='h-8 w-8 text-white' weight='bold' />
               </div>
               <div className='flex-1'>
@@ -81,22 +104,18 @@ export default function DashboardPage() {
             <Card className='p-6 hover:shadow-lg transition-shadow'>
               <h4 className='font-semibold text-neutral-900 mb-2'>Profile Setup</h4>
               <p className='text-sm text-neutral-600 mb-4'>Complete your profile to get better CA recommendations.</p>
-              <Button 
-                variant='outline' 
-                size='sm'
-                onClick={() => router.push('/profile')}
-              >
+              <Button variant='outline' size='sm' onClick={() => router.push("/profile")}>
                 Complete Profile
               </Button>
             </Card>
 
-                         <Card className='p-6 hover:shadow-lg transition-shadow'>
-               <h4 className='font-semibold text-neutral-900 mb-2'>Find CAs</h4>
-               <p className='text-sm text-neutral-600 mb-4'>Search for chartered accountants in your area.</p>
-               <Button variant='outline' size='sm'>
-                 Browse CAs
-               </Button>
-             </Card>
+            <Card className='p-6 hover:shadow-lg transition-shadow'>
+              <h4 className='font-semibold text-neutral-900 mb-2'>Find CAs</h4>
+              <p className='text-sm text-neutral-600 mb-4'>Search for chartered accountants in your area.</p>
+              <Button variant='outline' size='sm'>
+                Browse CAs
+              </Button>
+            </Card>
 
             <Card className='p-6 hover:shadow-lg transition-shadow'>
               <h4 className='font-semibold text-neutral-900 mb-2'>Contact Requests</h4>
