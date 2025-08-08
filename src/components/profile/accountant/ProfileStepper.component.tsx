@@ -106,10 +106,20 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
 
   const handleStepComplete = useCallback(
     (step: ProfileStep) => {
-      setCompletedSteps((prev) => new Set([...prev, step]));
-      setMessage({
-        type: StatusMessageType.SUCCESS,
-        text: `${getStepTitle(step)} completed successfully!`,
+      setCompletedSteps((prev) => {
+        const next = new Set([...prev, step]);
+        const totalWeight = STEP_CONFIG.reduce((sum, c) => sum + c.weight, 0);
+        const completedWeight = Array.from(next).reduce((sum, s) => {
+          const cfg = STEP_CONFIG.find((c) => c.step === s);
+          return sum + (cfg?.weight || 0);
+        }, 0);
+        // Only show success toast when 100% completed
+        if (Math.round((completedWeight / totalWeight) * 100) >= 100) {
+          setMessage({ type: StatusMessageType.SUCCESS, text: "Profile completed!" });
+        } else {
+          setMessage(null);
+        }
+        return next;
       });
 
       // Auto-advance to next step if not the last one
@@ -119,10 +129,7 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
           navigateToStep(STEP_CONFIG[nextStepIndex].step);
         }, 1500);
       } else {
-        // Profile completed, redirect to profile view
-        setTimeout(() => {
-          router.push("/profile/view");
-        }, 2000);
+        // 100% reached handled above
       }
     },
     [router, navigateToStep]
@@ -158,7 +165,7 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
       </div>
 
       {/* Progress Bar */}
-      <Progress value={progressPercentage} variant='default' size='default' fillVariant='primary' className='mb-6' />
+      <Progress value={progressPercentage} variant='default' size='default' fillVariant='primary' className='mb-2' />
 
       {/* Step Cards */}
       <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
@@ -177,6 +184,8 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
           />
         ))}
       </div>
+
+      {/* Only show toast elsewhere for 100% completion; hide inline badge/card here */}
     </Card>
   );
 
@@ -260,16 +269,26 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
 
 // Helper functions
 function getCompletedStepsFromProfile(profile: Profile): ProfileStep[] {
-  const steps: ProfileStep[] = [];
+  const byOrder: ProfileStep[] = [
+    ProfileStep.PERSONAL_INFO,
+    ProfileStep.VERIFICATION,
+    ProfileStep.EXPERIENCE,
+    ProfileStep.EDUCATION,
+  ];
 
-  // Determine completed steps based on profile data
+  // If backend tracked last_completed_section, trust it and mark all steps up to it as complete
+  if (profile.last_completed_section) {
+    const lastIndex = byOrder.indexOf(profile.last_completed_section as ProfileStep);
+    if (lastIndex >= 0) {
+      return byOrder.slice(0, lastIndex + 1);
+    }
+  }
+
+  // Fallback heuristic for legacy profiles (pre-completion tracking)
+  const steps: ProfileStep[] = [];
   if (profile.first_name && profile.username && profile.state_id && profile.district_id) {
     steps.push(ProfileStep.PERSONAL_INFO);
   }
-
-  // Add logic for other steps based on profile data
-  // This will be expanded as we implement the verification system
-
   return steps;
 }
 

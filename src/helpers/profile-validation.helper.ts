@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ValidationFields, CommonSchemas } from "./validation.helper";
+import { ValidationFields, CommonSchemas, FormRefinements } from "./validation.helper";
 import { Profile } from "@/src/types/profile.type";
 
 // Personal Information Step Schema
@@ -24,19 +24,47 @@ export const verificationSchema = z.object({
 
 export type VerificationFormData = z.infer<typeof verificationSchema>;
 
-// Professional Step Schema
-export const professionalSchema = z.object({
-  current_firm: ValidationFields.optionalText(),
-  years_of_experience: ValidationFields.experienceYears(),
-  practice_areas: ValidationFields.optionalStringArray(),
-  professional_achievements: ValidationFields.achievements(),
-  consultation_fee: ValidationFields.optionalPositiveNumber("Consultation fee"),
-});
+// Experience Step Schema (aligned with experiences table)
+export const experienceSchema = z
+  .object({
+    id: z.string().optional(),
+    title: ValidationFields.jobTitle(),
+    company_name: ValidationFields.companyName(),
+    location: ValidationFields.optionalText(),
+    is_current: z.boolean().default(false),
+    start_date: ValidationFields.requiredDate(),
+    end_date: ValidationFields.optionalDate(),
+    description: ValidationFields.description(),
+  })
+  .refine(
+    (data) =>
+      FormRefinements.experienceEndDate({ experiences: [{ is_current: data.is_current, end_date: data.end_date }] }),
+    {
+      path: ["end_date"],
+      message: "End date is required when the position is not current",
+    }
+  );
 
-export type ProfessionalFormData = z.infer<typeof professionalSchema>;
+export type ExperienceFormData = z.infer<typeof experienceSchema>;
+export const experienceListSchema = z
+  .object({
+    experiences: z.array(experienceSchema).min(1, "Add at least one experience"),
+  })
+  .refine(
+    (data) => {
+      const currentCount = data.experiences.filter((e) => !!e.is_current).length;
+      return currentCount <= 1;
+    },
+    {
+      path: ["experiences"],
+      message: "Only one experience can be marked as currently working",
+    }
+  );
+export type ExperienceListFormData = z.infer<typeof experienceListSchema>;
 
-// Education Step Schema
+// Education Step Schema (allow optional id for editing/removal)
 export const educationSchema = z.object({
+  id: z.string().optional(),
   institute_name: z.string().min(2, "Institute name is required"),
   degree: z.string().optional(),
   field_of_study: z.string().optional(),
@@ -44,11 +72,15 @@ export const educationSchema = z.object({
   end_date: z.string().optional(),
   grade: z.string().optional(),
   description: z.string().optional(),
-  certifications: ValidationFields.optionalStringArray(),
-  professional_memberships: ValidationFields.optionalStringArray(),
 });
 
 export type EducationFormData = z.infer<typeof educationSchema>;
+
+// Education list schema (support multiple entries similar to experiences)
+export const educationListSchema = z.object({
+  educations: z.array(educationSchema).min(1, "Add at least one education"),
+});
+export type EducationListFormData = z.infer<typeof educationListSchema>;
 
 // Profile completion validation helpers
 export const ProfileValidation = {
@@ -110,7 +142,7 @@ export const ProfileValidation = {
   getNextIncompleteStep: (profile: Profile | null): string | null => {
     if (!ProfileValidation.isPersonalInfoComplete(profile)) return "PERSONAL_INFO";
     if (!ProfileValidation.isVerificationComplete()) return "VERIFICATION";
-    if (!ProfileValidation.isProfessionalComplete(profile)) return "PROFESSIONAL";
+    if (!ProfileValidation.isProfessionalComplete(profile)) return "EXPERIENCE";
     if (!ProfileValidation.isEducationComplete()) return "EDUCATION";
     return null; // All complete
   },
@@ -119,7 +151,7 @@ export const ProfileValidation = {
   validateStepData: {
     personalInfo: (data: unknown) => personalInfoSchema.parse(data),
     verification: (data: unknown) => verificationSchema.parse(data),
-    professional: (data: unknown) => professionalSchema.parse(data),
+    professional: (data: unknown) => experienceSchema.parse(data),
     education: (data: unknown) => educationSchema.parse(data),
   },
 };
@@ -147,11 +179,7 @@ export const ProfileDefaults = {
   },
 
   professional: {
-    current_firm: "",
-    years_of_experience: 0,
-    practice_areas: [],
-    professional_achievements: "",
-    consultation_fee: 0,
+    // Deprecated: legacy professional fields were removed in favor of the experiences table
   },
 
   education: {
@@ -162,7 +190,5 @@ export const ProfileDefaults = {
     end_date: "",
     grade: "",
     description: "",
-    certifications: [],
-    professional_memberships: [],
   },
 };

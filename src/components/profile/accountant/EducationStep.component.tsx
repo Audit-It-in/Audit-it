@@ -1,19 +1,25 @@
 "use client";
-import { Badge } from "@/src/components/ui/badge";
-import { Card } from "@/src/components/ui/card";
-import { CertificateIcon, CheckCircleIcon, GraduationCapIcon } from "@phosphor-icons/react";
-import { DynamicArrayField } from "../shared/DynamicArrayField.component";
-import { EducationFormData, educationSchema, ProfileDefaults } from "@/src/helpers/profile-validation.helper";
+import { Button } from "@/src/components/ui/button";
+import { GraduationCapIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import {
+  educationListSchema,
+  EducationListFormData,
+  educationSchema,
+  ProfileDefaults,
+} from "@/src/helpers/profile-validation.helper";
 import { SaveContinueButton } from "./SaveContinueButton.component";
 import { Profile, ProfileStep } from "@/src/types/profile.type";
 import { ProfileFormField } from "../shared/ProfileFormField.component";
 import { ProfileFormSection } from "../shared/ProfileFormSection.component";
 import { StatusMessage } from "@/src/types/common.type";
-import { useEducation } from "@/src/services/profile.service";
-import { useForm } from "react-hook-form";
+import { deleteEducation, saveEducation, useEducations } from "@/src/services/profile.service";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { useProfileFormState } from "@/src/hooks/useProfileFormState";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
+import { DatePicker } from "@/src/components/ui/date-picker";
+import { Separator } from "@/src/components/ui/separator";
+import { z } from "zod";
 
 interface EducationStepProps {
   userId: string;
@@ -23,174 +29,178 @@ interface EducationStepProps {
 }
 
 export function EducationStep({ userId, onStepComplete, onMessage, existingProfile }: EducationStepProps) {
-  const { isSubmitting, handleSubmit: handleFormSubmit } = useProfileFormState({
+  const {
+    isSubmitting,
+    handleSubmit: handleFormSubmit,
+    showError,
+    showSuccess,
+  } = useProfileFormState({
     userId,
     step: ProfileStep.EDUCATION,
     onStepComplete,
     onMessage,
   });
 
-  // Fetch existing education data
-  const { data: existingEducation } = useEducation(existingProfile?.id);
+  // Fetch existing education data (all)
+  const { data: existingEducations } = useEducations(existingProfile?.id);
+
+  type EducationFormRow = z.infer<typeof educationSchema>;
+  type EducationListFormInput = { educations: EducationFormRow[] };
 
   const {
     register,
-    handleSubmit,
     control,
-    watch,
-    setValue,
+    handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<EducationFormData>({
-    resolver: zodResolver(educationSchema),
-    defaultValues: ProfileDefaults.education,
+  } = useForm<EducationListFormInput>({
+    resolver: zodResolver(educationListSchema),
+    defaultValues: {
+      educations: [{ ...ProfileDefaults.education } as EducationFormRow],
+    },
   });
 
-  const watchedCertifications = watch("certifications") || [];
-  const watchedMemberships = watch("professional_memberships") || [];
+  const { fields, append, remove } = useFieldArray({ name: "educations", control });
 
   // Load existing education data into form
   useEffect(() => {
-    if (existingEducation || existingProfile) {
+    if (existingEducations && existingEducations.length > 0) {
       reset({
-        institute_name: existingEducation?.institute_name || ProfileDefaults.education.institute_name,
-        degree: existingEducation?.degree || ProfileDefaults.education.degree,
-        field_of_study: existingEducation?.field_of_study || ProfileDefaults.education.field_of_study,
-        start_date: existingEducation?.start_date || "",
-        end_date: existingEducation?.end_date || "",
-        grade: existingEducation?.grade || "",
-        description: existingEducation?.description || "",
-        // Load certifications and memberships from profile
-        certifications: [],
-        professional_memberships: [],
+        educations: existingEducations.map((e) => ({
+          id: e.id,
+          institute_name: e.institute_name || "",
+          degree: e.degree || "",
+          field_of_study: e.field_of_study || "",
+          start_date: e.start_date || "",
+          end_date: e.end_date || "",
+          grade: e.grade || "",
+          description: e.description || "",
+        })),
       });
     }
-  }, [existingEducation, existingProfile, reset]);
+  }, [existingEducations, reset]);
 
-  const onSubmit = async (data: EducationFormData) => {
-    const stepData = {
-      institute_name: data.institute_name,
-      degree: data.degree,
-      field_of_study: data.field_of_study,
-      start_date: data.start_date,
-      end_date: data.end_date,
-      grade: data.grade,
-      description: data.description,
-      certifications: data.certifications || [],
-      professional_memberships: data.professional_memberships || [],
-    };
+  const onSubmit = async (data: EducationListFormInput) => {
+    try {
+      // Save each education row
+      for (const ed of data.educations) {
+        await saveEducation({
+          id: ed.id,
+          profile_id: existingProfile?.id as string,
+          institute_name: ed.institute_name,
+          degree: ed.degree,
+          field_of_study: ed.field_of_study,
+          start_date: ed.start_date,
+          end_date: ed.end_date,
+          grade: ed.grade,
+          description: ed.description,
+        } as any);
+      }
 
-    await handleFormSubmit(stepData);
+      await handleFormSubmit({});
+      showSuccess("Education saved successfully!");
+    } catch (err) {
+      showError(err instanceof Error ? err.message : "Failed to save education");
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
-      {/* CA Qualification */}
-      <ProfileFormSection title='CA Qualification' icon={GraduationCapIcon}>
-        <Card className='border-primary-200 bg-primary-50/50'>
-          <div className='flex items-center gap-2 mb-4'>
-            <h4 className='text-lg font-semibold text-primary-900'>Required Qualification</h4>
-            <Badge className='bg-accent-100 text-accent-900 border-accent-200'>Required</Badge>
-          </div>
+    <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
+      <ProfileFormSection title='Education' icon={GraduationCapIcon}>
+        <div className='space-y-2'>
+          {fields.map((field, index) => (
+            <div key={field.id} className='py-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                <ProfileFormField
+                  label='Institute Name'
+                  required
+                  placeholder='Institute of Chartered Accountants of India (ICAI)'
+                  error={(errors as any)?.educations?.[index]?.institute_name?.message}
+                  {...register(`educations.${index}.institute_name` as const)}
+                />
 
-          <div className='bg-white rounded-lg p-4 border border-primary-200'>
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-              <ProfileFormField
-                label='Institute Name'
-                required
-                placeholder='Institute of Chartered Accountants of India (ICAI)'
-                error={errors.institute_name?.message}
-                {...register("institute_name")}
-              />
+                <ProfileFormField
+                  label='Degree'
+                  placeholder='Chartered Accountant / B.Com / M.Com / etc.'
+                  error={(errors as any)?.educations?.[index]?.degree?.message}
+                  {...register(`educations.${index}.degree` as const)}
+                />
 
-              <ProfileFormField
-                label='Degree'
-                placeholder='Chartered Accountant'
-                error={errors.degree?.message}
-                {...register("degree")}
-              />
+                <ProfileFormField
+                  label='Field of Study'
+                  placeholder='Accounting and Finance'
+                  error={(errors as any)?.educations?.[index]?.field_of_study?.message}
+                  {...register(`educations.${index}.field_of_study` as const)}
+                />
 
-              <ProfileFormField
-                label='Field of Study'
-                placeholder='Accounting and Finance'
-                error={errors.field_of_study?.message}
-                {...register("field_of_study")}
-              />
+                <ProfileFormField
+                  label='Grade/Rank'
+                  placeholder='e.g., All India Rank 50, First Class'
+                  error={(errors as any)?.educations?.[index]?.grade?.message}
+                  {...register(`educations.${index}.grade` as const)}
+                />
 
-              <ProfileFormField
-                label='Grade/Rank'
-                placeholder='e.g., All India Rank 50, First Class'
-                description='If you achieved any notable rank or distinction'
-                error={errors.grade?.message}
-                {...register("grade")}
-              />
+                <Controller
+                  control={control}
+                  name={`educations.${index}.start_date` as const}
+                  render={({ field }) => (
+                    <ProfileFormField
+                      label='Start Date'
+                      error={(errors as any)?.educations?.[index]?.start_date?.message}
+                    >
+                      <DatePicker value={field.value} onChange={field.onChange} placeholder='dd/mm/yyyy' />
+                    </ProfileFormField>
+                  )}
+                />
 
-              <ProfileFormField
-                label='Start Date'
-                type='date'
-                error={errors.start_date?.message}
-                {...register("start_date")}
-              />
+                <Controller
+                  control={control}
+                  name={`educations.${index}.end_date` as const}
+                  render={({ field }) => (
+                    <ProfileFormField label='End Date' error={(errors as any)?.educations?.[index]?.end_date?.message}>
+                      <DatePicker value={field.value} onChange={field.onChange} placeholder='dd/mm/yyyy' />
+                    </ProfileFormField>
+                  )}
+                />
 
-              <ProfileFormField
-                label='End Date'
-                type='date'
-                error={errors.end_date?.message}
-                {...register("end_date")}
-              />
+                <ProfileFormField
+                  label='Description'
+                  placeholder='Additional details about your education'
+                  className='sm:col-span-2'
+                  error={(errors as any)?.educations?.[index]?.description?.message}
+                  {...register(`educations.${index}.description` as const)}
+                />
 
-              <ProfileFormField
-                label='Description'
-                placeholder='Additional details about your education'
-                className='sm:col-span-2'
-                error={errors.description?.message}
-                {...register("description")}
-              />
+                <div className='flex items-center justify-between gap-3 sm:col-span-2'>
+                  <Button
+                    type='button'
+                    variant='ghost'
+                    size='sm'
+                    className='text-red-600 hover:bg-red-50'
+                    onClick={async () => {
+                      const id = (fields[index] as unknown as { id?: string }).id;
+                      if (id && existingProfile?.id) await deleteEducation(id, existingProfile.id);
+                      remove(index);
+                    }}
+                  >
+                    <TrashIcon className='h-4 w-4' weight='bold' />
+                    Remove
+                  </Button>
+                  {index === fields.length - 1 && (
+                    <Button type='button' variant='outline' onClick={() => append({ ...ProfileDefaults.education })}>
+                      <PlusIcon className='h-4 w-4' weight='bold' />
+                      Add another education
+                    </Button>
+                  )}
+                </div>
+              </div>
+              {index < fields.length - 1 && <Separator className='mt-6' />}
             </div>
-          </div>
-        </Card>
-      </ProfileFormSection>
-
-      {/* Certifications */}
-      <ProfileFormSection title='Certifications' icon={CertificateIcon}>
-        <DynamicArrayField
-          value={watchedCertifications}
-          onChange={(newCerts) => setValue("certifications", newCerts)}
-          placeholder='e.g., CPA, CFA, FRM, ACCA'
-          description="Add professional certifications and courses you've completed"
-        />
-      </ProfileFormSection>
-
-      {/* Professional Memberships */}
-      <ProfileFormSection title='Professional Memberships' icon={CheckCircleIcon}>
-        <DynamicArrayField
-          value={watchedMemberships}
-          onChange={(newMemberships) => setValue("professional_memberships", newMemberships)}
-          placeholder='e.g., Institute of Cost Accountants, IIA'
-          description='Add memberships to professional institutes and organizations'
-        />
-      </ProfileFormSection>
-
-      {/* Completion Notice */}
-      <Card className='border-accent-200 bg-accent-50'>
-        <div className='flex items-start gap-3'>
-          <CheckCircleIcon className='h-5 w-5 text-accent-600 mt-0.5' weight='bold' />
-          <div>
-            <h4 className='text-sm font-medium text-accent-900 mb-1'>Profile Completion</h4>
-            <p className='text-sm text-accent-800'>
-              Congratulations! You&apos;re completing your CA profile. After submitting this step, your profile will be
-              ready and you can start receiving client inquiries.
-            </p>
-          </div>
+          ))}
         </div>
-      </Card>
+      </ProfileFormSection>
 
-      {/* Submit Button */}
-      <SaveContinueButton
-        isSubmitting={isSubmitting}
-        submittingText='Completing Profile...'
-        submitText='Complete Profile Setup'
-      />
+      <SaveContinueButton isSubmitting={isSubmitting} submittingText='Saving education...' submitText='Save & Finish' />
     </form>
   );
 }

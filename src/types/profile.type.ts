@@ -151,6 +151,13 @@ export interface SocialProfile {
   created_at: string;
   updated_at: string;
 }
+export interface Verification {
+  profile_id: string;
+  membership_number?: string; // nullable in DB
+  membership_certificate_url?: string; // nullable in DB
+  verified_at?: string;
+  verified_by?: string;
+}
 
 // Username availability checking
 export interface UsernameAvailability {

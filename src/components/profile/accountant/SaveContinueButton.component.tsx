@@ -3,6 +3,7 @@
 import { Button } from "@/src/components/ui/button";
 import { InlineLoader } from "@/src/components/common/Loader.component";
 import { LoadingAction } from "@/src/types/ui.type";
+import { ArrowLineRightIcon } from "@phosphor-icons/react/dist/ssr";
 
 interface SaveContinueButtonProps {
   isSubmitting: boolean;
@@ -32,7 +33,10 @@ export function SaveContinueButton({
             <span>{submittingText}</span>
           </div>
         ) : (
-          submitText
+          <span className='flex items-center justify-center gap-2'>
+            <span>{submitText}</span>
+            <ArrowLineRightIcon weight='bold' className='size-5' />
+          </span>
         )}
       </Button>
     </div>
