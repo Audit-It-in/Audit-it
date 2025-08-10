@@ -181,7 +181,7 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
       // Handle profile picture upload if there's a new file
       // We now store storage path in profile_picture_url
       let profilePicturePath = data.profile_picture_url;
-      const maybeNewPath = await uploadIfNeeded(profilePicturePath);
+      const maybeNewPath = await uploadIfNeeded();
       if (maybeNewPath) {
         profilePicturePath = maybeNewPath;
         setValue("profile_picture_url", maybeNewPath);

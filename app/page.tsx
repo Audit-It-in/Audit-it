@@ -1,7 +1,5 @@
 "use client";
 
-import { Header } from "@/src/components/layout/Header.component";
-import { Footer } from "@/src/components/layout/Footer.component";
 import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
 import { Card } from "@/src/components/ui/card";

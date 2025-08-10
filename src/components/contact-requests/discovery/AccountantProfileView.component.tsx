@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { GlobeIcon, EnvelopeIcon, PhoneIcon } from "@phosphor-icons/react";
 import { Button } from "@/src/components/ui/button";
 import { Card } from "@/src/components/ui/card";
 import { Loader } from "@/src/components/common/Loader.component";

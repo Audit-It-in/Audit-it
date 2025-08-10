@@ -3,7 +3,6 @@
 import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/src/hooks/useAuth";
-import { Header } from "@/src/components/layout/Header.component";
 import { ProfileStepper } from "@/src/components/profile/accountant/ProfileStepper.component";
 import { CustomerOnboarding } from "@/src/components/profile/customer/CustomerOnboarding.component";
 import { Loader } from "@/src/components/common/Loader.component";

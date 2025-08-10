@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { MapPinIcon, CheckCircleIcon, ChatCircleIcon } from "@phosphor-icons/react";
+import { MapPinIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
 
 interface ProfileCardHeaderProps {

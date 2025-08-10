@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/src/helpers/tailwind.helper";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useCreateContactRequest } from "@/src/services/contact-requests.service";
-import { useSpecializations } from "@/src/services/profile.service";
+import { useProfileDetails, useSpecializations } from "@/src/services/profile.service";
 import type { ProfileDetails } from "@/src/types/profile.type";
 import type { CreateContactRequestData, UrgencyLevel } from "@/src/types/contact-request.type";
 import { LoadingAction } from "@/src/types/ui.type";
@@ -50,6 +50,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export const ContactRequestModal: React.FC<ContactRequestModalProps> = ({ open, onClose, caProfile }) => {
   const { user, profile: customerProfile, isAuthenticated } = useAuth();
+  const { data: customerDetails } = useProfileDetails(user?.id);
   const { data: specializations = [] } = useSpecializations();
   const createMutation = useCreateContactRequest();
 
@@ -71,7 +72,7 @@ export const ContactRequestModal: React.FC<ContactRequestModalProps> = ({ open, 
       urgency: defaultUrgency,
       customer_phone: customerProfile?.phone || "",
       location_city: "",
-      location_state: customerProfile?.state_name || "",
+      location_state: customerDetails?.state_name || "",
     },
   });
 
@@ -85,10 +86,10 @@ export const ContactRequestModal: React.FC<ContactRequestModalProps> = ({ open, 
         urgency: defaultUrgency,
         customer_phone: customerProfile?.phone || "",
         location_city: "",
-        location_state: customerProfile?.state_name || "",
+        location_state: customerDetails?.state_name || "",
       });
     }
-  }, [open, caProfile?.id, reset, customerProfile?.phone, customerProfile?.state_name]);
+  }, [open, caProfile?.id, reset, customerProfile?.phone, customerDetails?.state_name]);
 
   const urgency = watch("urgency");
 

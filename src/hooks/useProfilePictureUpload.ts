@@ -12,32 +12,29 @@ export function useProfilePictureUpload({ userId }: UseProfilePictureUploadOptio
 
   const clearFile = useCallback(() => setFile(null), []);
 
-  const uploadIfNeeded = useCallback(
-    async (_currentPath?: string | null): Promise<string | null> => {
-      setError(null);
-      if (!file) return null;
+  const uploadIfNeeded = useCallback(async (): Promise<string | null> => {
+    setError(null);
+    if (!file) return null;
 
-      const validation = validateProfilePicture(file);
-      if (!validation.isValid) {
-        setError(validation.error || "Invalid file");
-        throw new Error(validation.error || "Invalid file");
-      }
+    const validation = validateProfilePicture(file);
+    if (!validation.isValid) {
+      setError(validation.error || "Invalid file");
+      throw new Error(validation.error || "Invalid file");
+    }
 
-      setIsUploading(true);
-      try {
-        const res = await uploadProfilePicture(file, userId);
-        if (!res.success || !res.path) {
-          const msg = res.error || "Failed to upload profile picture";
-          setError(msg);
-          throw new Error(msg);
-        }
-        return res.path;
-      } finally {
-        setIsUploading(false);
+    setIsUploading(true);
+    try {
+      const res = await uploadProfilePicture(file, userId);
+      if (!res.success || !res.path) {
+        const msg = res.error || "Failed to upload profile picture";
+        setError(msg);
+        throw new Error(msg);
       }
-    },
-    [file, userId]
-  );
+      return res.path;
+    } finally {
+      setIsUploading(false);
+    }
+  }, [file, userId]);
 
   return { file, isUploading, error, setFile, clearFile, uploadIfNeeded };
 }

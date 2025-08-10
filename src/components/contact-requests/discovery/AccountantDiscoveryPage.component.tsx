@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { MagnifyingGlassIcon, WarningIcon } from "@phosphor-icons/react";
 import { SearchFilters } from "./SearchFilters.component";
-import { Loader, InlineLoader } from "@/src/components/common/Loader.component";
 import { DiscoveryGridSkeleton } from "@/src/components/contact-requests/skeletons/DiscoveryGridSkeleton.component";
 import { Card } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
@@ -11,7 +10,6 @@ import { cn } from "@/src/helpers/tailwind.helper";
 import { useInfiniteAccountants } from "@/src/services/accountant-discovery.service";
 import type { CADiscoveryFilters } from "@/src/types/contact-request.type";
 import type { ProfileDetails } from "@/src/types/profile.type";
-import { LoadingAction, SpinnerSize } from "@/src/types/ui.type";
 import { ResultsHeader } from "./ResultsHeader.component";
 import { AccountantGrid } from "./AccountantGrid.component";
 import { LoadMoreTrigger } from "./LoadMoreTrigger.component";

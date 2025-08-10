@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/src/hooks/useAuth";
-import { Header } from "@/src/components/layout/Header.component";
 import { Card } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
