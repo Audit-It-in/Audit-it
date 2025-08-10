@@ -110,11 +110,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ filters, onFilters
   return (
     <Card
       variant='subtle'
-      className={cn(
-        "space-y-4",
-        "shadow-neumorphic-md border border-primary-200/50 bg-gradient-to-br from-white to-primary-50/20",
-        className
-      )}
+      className={cn("space-y-4", "shadow-neumorphic-md border border-primary-100 bg-white", className)}
     >
       {/* Search Bar */}
       <div className='relative'>

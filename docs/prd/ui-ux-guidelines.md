@@ -7,6 +7,7 @@
 - **Mobile-First**: Responsive design with progressive enhancement for larger screens
 - **Component Library**: Custom neumorphic UI components with brand color integration
 - **Visual Style**: Soft shadows, subtle depth, and brand-consistent color schemes
+- **No Gradients**: Gradients are prohibited in UI; use solid fills with neumorphic shadows only
 
 ## Neumorphic Design System
 
@@ -18,6 +19,7 @@ The project uses a **neumorphic design philosophy** with custom components that 
 - **Consistent Typography**: Clear text hierarchy with brand-appropriate colors
 - **Accessibility**: Maintains WCAG standards while achieving neumorphic aesthetics
 - **Responsive**: Neumorphic effects scale appropriately across devices
+- **No Gradients**: Avoid gradient backgrounds, fills, overlays, or ornaments. Use solid brand colors only; depth should be conveyed via shadow utilities, not color transitions
 
 ### Component Configuration
 ```typescript

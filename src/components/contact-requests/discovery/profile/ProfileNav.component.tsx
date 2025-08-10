@@ -15,7 +15,7 @@ interface ProfileNavProps {
 export const ProfileNav: React.FC<ProfileNavProps> = ({ fullName, onBack, onShare }) => {
   return (
     <div className='flex items-center justify-between mb-6'>
-      <nav className='flex items-center space-x-3 p-3 rounded-full shadow-neumorphic-inset bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-200/50'>
+      <nav className='flex items-center space-x-3 p-3 rounded-full shadow-neumorphic-inset bg-neutral-50 border border-primary-100'>
         <button
           onClick={onBack}
           className={cn(
@@ -39,9 +39,7 @@ export const ProfileNav: React.FC<ProfileNavProps> = ({ fullName, onBack, onShar
       <Button
         onClick={onShare}
         className={cn(
-          "gap-2 shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset",
-          "bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700",
-          "text-white border-0 transition-all duration-200"
+          "gap-2 shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset bg-accent-600 hover:bg-accent-700 text-white border-0 transition-all duration-200"
         )}
       >
         <ShareIcon className='h-4 w-4' weight='bold' />

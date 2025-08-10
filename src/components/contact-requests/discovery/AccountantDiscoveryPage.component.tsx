@@ -145,7 +145,7 @@ export const AccountantDiscoveryPage: React.FC<AccountantDiscoveryPageProps> = (
             ) : (
               <Card
                 variant='subtle'
-                className='text-center py-16 shadow-neumorphic-md border border-primary-200/50 bg-gradient-to-br from-white to-primary-50/20'
+                className='text-center py-16 shadow-neumorphic-md border border-primary-100 bg-white'
               >
                 <div className='space-y-4'>
                   <div className='flex justify-center'>

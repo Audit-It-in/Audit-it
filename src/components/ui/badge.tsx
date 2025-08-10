@@ -15,12 +15,12 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default: [
-          "bg-gradient-to-r from-primary-100/80 to-accent-100/80 border border-primary-300/60",
+          "bg-primary-100/80 border border-primary-300/60",
           "shadow-[inset_2px_2px_4px_rgba(0,0,0,0.05),inset_-2px_-2px_4px_rgba(255,255,255,0.8)]",
           "text-primary-700 font-semibold",
         ],
         primary: [
-          "bg-gradient-to-br from-primary-50/80 to-primary-100/60 border border-primary-200/60",
+          "bg-primary-100 border border-primary-200/60",
           "shadow-[inset_1px_1px_3px_rgba(0,0,0,0.05),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]",
           "text-primary-800 font-medium",
         ],
@@ -29,22 +29,22 @@ const badgeVariants = cva(
           "shadow-[inset_1px_1px_3px_rgba(0,0,0,0.05),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]",
         ],
         secondary: [
-          "bg-gradient-to-br from-neutral-50/80 to-neutral-100/60 border border-neutral-200/60",
+          "bg-neutral-100 border border-neutral-200/60",
           "shadow-[inset_1px_1px_3px_rgba(0,0,0,0.05),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]",
           "text-neutral-700 font-medium",
         ],
         success: [
-          "bg-gradient-to-br from-green-50/80 to-green-100/60 border border-green-200/60",
+          "bg-green-100 border border-green-200/60",
           "shadow-[inset_1px_1px_3px_rgba(0,0,0,0.05),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]",
           "text-green-800 font-medium",
         ],
         warning: [
-          "bg-gradient-to-br from-yellow-50/80 to-yellow-100/60 border border-yellow-200/60",
+          "bg-yellow-100 border border-yellow-200/60",
           "shadow-[inset_1px_1px_3px_rgba(0,0,0,0.05),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]",
           "text-yellow-800 font-medium",
         ],
         destructive: [
-          "bg-gradient-to-br from-red-50/80 to-red-100/60 border border-red-200/60",
+          "bg-red-100 border border-red-200/60",
           "shadow-[inset_1px_1px_3px_rgba(0,0,0,0.05),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]",
           "text-red-800 font-medium",
         ],
@@ -54,7 +54,7 @@ const badgeVariants = cva(
           "text-neutral-700 hover:bg-neutral-50",
         ],
         tag: [
-          "bg-gradient-to-br from-primary-50/80 to-primary-100/60 border border-primary-200/60",
+          "bg-primary-100 border border-primary-200/60",
           "shadow-[inset_1px_1px_3px_rgba(0,0,0,0.05),inset_-1px_-1px_3px_rgba(255,255,255,0.8)]",
           "text-primary-800 font-medium group",
           "hover:shadow-[inset_2px_2px_6px_rgba(0,0,0,0.08),inset_-2px_-2px_6px_rgba(255,255,255,0.9)]",

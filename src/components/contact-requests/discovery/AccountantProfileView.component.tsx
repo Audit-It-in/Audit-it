@@ -199,13 +199,13 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         <div className='lg:col-span-2 space-y-6'>
-          <Card className='shadow-neumorphic-md border border-primary-200/50 bg-gradient-to-br from-white to-primary-50/30'>
+          <Card className='shadow-neumorphic-md border border-primary-100 bg-white'>
             <div className='p-6 space-y-6'>
               <div className='flex items-center gap-3'>
-                <div className='w-2 h-8 bg-gradient-to-b from-primary-500 to-accent-500 rounded-full shadow-neumorphic-sm'></div>
+                <div className='w-2 h-8 bg-primary-500 rounded-full shadow-neumorphic-sm'></div>
                 <h2 className='text-2xl font-bold text-primary-900'>Professional Summary</h2>
               </div>
-              <div className='p-4 rounded-xl shadow-neumorphic-inset bg-gradient-to-r from-primary-50/50 to-accent-50/30 border border-primary-200/30'>
+              <div className='p-4 rounded-xl shadow-neumorphic-inset bg-neutral-50 border border-primary-100'>
                 {profile.bio ? (
                   <p className='text-primary-800 leading-relaxed font-medium'>{profile.bio}</p>
                 ) : (

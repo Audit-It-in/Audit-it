@@ -5,12 +5,11 @@ import { BriefcaseIcon, CertificateIcon } from "@phosphor-icons/react";
 
 interface ProfileCardMetricsProps {
   numSpecializations: number;
-  hasWhatsapp: boolean;
 }
 
-export const ProfileCardMetrics: React.FC<ProfileCardMetricsProps> = ({ numSpecializations, hasWhatsapp }) => {
+export const ProfileCardMetrics: React.FC<ProfileCardMetricsProps> = ({ numSpecializations }) => {
   return (
-    <div className='grid grid-cols-3 gap-3'>
+    <div className='grid grid-cols-2 gap-3'>
       <div className='text-center p-3 rounded-lg shadow-neumorphic-inset bg-primary-50/50 border border-primary-200/30'>
         <div className='flex justify-center mb-1'>
           <BriefcaseIcon className='h-4 w-4 text-primary-600' weight='bold' />
@@ -25,14 +24,6 @@ export const ProfileCardMetrics: React.FC<ProfileCardMetricsProps> = ({ numSpeci
         </div>
         <div className='text-xs font-bold text-accent-800'>{numSpecializations}</div>
         <div className='text-xs text-accent-600'>Services</div>
-      </div>
-
-      <div className='text-center p-3 rounded-lg shadow-neumorphic-inset bg-green-50/50 border border-green-200/30'>
-        <div className='flex justify-center mb-1'>
-          <div className='w-3 h-3 bg-green-500 rounded-full shadow-neumorphic-sm'></div>
-        </div>
-        <div className='text-xs font-bold text-green-800'>{hasWhatsapp ? "Available" : "Email"}</div>
-        <div className='text-xs text-green-600'>Contact</div>
       </div>
     </div>
   );

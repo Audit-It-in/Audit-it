@@ -27,7 +27,8 @@ export const AccountantProfileCard: React.FC<AccountantProfileCardProps> = ({
 }) => {
   const fullName = `${profile.first_name || ""} ${profile.last_name || ""}`.trim();
   const initials = `${profile.first_name?.[0] || ""}${profile.last_name?.[0] || ""}`.toUpperCase();
-  const location = [profile.district_name, profile.state_name].filter(Boolean).join(", ");
+  const city = profile.district_name || "";
+  const state = profile.state_name || "";
   const picturePathOrUrl = profile.profile_picture_url || "";
   const isAbsoluteUrl = picturePathOrUrl.startsWith("http");
   const { data: signedUrl } = useProfilePictureUrl(isAbsoluteUrl ? undefined : picturePathOrUrl);
@@ -42,13 +43,11 @@ export const AccountantProfileCard: React.FC<AccountantProfileCardProps> = ({
       : "#";
 
   // Get first few specializations to display
-  const displaySpecializations = profile.specialization_names?.slice(0, 3) || [];
-  const remainingSpecializations = (profile.specialization_names?.length || 0) - 3;
+  const displaySpecializations = profile.specialization_names?.slice(0, 5) || [];
+  const remainingSpecializations = (profile.specialization_names?.length || 0) - 5;
 
   // Verification heuristic or provided
   const isVerified = Boolean(verifiedAt) || !!profile.username;
-  const rating = 4.5; // Mock rating
-  const responseTime = "2 hours"; // Mock response time
 
   const handleContactClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -63,43 +62,47 @@ export const AccountantProfileCard: React.FC<AccountantProfileCardProps> = ({
       className={cn(
         "group relative overflow-hidden transition-all duration-300 cursor-pointer",
         "shadow-neumorphic-md hover:shadow-neumorphic-lg active:shadow-neumorphic-sm",
-        "bg-gradient-to-br from-white via-primary-50/30 to-accent-50/20",
-        "border border-primary-200/50",
+        "bg-white border border-primary-100",
         className
       )}
     >
       <Link href={profileUrl} className='block'>
         <div className='space-y-5'>
+          {/* Header */}
           <ProfileCardHeader
             fullName={fullName}
             initials={initials}
-            location={location}
+            locationCity={city}
+            locationState={state}
             avatarUrl={avatarUrl || undefined}
             isVerified={isVerified}
-            rating={rating}
-            responseTime={responseTime}
-            showContactButton={showContactButton}
-            onContactClick={handleContactClick}
           />
 
-          {profile.bio && (
-            <div className='p-3 rounded-lg shadow-neumorphic-inset bg-gradient-to-r from-primary-50/50 to-accent-50/30 border border-primary-200/30'>
-              <p className='text-sm text-primary-800/90 line-clamp-2 leading-relaxed font-medium'>{profile.bio}</p>
-            </div>
-          )}
-
-          <ProfileCardMetrics
-            numSpecializations={displaySpecializations.length}
-            hasWhatsapp={Boolean(profile.whatsapp_available)}
-          />
-
+          {/* Specializations immediately after header */}
           {displaySpecializations.length > 0 && (
             <ProfileCardFooter
               displaySpecializations={displaySpecializations}
               remainingSpecializations={remainingSpecializations}
-              createdAtISO={profile.created_at}
-              hasWhatsapp={Boolean(profile.whatsapp_available)}
             />
+          )}
+
+          <ProfileCardMetrics numSpecializations={displaySpecializations.length} />
+
+          {/* Bio moved to bottom */}
+          {profile.bio && (
+            <div className='p-3 rounded-lg shadow-neumorphic-inset bg-neutral-50 border border-primary-100'>
+              <p className='text-sm text-primary-800/90 line-clamp-2 leading-relaxed font-medium'>{profile.bio}</p>
+            </div>
+          )}
+
+          {showContactButton && (
+            <div className='pt-2'>
+              <Link href={profileUrl} onClick={handleContactClick} className='block'>
+                <div className='w-full text-center px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold shadow-neumorphic-md hover:shadow-neumorphic-lg'>
+                  Contact
+                </div>
+              </Link>
+            </div>
           )}
         </div>
       </Link>

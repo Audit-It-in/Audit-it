@@ -16,9 +16,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: [
-          "bg-gradient-to-br from-primary-600 via-primary-700 to-accent-600 text-white font-semibold",
-          "shadow-[4px_4px_12px_rgba(0,0,0,0.15),-2px_-2px_8px_rgba(255,255,255,0.1)]",
-          "hover:shadow-[6px_6px_16px_rgba(0,0,0,0.2),-3px_-3px_10px_rgba(255,255,255,0.15)]",
+          "bg-primary-600 hover:bg-primary-700 text-white font-semibold",
+          "shadow-[4px_4px_12px_rgba(0,0,0,0.12),-2px_-2px_8px_rgba(255,255,255,0.2)]",
+          "hover:shadow-[6px_6px_16px_rgba(0,0,0,0.16),-3px_-3px_10px_rgba(255,255,255,0.25)]",
           "hover:scale-[1.02] active:scale-[0.98]",
           "disabled:hover:scale-100",
         ],
@@ -29,9 +29,9 @@ const buttonVariants = cva(
           "hover:scale-[1.02] active:scale-[0.98]",
         ],
         accent: [
-          "bg-gradient-to-r from-accent-600 to-accent-700 hover:from-accent-700 hover:to-accent-800 text-white",
-          "shadow-[4px_4px_12px_rgba(0,0,0,0.15),-2px_-2px_8px_rgba(255,255,255,0.1)]",
-          "hover:shadow-[6px_6px_16px_rgba(0,0,0,0.2),-3px_-3px_10px_rgba(255,255,255,0.15)]",
+          "bg-accent-600 hover:bg-accent-700 text-white",
+          "shadow-[4px_4px_12px_rgba(0,0,0,0.12),-2px_-2px_8px_rgba(255,255,255,0.2)]",
+          "hover:shadow-[6px_6px_16px_rgba(0,0,0,0.16),-3px_-3px_10px_rgba(255,255,255,0.25)]",
           "active:shadow-[inset_4px_4px_12px_rgba(0,0,0,0.2)]",
           "hover:scale-[1.02] active:scale-[0.98]",
         ],
@@ -61,8 +61,10 @@ const buttonVariants = cva(
       },
       glow: {
         none: "",
-        primary: "relative before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary-600 before:to-accent-600 before:rounded-lg before:blur-lg before:opacity-20 before:-z-10",
-        accent: "relative before:absolute before:inset-0 before:bg-gradient-to-br before:from-accent-600 before:to-accent-700 before:rounded-lg before:blur-lg before:opacity-20 before:-z-10",
+        primary:
+          "relative before:absolute before:inset-0 before:bg-primary-600 before:rounded-lg before:blur-lg before:opacity-15 before:-z-10",
+        accent:
+          "relative before:absolute before:inset-0 before:bg-accent-600 before:rounded-lg before:blur-lg before:opacity-15 before:-z-10",
       },
     },
     defaultVariants: {

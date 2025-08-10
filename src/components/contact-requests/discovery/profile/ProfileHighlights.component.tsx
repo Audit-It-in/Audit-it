@@ -18,7 +18,7 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
 }) => {
   return (
     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-      <div className='flex items-center gap-4 p-4 rounded-xl shadow-neumorphic-inset bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-200/50'>
+      <div className='flex items-center gap-4 p-4 rounded-xl shadow-neumorphic-inset bg-primary-50 border border-primary-200/50'>
         <div className='p-3 rounded-full shadow-neumorphic-sm bg-white'>
           <BriefcaseIcon className='h-6 w-6 text-primary-600' weight='bold' />
         </div>
@@ -28,7 +28,7 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
         </div>
       </div>
 
-      <div className='flex items-center gap-4 p-4 rounded-xl shadow-neumorphic-inset bg-gradient-to-r from-accent-50 to-accent-100 border border-accent-200/50'>
+      <div className='flex items-center gap-4 p-4 rounded-xl shadow-neumorphic-inset bg-accent-50 border border-accent-200/50'>
         <div className='p-3 rounded-full shadow-neumorphic-sm bg-white'>
           <CertificateIcon className='h-6 w-6 text-accent-600' weight='bold' />
         </div>
@@ -39,7 +39,7 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
       </div>
 
       {isVerified && (
-        <div className='flex items-center gap-4 p-4 rounded-xl shadow-neumorphic-inset bg-gradient-to-r from-green-50 to-green-100 border border-green-200/50'>
+        <div className='flex items-center gap-4 p-4 rounded-xl shadow-neumorphic-inset bg-green-50 border border-green-200/50'>
           <div className='p-3 rounded-full shadow-neumorphic-sm bg-white'>
             <CheckCircleIcon className='h-6 w-6 text-green-600' weight='fill' />
           </div>
@@ -51,7 +51,7 @@ export const ProfileHighlights: React.FC<ProfileHighlightsProps> = ({
       )}
 
       {hasWhatsapp && (
-        <div className='flex items-center gap-4 p-4 rounded-xl shadow-neumorphic-inset bg-gradient-to-r from-green-50 to-green-100 border border-green-200/50'>
+        <div className='flex items-center gap-4 p-4 rounded-xl shadow-neumorphic-inset bg-green-50 border border-green-200/50'>
           <div className='p-3 rounded-full shadow-neumorphic-sm bg-white'>
             <div className='w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-neumorphic-sm'>
               <div className='w-3 h-3 bg-white rounded-full'></div>

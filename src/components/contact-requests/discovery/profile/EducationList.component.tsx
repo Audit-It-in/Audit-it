@@ -24,10 +24,10 @@ export const EducationList: React.FC<EducationListProps> = ({ educations }) => {
   if (!educations || educations.length === 0) return null;
 
   return (
-    <Card className='shadow-neumorphic-md border border-primary-200/50 bg-gradient-to-br from-white to-primary-50/30'>
+    <Card className='shadow-neumorphic-md border border-primary-100 bg-white'>
       <div className='p-6 space-y-6'>
         <div className='flex items-center gap-3'>
-          <div className='p-3 rounded-full shadow-neumorphic-sm bg-gradient-to-br from-primary-100 to-accent-100'>
+          <div className='p-3 rounded-full shadow-neumorphic-sm bg-white'>
             <GraduationCapIcon className='h-6 w-6 text-primary-600' weight='bold' />
           </div>
           <h2 className='text-2xl font-bold text-primary-900'>Education</h2>

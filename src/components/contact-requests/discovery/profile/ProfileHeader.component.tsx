@@ -45,30 +45,22 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   isAuthenticated,
 }) => {
   return (
-    <Card
-      className={cn(
-        "relative overflow-hidden shadow-neumorphic-lg border border-primary-200/50",
-        "bg-gradient-to-br from-white via-primary-50/40 to-accent-50/30"
-      )}
-    >
-      <div className='absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary-200/30 to-transparent rounded-full blur-2xl' />
-      <div className='absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-accent-200/30 to-transparent rounded-full blur-xl' />
-
+    <Card className={cn("relative overflow-hidden shadow-neumorphic-lg border border-primary-100 bg-white")}>
       <div className='relative p-8 space-y-8'>
         <div className='flex flex-col lg:flex-row gap-8'>
           <div className='flex-shrink-0'>
             <div className='relative'>
-              <div className='p-2 rounded-full shadow-neumorphic-inset bg-gradient-to-br from-primary-100 to-accent-100'>
+              <div className='p-2 rounded-full shadow-neumorphic-inset bg-white'>
                 <Avatar className='h-32 w-32 shadow-neumorphic-md border-2 border-white/50'>
                   <AvatarImage src={avatarUrl || undefined} alt={fullName} className='object-cover' />
-                  <AvatarFallback className='bg-gradient-to-br from-primary-200 to-accent-200 text-primary-800 font-bold text-3xl'>
+                  <AvatarFallback className='bg-primary-200 text-primary-800 font-bold text-3xl'>
                     {initials}
                   </AvatarFallback>
                 </Avatar>
               </div>
               {isVerified && (
-                <div className='absolute -bottom-2 -right-2 p-2 rounded-full shadow-neumorphic-md bg-white border border-accent-200/50'>
-                  <CheckCircleIcon className='h-8 w-8 text-accent-600' weight='fill' />
+                <div className='absolute -bottom-2 -right-2 rounded-full shadow-neumorphic-md bg-accent-600 ring-4 ring-white p-1'>
+                  <CheckCircleIcon className='h-6 w-6 text-white' weight='fill' />
                 </div>
               )}
             </div>
@@ -78,16 +70,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             <div className='space-y-4'>
               <h1 className='text-4xl font-bold text-primary-900 leading-tight'>{fullName}</h1>
               {location && (
-                <div className='flex items-center gap-3 p-3 rounded-full shadow-neumorphic-inset bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-200/50 w-fit'>
+                <div className='flex items-center gap-3 p-3 rounded-full shadow-neumorphic-inset bg-neutral-50 border border-primary-100 w-fit'>
                   <div className='p-2 rounded-full shadow-neumorphic-sm bg-white'>
-                    <MapPinIcon className='h-5 w-5 text-primary-600' weight='bold' />
+                    <MapPinIcon className='h-10 w-10 text-primary-600' weight='bold' />
                   </div>
                   <span className='text-lg font-bold text-primary-800'>{location}</span>
                 </div>
               )}
 
               <div className='flex flex-wrap gap-4'>
-                <div className='flex items-center gap-3 p-3 rounded-full shadow-neumorphic-inset bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200/50'>
+                <div className='flex items-center gap-3 p-3 rounded-full shadow-neumorphic-inset bg-yellow-50 border border-yellow-200/50'>
                   <div className='flex items-center gap-1'>
                     {[...Array(5)].map((_, i) => (
                       <StarIcon
@@ -101,7 +93,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
                   <span className='text-yellow-700 font-medium'>({totalReviews} reviews)</span>
                 </div>
                 {responseTime && (
-                  <div className='flex items-center gap-3 p-3 rounded-full shadow-neumorphic-inset bg-gradient-to-r from-accent-50 to-accent-100 border border-accent-200/50'>
+                  <div className='flex items-center gap-3 p-3 rounded-full shadow-neumorphic-inset bg-accent-50 border border-accent-200/50'>
                     <div className='p-1 rounded-full shadow-neumorphic-sm bg-white'>
                       <ClockIcon className='h-4 w-4 text-accent-600' weight='bold' />
                     </div>
@@ -115,9 +107,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <Button
                 size='lg'
                 onClick={onPrimaryCTA}
+                variant='primary'
                 className={cn(
                   "gap-3 px-8 py-4 shadow-neumorphic-md hover:shadow-neumorphic-lg active:shadow-neumorphic-sm",
-                  "bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800",
                   "text-white border-0 transition-all duration-300 font-bold text-lg"
                 )}
               >

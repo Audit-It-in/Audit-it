@@ -12,7 +12,7 @@ const avatarVariants = cva(
     "transition-all duration-300 ease-out",
     // Neumorphic depth effect - raised from surface
     "before:absolute before:inset-0 before:rounded-full before:pointer-events-none",
-    "before:bg-gradient-to-br before:from-white/90 before:via-primary-50/30 before:to-primary-100/40",
+    "before:bg-white",
     "before:shadow-[4px_4px_8px_rgba(37,99,235,0.15),-4px_-4px_8px_rgba(255,255,255,0.9)]",
     "before:transition-all before:duration-300",
     // Inner border highlight
@@ -78,8 +78,8 @@ const avatarFallbackVariants = cva(
   [
     "relative z-10 flex size-full items-center justify-center rounded-full",
     "font-bold select-none tracking-tight",
-    // Neumorphic fallback background
-    "bg-gradient-to-br from-primary-100/90 via-primary-50/70 to-white/90",
+    // Neumorphic fallback background (no gradients)
+    "bg-primary-100",
     "text-primary-700 shadow-[inset_0_1px_2px_rgba(255,255,255,0.5)]",
     "transition-all duration-300",
   ],

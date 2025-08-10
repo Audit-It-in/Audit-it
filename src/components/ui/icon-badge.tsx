@@ -13,23 +13,23 @@ const iconBadgeVariants = cva(
     variants: {
       variant: {
         default: [
-          "bg-gradient-to-br from-primary-600 to-primary-700 text-white",
+          "bg-primary-600 text-white",
           "shadow-[3px_3px_8px_rgba(0,0,0,0.15),-2px_-2px_6px_rgba(255,255,255,0.1)]",
         ],
         accent: [
-          "bg-gradient-to-br from-accent-600 to-accent-700 text-white",
+          "bg-accent-600 text-white",
           "shadow-[3px_3px_8px_rgba(0,0,0,0.15),-2px_-2px_6px_rgba(255,255,255,0.1)]",
         ],
         success: [
-          "bg-gradient-to-br from-accent-500 to-accent-600 text-white",
+          "bg-accent-500 text-white",
           "shadow-[3px_3px_8px_rgba(0,0,0,0.1),-3px_-3px_8px_rgba(255,255,255,0.9)]",
         ],
         neutral: [
-          "bg-gradient-to-br from-neutral-100 to-neutral-200 text-neutral-500",
+          "bg-neutral-200 text-neutral-600",
           "shadow-[2px_2px_6px_rgba(0,0,0,0.08),-2px_-2px_6px_rgba(255,255,255,0.8)]",
         ],
         inset: [
-          "bg-gradient-to-br from-primary-600 to-primary-700 text-white",
+          "bg-primary-600 text-white",
           "shadow-[inset_3px_3px_8px_rgba(0,0,0,0.2),inset_-3px_-3px_8px_rgba(255,255,255,0.1)]",
         ],
       },

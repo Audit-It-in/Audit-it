@@ -205,7 +205,7 @@ export const ContactRequestModal: React.FC<ContactRequestModalProps> = ({ open, 
       <Card
         className={cn(
           "relative z-[61] w-full max-w-2xl mx-4",
-          "shadow-neumorphic-lg border border-primary-200/50 bg-gradient-to-br from-white via-primary-50/40 to-accent-50/30"
+          "shadow-neumorphic-lg border border-primary-100 bg-white"
         )}
         ref={modalRef}
       >

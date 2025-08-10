@@ -40,7 +40,7 @@ export const MobileFilterSheet: React.FC<MobileFilterSheetProps> = ({ filters, o
             aria-hidden='true'
           />
           <div className='absolute inset-x-0 bottom-0 p-4' id='mobile-filter-sheet'>
-            <Card className='shadow-neumorphic-lg border border-primary-200/50 bg-gradient-to-br from-white via-primary-50/40 to-accent-50/30'>
+            <Card className='shadow-neumorphic-lg border border-primary-100 bg-white'>
               <div className='p-4 space-y-4'>
                 <div className='flex items-center justify-between'>
                   <div id='mobile-filters-title' className='font-semibold text-primary-900'>

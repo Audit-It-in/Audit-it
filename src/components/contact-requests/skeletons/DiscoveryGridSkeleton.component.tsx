@@ -13,15 +13,9 @@ export const DiscoveryGridSkeleton: React.FC<DiscoveryGridSkeletonProps> = ({ co
   return (
     <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6", className)}>
       {Array.from({ length: count }).map((_, idx) => (
-        <Card
-          key={idx}
-          className={cn(
-            "p-6 space-y-4",
-            "shadow-neumorphic-md border border-primary-200/40 bg-gradient-to-br from-white to-primary-50/20"
-          )}
-        >
+        <Card key={idx} className={cn("p-6 space-y-4", "shadow-neumorphic-md border border-primary-100 bg-white")}>
           <div className='flex items-start gap-4'>
-            <div className='p-1 rounded-full shadow-neumorphic-inset bg-gradient-to-br from-primary-100 to-accent-100'>
+            <div className='p-1 rounded-full shadow-neumorphic-inset bg-white'>
               <div className='h-16 w-16 rounded-full bg-neutral-200 animate-pulse shadow-neumorphic-sm' />
             </div>
             <div className='flex-1 space-y-3'>
