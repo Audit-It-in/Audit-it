@@ -184,7 +184,7 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
           });
 
           setUsernameAvailability({ isChecking: false, result });
-        } catch (error) {
+        } catch {
           setUsernameAvailability({ isChecking: false, result: null });
         }
       }, 800);
@@ -207,6 +207,11 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
     existingProfile?.state_id,
     existingProfile?.district_id,
     userId,
+    hasInitialized,
+    usernameAvailability.isChecking,
+    checkUsernameMutation,
+    usernameCheckTimeout,
+    existingProfile,
   ]);
 
   const onSubmit = async (data: PersonalInfoFormData) => {

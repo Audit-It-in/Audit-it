@@ -392,7 +392,9 @@ export function useSaveVerificationStep() {
 }
 
 // Education: upsert a single education row (insert when id missing, update by id when present)
-export async function saveEducation(educationData: Omit<Education, "created_at" | "updated_at">): Promise<Education> {
+export async function saveEducation(
+  educationData: Omit<Education, "created_at" | "updated_at" | "id"> & { id?: string }
+): Promise<Education> {
   try {
     if (educationData.id) {
       const { data, error } = await supabase

@@ -1,12 +1,7 @@
 "use client";
 import { Button } from "@/src/components/ui/button";
 import { GraduationCapIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
-import {
-  educationListSchema,
-  EducationListFormData,
-  educationSchema,
-  ProfileDefaults,
-} from "@/src/helpers/profile-validation.helper";
+import { educationListSchema, educationSchema, ProfileDefaults } from "@/src/helpers/profile-validation.helper";
 import { SaveContinueButton } from "./SaveContinueButton.component";
 import { Profile, ProfileStep } from "@/src/types/profile.type";
 import { ProfileFormField } from "../shared/ProfileFormField.component";
@@ -86,9 +81,8 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
       try {
         // Save each education row
         for (const ed of data.educations) {
-          await saveEducation({
-            id: ed.id,
-            profile_id: existingProfile?.id as string,
+          const basePayload = {
+            profile_id: (existingProfile?.id as string) ?? "",
             institute_name: ed.institute_name,
             degree: ed.degree,
             field_of_study: ed.field_of_study,
@@ -96,7 +90,12 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
             end_date: ed.end_date,
             grade: ed.grade,
             description: ed.description,
-          } as any);
+          } as const;
+
+          const payload: Parameters<typeof saveEducation>[0] = ed.id
+            ? { id: ed.id, ...basePayload }
+            : { ...basePayload };
+          await saveEducation(payload);
         }
 
         await handleFormSubmit({});
@@ -116,8 +115,8 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
     >
       <ProfileFormSection title='Education' icon={GraduationCapIcon}>
         <div className='space-y-2'>
-          {(errors as any)?.educations?.message && (
-            <p className='text-xs text-red-500 font-medium px-1'>{(errors as any).educations.message}</p>
+          {errors.educations?.message && (
+            <p className='text-xs text-red-500 font-medium px-1'>{errors.educations.message as string}</p>
           )}
           {fields.map((field, index) => (
             <div key={field.id} className='py-4'>
@@ -126,28 +125,28 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
                   label='Institute Name'
                   required
                   placeholder='Institute of Chartered Accountants of India (ICAI)'
-                  error={(errors as any)?.educations?.[index]?.institute_name?.message}
+                  error={errors.educations?.[index]?.institute_name?.message as string | undefined}
                   {...register(`educations.${index}.institute_name` as const)}
                 />
 
                 <ProfileFormField
                   label='Degree'
                   placeholder='Chartered Accountant / B.Com / M.Com / etc.'
-                  error={(errors as any)?.educations?.[index]?.degree?.message}
+                  error={errors.educations?.[index]?.degree?.message as string | undefined}
                   {...register(`educations.${index}.degree` as const)}
                 />
 
                 <ProfileFormField
                   label='Field of Study'
                   placeholder='Accounting and Finance'
-                  error={(errors as any)?.educations?.[index]?.field_of_study?.message}
+                  error={errors.educations?.[index]?.field_of_study?.message as string | undefined}
                   {...register(`educations.${index}.field_of_study` as const)}
                 />
 
                 <ProfileFormField
                   label='Grade/Rank'
                   placeholder='e.g., All India Rank 50, First Class'
-                  error={(errors as any)?.educations?.[index]?.grade?.message}
+                  error={errors.educations?.[index]?.grade?.message as string | undefined}
                   {...register(`educations.${index}.grade` as const)}
                 />
 
@@ -157,7 +156,7 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
                   render={({ field }) => (
                     <ProfileFormField
                       label='Start Date'
-                      error={(errors as any)?.educations?.[index]?.start_date?.message}
+                      error={errors.educations?.[index]?.start_date?.message as string | undefined}
                     >
                       <DatePicker value={field.value} onChange={field.onChange} placeholder='dd/mm/yyyy' />
                     </ProfileFormField>
@@ -168,7 +167,10 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
                   control={control}
                   name={`educations.${index}.end_date` as const}
                   render={({ field }) => (
-                    <ProfileFormField label='End Date' error={(errors as any)?.educations?.[index]?.end_date?.message}>
+                    <ProfileFormField
+                      label='End Date'
+                      error={errors.educations?.[index]?.end_date?.message as string | undefined}
+                    >
                       <DatePicker value={field.value} onChange={field.onChange} placeholder='dd/mm/yyyy' />
                     </ProfileFormField>
                   )}
@@ -178,7 +180,7 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
                   label='Description'
                   placeholder='Additional details about your education'
                   className='sm:col-span-2'
-                  error={(errors as any)?.educations?.[index]?.description?.message}
+                  error={errors.educations?.[index]?.description?.message as string | undefined}
                   {...register(`educations.${index}.description` as const)}
                 />
 

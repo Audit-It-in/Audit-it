@@ -1,6 +1,6 @@
 "use client";
 import { SaveContinueButton } from "./SaveContinueButton.component";
-import { ExperienceFormData, experienceListSchema } from "@/src/helpers/profile-validation.helper";
+import { experienceListSchema } from "@/src/helpers/profile-validation.helper";
 import { z } from "zod";
 import { Profile, ProfileStep } from "@/src/types/profile.type";
 import { ProfileFormField } from "../shared/ProfileFormField.component";
@@ -30,7 +30,6 @@ interface ProfessionalStepProps {
   existingProfile: Profile | null;
 }
 
-type ExperienceListFormData = z.infer<typeof experienceListSchema>;
 type ExperienceListFormInput = z.input<typeof experienceListSchema>;
 
 export function ProfessionalStep({ userId, onStepComplete, onMessage, existingProfile }: ProfessionalStepProps) {
@@ -96,18 +95,22 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage, existingPr
   const onSubmit = async (data: ExperienceListFormInput) => {
     await withSubmitting(async () => {
       try {
+        if (!existingProfile?.id) {
+          throw new Error("Profile not found");
+        }
+
         for (const exp of data.experiences) {
           await saveExperience({
-            id: exp.id,
-            profile_id: existingProfile?.id as string,
+            id: exp.id!,
+            profile_id: existingProfile.id,
             title: exp.title,
             company_name: exp.company_name,
-            location: exp.location || null,
+            location: exp.location,
             is_current: !!exp.is_current,
             start_date: exp.start_date,
-            end_date: exp.end_date || null,
-            description: exp.description || null,
-          } as any);
+            end_date: exp.end_date,
+            description: exp.description,
+          });
         }
 
         await handleFormSubmit({});
@@ -148,8 +151,8 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage, existingPr
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
       <ProfileFormSection title='Professional Experience' icon={BriefcaseIcon} variant='default'>
         <div className='space-y-2'>
-          {(errors as any)?.experiences?.message && (
-            <p className='text-xs text-red-500 font-medium px-1'>{(errors as any).experiences.message}</p>
+          {errors.experiences?.message && (
+            <p className='text-xs text-red-500 font-medium px-1'>{errors.experiences.message as string}</p>
           )}
           {fields.map((field, index) => (
             <div key={field.id} className='py-4'>

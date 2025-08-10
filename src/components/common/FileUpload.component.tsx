@@ -42,7 +42,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
   uploadProgress = 0,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
-  const [dragCounter, setDragCounter] = useState(0);
 
   const validateFile = useCallback(
     (file: File): string | null => {
@@ -78,7 +77,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragCounter((prev) => prev + 1);
     if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
       setIsDragOver(true);
     }
@@ -87,13 +85,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragCounter((prev) => {
-      const newCounter = prev - 1;
-      if (newCounter === 0) {
-        setIsDragOver(false);
-      }
-      return newCounter;
-    });
+    setIsDragOver(false);
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -106,7 +98,6 @@ const FileUpload: React.FC<FileUploadProps> = ({
       e.preventDefault();
       e.stopPropagation();
       setIsDragOver(false);
-      setDragCounter(0);
 
       if (disabled || isUploading) return;
 

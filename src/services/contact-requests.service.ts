@@ -168,10 +168,7 @@ export async function fetchContactRequestsByCA(
   pagination: PaginationParams = { page: DEFAULT_PAGINATION.PAGE, limit: DEFAULT_PAGINATION.LIMIT }
 ): Promise<PaginatedResponse<ContactRequestDetails>> {
   try {
-    const filtersWithCA = {
-      ...filters,
-      // Add CA filter to existing filters
-    };
+    // CA filter applied explicitly via eq("ca_profile_id", caProfileId)
 
     const { page, limit } = pagination;
     const offset = (page - 1) * limit;
@@ -542,11 +539,13 @@ export async function fetchContactRequestAnalytics(
       return acc;
     }, {} as Record<string, number>);
 
-    const topServiceTypes = Object.entries(serviceTypeCounts).map(([serviceType, count]) => ({
-      serviceType,
-      count,
-      percentage: (count / totalRequests) * 100,
-    }));
+    const topServiceTypes = (Object.entries(serviceTypeCounts) as Array<[string, number]>).map(
+      ([serviceType, countValue]) => ({
+        serviceType,
+        count: countValue,
+        percentage: totalRequests > 0 ? (countValue / totalRequests) * 100 : 0,
+      })
+    );
 
     // Generate monthly breakdown (simplified)
     const monthlyBreakdown = [
@@ -980,7 +979,13 @@ export function getContactRequestCacheKey(
   }
 }
 
-export function invalidateContactRequestCaches(queryClient: any, caProfileId?: string, customerProfileId?: string) {
+import type { QueryClient } from "@tanstack/react-query";
+
+export function invalidateContactRequestCaches(
+  queryClient: QueryClient,
+  caProfileId?: string,
+  customerProfileId?: string
+) {
   // Invalidate all contact request queries
   queryClient.invalidateQueries({ queryKey: ["contact-requests"] });
 

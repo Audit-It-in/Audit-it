@@ -8,13 +8,29 @@ import { Button } from "@/src/components/ui/button";
 import { APP_CONFIG } from "@/src/constants/app.constants";
 import { UserIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { Suspense, useEffect } from "react";
 import { Loader } from "@/src/components/common/Loader.component";
 import { LoadingAction } from "@/src/types/ui.type";
 import { StatusMessage as StatusMessageComponent } from "@/src/components/common/StatusMessage.component";
 import { StatusMessageType } from "@/src/types/common.type";
 
 export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <Loader
+          action={LoadingAction.LOADING}
+          title='Loading Dashboard'
+          subtitle='Preparing your personalized experience'
+        />
+      }
+    >
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardContent() {
   const { user, profile, isAuthenticated, authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -24,7 +40,6 @@ export default function DashboardPage() {
     if (!authLoading && !isAuthenticated) {
       router.push("/auth");
     } else if (!authLoading && isAuthenticated && profile !== undefined) {
-      // If user is authenticated but doesn't have a role, redirect to role selection
       if (!profile || !profile.role) {
         router.push("/role-selection");
       }
@@ -34,7 +49,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (searchParams.get("completed") === "profile") {
       setShowCompletion(true);
-      // Clean the URL param after showing
       router.replace("/dashboard");
     }
   }, [searchParams, router]);
@@ -64,7 +78,6 @@ export default function DashboardPage() {
               message={{ type: StatusMessageType.SUCCESS, text: "Woohoo! profile saved successfully" }}
             />
           )}
-          {/* Welcome Section */}
           <div className='mb-8'>
             <Badge className='mb-4'>Welcome to {APP_CONFIG.name}</Badge>
             <h1 className='text-3xl font-bold text-neutral-900 mb-2'>
@@ -73,7 +86,6 @@ export default function DashboardPage() {
             <p className='text-lg text-neutral-600'>Great to see you again. Here&apos;s your dashboard overview.</p>
           </div>
 
-          {/* User Info Card */}
           <Card className='p-6 mb-8'>
             <div className='flex items-center space-x-4'>
               <div className='flex h-16 w-16 items-center justify-center rounded-full bg-primary-600'>
@@ -99,7 +111,6 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          {/* Quick Actions */}
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             <Card className='p-6 hover:shadow-lg transition-shadow'>
               <h4 className='font-semibold text-neutral-900 mb-2'>Profile Setup</h4>
@@ -126,7 +137,6 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Auth Debug Info (Development Only) */}
           {process.env.NODE_ENV === "development" && (
             <Card className='p-6 mt-8 bg-neutral-100'>
               <h4 className='font-semibold text-neutral-900 mb-4'>Debug Info (Dev Only)</h4>

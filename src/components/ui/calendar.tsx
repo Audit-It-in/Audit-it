@@ -4,7 +4,7 @@ import { DayPicker } from "react-day-picker";
 import { cn } from "@/src/helpers/tailwind.helper";
 import "react-day-picker/style.css";
 import { useMemo, useState } from "react";
-import { addMonths, format, setMonth, setYear } from "date-fns";
+import { addMonths, format, setYear } from "date-fns";
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 
@@ -97,9 +97,7 @@ export function Calendar({
         month={currentMonth}
         onMonthChange={setCurrentMonth}
         selected={selected}
-        onSelect={onSelect}
-        disabled={disabled}
-        components={{ Caption: () => null, Nav: () => null }}
+        onSelect={disabled ? undefined : onSelect}
         styles={{
           caption: { display: "none" },
           caption_label: { display: "none" },
@@ -108,9 +106,7 @@ export function Calendar({
         /* Disable outside min/max if provided */
         modifiersClassNames={{}}
         className={cn("p-2 pt-1 text-sm w-80")}
-        disabled={
-          [minDate ? { before: minDate } : undefined, maxDate ? { after: maxDate } : undefined].filter(Boolean) as any
-        }
+        disabled={[...(minDate ? [{ before: minDate }] : []), ...(maxDate ? [{ after: maxDate }] : [])]}
         classNames={{
           caption: "hidden",
           caption_label: "hidden",
