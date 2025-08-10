@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useCallback, useState } from 'react';
-import Image from "next/image";
-import { CameraIcon, UserIcon, XIcon, CheckCircleIcon } from '@phosphor-icons/react';
-import { cn } from '@/src/helpers/tailwind.helper';
-import { Loader } from '@/src/components/common/Loader.component';
-import { SpinnerSize, LoadingAction } from '@/src/types/ui.type';
-// Avatar components not used in this component - using custom Image elements
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import { CameraIcon, UserIcon, XIcon, CheckCircleIcon } from "@phosphor-icons/react";
+import { cn } from "@/src/helpers/tailwind.helper";
+import { Loader } from "@/src/components/common/Loader.component";
+import { SpinnerSize, LoadingAction } from "@/src/types/ui.type";
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
+import { FILE_VALIDATION } from "@/src/services/upload.service";
 
 export interface AvatarUploadProps {
   value?: File | null;
@@ -20,6 +20,9 @@ export interface AvatarUploadProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   className?: string;
   showRemove?: boolean;
+  onError?: (message: string) => void;
+  helperText?: string;
+  errorText?: string;
 }
 
 const sizeClasses = {
@@ -71,16 +74,22 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   value,
   onChange,
   currentImageUrl,
-  maxSize = 5 * 1024 * 1024, // 5MB
-  allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"],
+  maxSize = FILE_VALIDATION.PROFILE_PICTURE.maxSize,
+  allowedTypes = [...FILE_VALIDATION.PROFILE_PICTURE.allowedTypes],
   disabled = false,
   isUploading = false,
   uploadProgress = 0,
   size = "md",
   className,
   showRemove = true,
+  onError,
+  helperText,
+  errorText,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const triggerId = useId();
+  const [objectPreviewUrl, setObjectPreviewUrl] = useState<string | null>(null);
 
   const sizeConfig = sizeClasses[size];
 
@@ -106,12 +115,13 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       const validationError = validateFile(file);
       if (validationError) {
         console.error("File validation error:", validationError);
+        onError?.(validationError);
         return;
       }
 
       onChange(file);
     },
-    [disabled, isUploading, validateFile, onChange]
+    [disabled, isUploading, validateFile, onChange, onError]
   );
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -168,15 +178,32 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     [disabled, isUploading, onChange]
   );
 
-  const previewUrl = value ? URL.createObjectURL(value) : currentImageUrl;
+  // Manage object URL lifecycle
+  useEffect(() => {
+    if (value) {
+      const url = URL.createObjectURL(value);
+      setObjectPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setObjectPreviewUrl(null);
+    }
+  }, [value]);
+
+  const previewUrl = value ? objectPreviewUrl : currentImageUrl;
   const hasImage = !!(value || currentImageUrl);
 
   return (
     <div className={cn("relative inline-block", className)}>
-      {/* Main Avatar using our neumorphic Avatar component */}
+      {/* Main Avatar using neumorphic Avatar UI */}
       <div
+        role='button'
+        aria-label={hasImage ? "Change profile photo" : "Upload profile photo"}
+        aria-describedby={`${triggerId}-help`}
+        tabIndex={disabled || isUploading ? -1 : 0}
         className={cn(
-          "relative cursor-pointer transition-all duration-300 group",
+          "relative transition-all duration-300 group outline-none",
+          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-full",
+          !disabled && !isUploading && "cursor-pointer",
           disabled && "opacity-60 cursor-not-allowed",
           isUploading && "pointer-events-none"
         )}
@@ -184,10 +211,18 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={() => !disabled && !isUploading && document.getElementById("avatar-input")?.click()}
+        onClick={() => !disabled && !isUploading && inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (disabled || isUploading) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
       >
         <input
-          id='avatar-input'
+          ref={inputRef}
+          id={`${triggerId}-input`}
           type='file'
           accept='image/*'
           onChange={handleFileInput}
@@ -195,41 +230,24 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
           disabled={disabled || isUploading}
         />
 
-        {/* Custom Neumorphic Avatar Container */}
         <div
           className={cn(
-            "relative rounded-full transition-all duration-300",
-            // Enhanced neumorphic effect - more pronounced
-            "bg-gradient-to-br from-white via-primary-50/30 to-primary-50",
-            "shadow-[8px_8px_16px_rgba(37,99,235,0.15),-8px_-8px_16px_rgba(255,255,255,0.9)]",
-            "border border-primary-100/60",
-            // Hover state
-            "group-hover:shadow-[12px_12px_24px_rgba(37,99,235,0.2),-12px_-12px_24px_rgba(255,255,255,0.95)]",
-            "group-hover:scale-[1.02]",
-            // Drag over state - inset effect
-            isDragOver && [
-              "shadow-[inset_6px_6px_12px_rgba(37,99,235,0.2),inset_-6px_-6px_12px_rgba(255,255,255,0.8)]",
-              "bg-gradient-to-br from-primary-50 to-primary-100",
-              "border-primary-200",
-            ],
-            // Size variants with proper aspect ratio
+            // Size variants
             size === "xs" && "size-6",
             size === "sm" && "size-8",
             size === "md" && "size-10",
             size === "lg" && "size-12",
             size === "xl" && "size-16",
-            size === "2xl" && "size-20"
+            size === "2xl" && "size-20",
+            "rounded-full shadow-neumorphic-md hover:shadow-neumorphic-lg active:shadow-neumorphic-sm border border-primary-100/60",
+            isDragOver && "shadow-neumorphic-inset bg-primary-50/80 border-primary-200"
           )}
         >
-          {/* Inner highlight ring */}
-          <div className='absolute inset-[1px] rounded-full bg-gradient-to-br from-white/60 to-transparent pointer-events-none' />
-
-          {/* Image or Fallback Content */}
-          <div className='relative z-10 size-full rounded-full overflow-hidden'>
+          <Avatar className='size-full' variant='interactive'>
             {hasImage && previewUrl ? (
-              <Image src={previewUrl} alt='Profile' fill className='object-cover rounded-full' />
+              <AvatarImage src={previewUrl} alt='Profile' />
             ) : (
-              <div className='size-full flex items-center justify-center bg-gradient-to-br from-primary-50/80 to-primary-100/60 rounded-full'>
+              <AvatarFallback size={size} className='bg-primary-50'>
                 <UserIcon
                   className={cn(
                     sizeConfig.icon,
@@ -238,9 +256,9 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
                   )}
                   weight='bold'
                 />
-              </div>
+              </AvatarFallback>
             )}
-          </div>
+          </Avatar>
         </div>
 
         {/* Upload Progress Overlay */}
@@ -253,12 +271,12 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
           </div>
         )}
 
-        {/* Camera Overlay - Clean, no distortion */}
+        {/* Camera Overlay */}
         {!isUploading && (
           <div
             className={cn(
               "absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-full z-10",
-              "bg-black/50 flex items-center justify-center"
+              "bg-black/40 flex items-center justify-center"
             )}
           >
             <CameraIcon className={cn(sizeConfig.camera, "text-white")} weight='bold' />
@@ -275,13 +293,12 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
           </div>
         )}
 
-        {/* Enhanced Drag Over Overlay */}
+        {/* Drag Over Overlay */}
         {isDragOver && !isUploading && (
           <div className='absolute inset-0 rounded-full flex items-center justify-center z-10 animate-pulse'>
-            {/* Animated border */}
-            <div className='absolute inset-1 border-2 border-primary-400 border-dashed rounded-full animate-pulse-slow' />
+            <div className='absolute inset-1 border-2 border-primary-400 border-dashed rounded-full' />
             <div className='text-center'>
-              <div className='p-3 rounded-full bg-primary-100/80 backdrop-blur-sm mb-2 mx-auto w-fit shadow-lg'>
+              <div className='p-3 rounded-full bg-primary-100/80 backdrop-blur-sm mb-2 mx-auto w-fit shadow-neumorphic-sm'>
                 <CameraIcon className={cn(sizeConfig.camera, "text-primary-600")} weight='bold' />
               </div>
               <p
@@ -294,25 +311,22 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         )}
       </div>
 
-      {/* Enhanced Remove Button - Better neumorphic design */}
+      {/* Remove Button */}
       {showRemove && hasImage && !isUploading && (
         <button
           type='button'
           onClick={handleRemove}
+          aria-label='Remove profile photo'
           className={cn(
             "absolute -top-2 -right-2 rounded-full transition-all duration-300 z-30",
-            "bg-gradient-to-br from-red-400 via-red-500 to-red-600",
-            "shadow-[4px_4px_8px_rgba(239,68,68,0.3),-2px_-2px_4px_rgba(255,255,255,0.8)]",
-            "hover:shadow-[6px_6px_12px_rgba(239,68,68,0.4),-3px_-3px_6px_rgba(255,255,255,0.9)]",
-            "hover:scale-110 active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(185,28,28,0.3)]",
+            "bg-red-500 hover:bg-red-600",
+            "shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset",
             "border border-red-300/30",
             "flex items-center justify-center group",
             sizeConfig.button
           )}
           disabled={disabled}
         >
-          {/* Inner highlight */}
-          <div className='absolute inset-[1px] rounded-full bg-gradient-to-br from-white/20 to-transparent pointer-events-none' />
           <XIcon
             className={cn(
               sizeConfig.buttonIcon,
@@ -323,28 +337,37 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         </button>
       )}
 
-      {/* Enhanced Success Indicator - Better neumorphic design */}
+      {/* Success Indicator */}
       {value && !isUploading && (
         <div
           className={cn(
             "absolute -bottom-2 -right-2 rounded-full transition-all duration-300 z-30",
-            "bg-gradient-to-br from-accent-400 via-accent-500 to-accent-600",
-            "shadow-[4px_4px_8px_rgba(16,185,129,0.3),-2px_-2px_4px_rgba(255,255,255,0.8)]",
+            "bg-accent-600",
+            "shadow-neumorphic-sm",
             "border border-accent-300/30",
             "flex items-center justify-center animate-pulse",
             sizeConfig.button
           )}
         >
-          {/* Inner highlight */}
-          <div className='absolute inset-[1px] rounded-full bg-gradient-to-br from-white/20 to-transparent pointer-events-none' />
           <CheckCircleIcon
             className={cn(sizeConfig.buttonIcon, "text-white drop-shadow-sm relative z-10")}
             weight='bold'
           />
         </div>
       )}
+
+      {/* Helper / Error text */}
+      {(helperText || errorText) && (
+        <div id={`${triggerId}-help`} className={cn("mt-2", sizeConfig.text)}>
+          {errorText ? (
+            <p className='text-red-600 font-medium'>{errorText}</p>
+          ) : (
+            helperText && <p className='text-neutral-600'>{helperText}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
-export default AvatarUpload; 
+export default AvatarUpload;

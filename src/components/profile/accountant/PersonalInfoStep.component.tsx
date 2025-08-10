@@ -3,7 +3,7 @@ import AvatarUpload from "@/src/components/common/AvatarUpload.component";
 import { Card as NeumorphicCard } from "@/src/components/ui/card";
 import { Switch } from "@/src/components/ui/switch";
 import { CheckboxGroup } from "@/src/components/ui/checkbox-group";
-import { FILE_VALIDATION, uploadProfilePicture } from "@/src/services/upload.service";
+import { FILE_VALIDATION, useProfilePictureUrl } from "@/src/services/upload.service";
 import { SaveContinueButton } from "./SaveContinueButton.component";
 import { IconBadge } from "@/src/components/ui/icon-badge";
 import { InlineLoader } from "@/src/components/common/Loader.component";
@@ -11,13 +11,13 @@ import { Label } from "@/src/components/ui/label";
 import { LoadingAction, SpinnerSize } from "@/src/types/ui.type";
 import { LocationFields } from "../shared/LocationFields.component";
 import { PersonalInfoFormData, personalInfoSchema, ProfileDefaults } from "@/src/helpers/profile-validation.helper";
-import { Profile, ProfileStep, UsernameAvailability } from "@/src/types/profile.type";
+import { Profile, ProfileStep } from "@/src/types/profile.type";
 import { ProfileFormField } from "../shared/ProfileFormField.component";
 import { StatusMessage } from "@/src/types/common.type";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLanguages, useSpecializations, useUsernameAvailability } from "@/src/services/profile.service";
+import { useLanguages, useSpecializations } from "@/src/services/profile.service";
 import { useProfileFormState } from "@/src/hooks/useProfileFormState";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -29,6 +29,8 @@ import {
   ChatCircleIcon,
   BriefcaseIcon,
 } from "@phosphor-icons/react";
+import { useDebouncedUsernameAvailability } from "@/src/hooks/useDebouncedUsernameAvailability";
+import { useProfilePictureUpload } from "@/src/hooks/useProfilePictureUpload";
 
 interface PersonalInfoStepProps {
   userId: string;
@@ -38,14 +40,13 @@ interface PersonalInfoStepProps {
 }
 
 export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingProfile }: PersonalInfoStepProps) {
-  const [usernameCheckTimeout, setUsernameCheckTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [usernameAvailability, setUsernameAvailability] = useState<{
-    isChecking: boolean;
-    result: UsernameAvailability | null;
-  }>({ isChecking: false, result: null });
   const [hasInitialized, setHasInitialized] = useState(false);
-  const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
-  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  const {
+    file: avatarFile,
+    setFile: setAvatarFile,
+    isUploading: avatarUploading,
+    uploadIfNeeded,
+  } = useProfilePictureUpload({ userId });
 
   const {
     isSubmitting,
@@ -108,6 +109,9 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
   const watchedUsername = watch("username");
   const watchedLanguageIds = watch("language_ids");
   const watchedSpecializationIds = watch("specialization_ids");
+  const watchedProfilePicturePath = watch("profile_picture_url");
+  const isAbsoluteUrl = Boolean(watchedProfilePicturePath && watchedProfilePicturePath.startsWith("http"));
+  const { data: signedAvatarUrl } = useProfilePictureUrl(isAbsoluteUrl ? undefined : watchedProfilePicturePath);
 
   // Reset form when existing profile changes (navigation)
   useEffect(() => {
@@ -138,93 +142,36 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
     }
   }, [existingProfile, user, reset, hasInitialized]);
 
-  // Mutations
-  const checkUsernameMutation = useUsernameAvailability();
-
   // Reset district when state changes
   const handleStateChange = () => {
     setValue("district_id", 0);
   };
 
-  // Username availability checking with debounce
-  useEffect(() => {
-    // Only check if we have valid data and it's not the current user's existing username
-    const shouldCheck =
-      watchedUsername &&
-      watchedUsername.length >= 3 &&
-      watchedStateId &&
-      watchedStateId > 0 &&
-      watchedDistrictId &&
-      watchedDistrictId > 0 &&
-      !(
-        existingProfile?.username === watchedUsername &&
-        existingProfile?.state_id === watchedStateId &&
-        existingProfile?.district_id === watchedDistrictId
-      );
+  // Username availability checking with debounce (DRY hook)
+  const unchangedFromExisting =
+    !!existingProfile &&
+    existingProfile.username === watchedUsername &&
+    existingProfile.state_id === watchedStateId &&
+    existingProfile.district_id === watchedDistrictId;
 
-    if (usernameCheckTimeout) {
-      clearTimeout(usernameCheckTimeout);
-    }
-
-    if (shouldCheck && hasInitialized) {
-      const timeout = setTimeout(async () => {
-        // Double check we're not already checking
-        if (usernameAvailability.isChecking) {
-          return;
-        }
-
-        setUsernameAvailability({ isChecking: true, result: null });
-
-        try {
-          const result = await checkUsernameMutation.mutateAsync({
-            username: watchedUsername,
-            stateId: watchedStateId,
-            districtId: watchedDistrictId,
-            excludeUserId: existingProfile ? userId : undefined,
-          });
-
-          setUsernameAvailability({ isChecking: false, result });
-        } catch {
-          setUsernameAvailability({ isChecking: false, result: null });
-        }
-      }, 800);
-
-      setUsernameCheckTimeout(timeout);
-    } else {
-      setUsernameAvailability({ isChecking: false, result: null });
-    }
-
-    return () => {
-      if (usernameCheckTimeout) {
-        clearTimeout(usernameCheckTimeout);
-      }
-    };
-  }, [
-    watchedUsername,
-    watchedStateId,
-    watchedDistrictId,
-    existingProfile?.username,
-    existingProfile?.state_id,
-    existingProfile?.district_id,
-    userId,
-    hasInitialized,
-    usernameAvailability.isChecking,
-    checkUsernameMutation,
-    usernameCheckTimeout,
-    existingProfile,
-  ]);
+  const {
+    isChecking: unameIsChecking,
+    result: unameResult,
+    checkNow: checkUsernameNow,
+  } = useDebouncedUsernameAvailability({
+    username: watchedUsername,
+    stateId: watchedStateId,
+    districtId: watchedDistrictId,
+    excludeUserId: existingProfile ? userId : undefined,
+    enabled: hasInitialized && !unchangedFromExisting,
+    delayMs: 800,
+  });
 
   const onSubmit = async (data: PersonalInfoFormData) => {
     try {
       // Check username availability one final time
-      if (!existingProfile || existingProfile.username !== data.username) {
-        const availability = await checkUsernameMutation.mutateAsync({
-          username: data.username,
-          stateId: data.state_id,
-          districtId: data.district_id,
-          excludeUserId: existingProfile ? userId : undefined,
-        });
-
+      if (!unchangedFromExisting) {
+        const availability = await checkUsernameNow();
         if (!availability.isAvailable) {
           showError("Username is not available in this location. Please choose a different username.");
           return;
@@ -232,21 +179,12 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
       }
 
       // Handle profile picture upload if there's a new file
-      let profilePictureUrl = data.profile_picture_url;
-      if (profilePictureFile) {
-        setIsUploadingPicture(true);
-        const uploadResult = await uploadProfilePicture(profilePictureFile, userId);
-
-        if (uploadResult.success && uploadResult.url) {
-          profilePictureUrl = uploadResult.url;
-          // Update the form field to reflect the new URL
-          setValue("profile_picture_url", uploadResult.url);
-        } else {
-          showError(uploadResult.error || "Failed to upload profile picture");
-          setIsUploadingPicture(false);
-          return;
-        }
-        setIsUploadingPicture(false);
+      // We now store storage path in profile_picture_url
+      let profilePicturePath = data.profile_picture_url;
+      const maybeNewPath = await uploadIfNeeded(profilePicturePath);
+      if (maybeNewPath) {
+        profilePicturePath = maybeNewPath;
+        setValue("profile_picture_url", maybeNewPath);
       }
 
       const stepData = {
@@ -254,7 +192,7 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
         first_name: data.first_name,
         middle_name: data.middle_name || null,
         last_name: data.last_name,
-        profile_picture_url: profilePictureUrl || null,
+        profile_picture_url: profilePicturePath || null,
         bio: data.bio || null,
         state_id: data.state_id,
         district_id: data.district_id,
@@ -291,9 +229,9 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
           {/* Profile Picture - Larger Size */}
           <div className='flex flex-col items-center space-y-4 mb-8'>
             <AvatarUpload
-              value={profilePictureFile}
+              value={avatarFile}
               onChange={(file) => {
-                setProfilePictureFile(file);
+                setAvatarFile(file);
                 // Clear the URL when a new file is selected or removed
                 if (file) {
                   setValue("profile_picture_url", "");
@@ -302,10 +240,10 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
                   setValue("profile_picture_url", "");
                 }
               }}
-              currentImageUrl={watch("profile_picture_url")}
+              currentImageUrl={isAbsoluteUrl ? watchedProfilePicturePath : signedAvatarUrl}
               maxSize={FILE_VALIDATION.PROFILE_PICTURE.maxSize}
               allowedTypes={[...FILE_VALIDATION.PROFILE_PICTURE.allowedTypes]}
-              isUploading={isUploadingPicture}
+              isUploading={avatarUploading}
               size='2xl'
               showRemove={true}
               className='transition-all duration-300 hover:scale-[1.02]'
@@ -392,15 +330,15 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
                   error={errors.username?.message}
                   {...register("username")}
                 />
-                {usernameAvailability.isChecking && (
+                {unameIsChecking && (
                   <div className='flex items-center gap-2 text-xs text-primary-600 bg-primary-50/60 p-2 rounded-lg border border-primary-200/60'>
                     <InlineLoader action={LoadingAction.LOADING} size={SpinnerSize.SMALL} />
                     <span className='font-medium'>Checking availability...</span>
                   </div>
                 )}
-                {usernameAvailability.result && (
+                {unameResult && (
                   <div className='text-xs'>
-                    {usernameAvailability.result.isAvailable ? (
+                    {unameResult.isAvailable ? (
                       <div className='flex items-center gap-2 text-accent-700 bg-accent-50/60 p-2 rounded-lg border border-accent-200/60'>
                         <CheckCircleIcon className='h-4 w-4' />
                         <span className='font-medium'>Available</span>
@@ -411,17 +349,17 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
                           <WarningIcon className='h-4 w-4' />
                           <span className='font-medium'>Not available</span>
                         </div>
-                        {usernameAvailability.result.suggested && (
+                        {unameResult.suggested && (
                           <div className='text-neutral-600'>
-                            <span>Try: {usernameAvailability.result.suggested.join(", ")}</span>
+                            <span>Try: {unameResult.suggested.join(", ")}</span>
                           </div>
                         )}
                       </div>
                     )}
-                    {usernameAvailability.result.profileUrl && (
+                    {unameResult.profileUrl && (
                       <div className='flex items-center gap-2 text-primary-600 bg-primary-50/40 p-2 rounded-lg border border-primary-200/40 mt-2'>
                         <LinkIcon className='h-4 w-4' />
-                        <span className='font-medium'>audit-it.com/{usernameAvailability.result.profileUrl}</span>
+                        <span className='font-medium'>audit-it.com/{unameResult.profileUrl}</span>
                       </div>
                     )}
                   </div>
@@ -505,8 +443,8 @@ export function PersonalInfoStep({ userId, onStepComplete, onMessage, existingPr
 
       {/* Submit Button - Neumorphic Design */}
       <SaveContinueButton
-        isSubmitting={isSubmitting}
-        disabled={usernameAvailability.isChecking}
+        isSubmitting={isSubmitting || avatarUploading}
+        disabled={unameIsChecking}
         submittingText='Saving your information...'
         submitText='Save & Continue to Verification'
       />

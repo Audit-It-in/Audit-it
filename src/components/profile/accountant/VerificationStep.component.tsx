@@ -14,6 +14,7 @@ import { useSaveProfileStep, useVerification } from "@/src/services/profile.serv
 import FileUpload from "@/src/components/common/FileUpload.component";
 import { uploadCertificate, FILE_VALIDATION } from "@/src/services/upload.service";
 import { verificationSchema, VerificationFormData } from "@/src/helpers/profile-validation.helper";
+import { formatMembershipNumber } from "@/src/helpers/validation.helper";
 
 interface VerificationStepProps {
   userId: string;
@@ -57,10 +58,6 @@ export function VerificationStep({ userId, onStepComplete, onMessage, existingPr
   // Mutations
   const saveProfileStepMutation = useSaveProfileStep();
 
-  const formatMembershipNumber = (value: string): string => {
-    // Remove any non-alphanumeric characters and convert to uppercase
-    return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-  };
 
   const onSubmit = async (data: VerificationFormData) => {
     try {

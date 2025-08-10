@@ -3,12 +3,17 @@
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
 import { useAuth } from "@/src/hooks/useAuth";
+import { useProfilePictureUrl } from "@/src/services/upload.service";
 import { APP_CONFIG } from "@/src/constants/app.constants";
 import { UserIcon, MathOperationsIcon, NotEqualsIcon, PiIcon } from "@phosphor-icons/react";
 import { Logo } from "@/src/components/common/Logo.component";
 
 export function Header() {
   const { user, profile, isAuthenticated, signOut } = useAuth();
+  const picturePathOrUrl = profile?.profile_picture_url || "";
+  const isAbsoluteUrl = picturePathOrUrl.startsWith("http");
+  const { data: signedUrl } = useProfilePictureUrl(isAbsoluteUrl ? undefined : picturePathOrUrl);
+  const avatarUrl = isAbsoluteUrl ? picturePathOrUrl : signedUrl;
 
   const handleSignOut = async () => {
     try {
@@ -45,7 +50,7 @@ export function Header() {
                   <div className='flex items-center space-x-3'>
                     <div className='p-1 bg-white rounded-full shadow-[inset_2px_2px_4px_rgba(37,99,235,0.1),inset_-2px_-2px_4px_rgba(255,255,255,0.9)]'>
                       <Avatar className='h-8 w-8 shadow-[2px_2px_4px_rgba(37,99,235,0.2)]'>
-                        <AvatarImage src={profile?.profile_picture_url} />
+                        <AvatarImage src={avatarUrl} />
                         <AvatarFallback className='bg-primary-100 text-primary-700'>
                           <UserIcon className='h-4 w-4' weight='bold' />
                         </AvatarFallback>

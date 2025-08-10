@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import { UploadIcon, FileIcon, ImageIcon, XIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import { cn } from "@/src/helpers/tailwind.helper";
 import { Button } from "@/src/components/ui/button";
 import { Loader } from "@/src/components/common/Loader.component";
 import { SpinnerSize, LoadingAction } from "@/src/types/ui.type";
+import { FILE_VALIDATION } from "@/src/services/upload.service";
 
 export interface FileUploadProps {
   value?: File | null;
@@ -23,14 +24,15 @@ export interface FileUploadProps {
   className?: string;
   isUploading?: boolean;
   uploadProgress?: number;
+  onError?: (message: string) => void;
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({
   value,
   onChange,
   accept = "image/*,.pdf",
-  maxSize = 5 * 1024 * 1024, // 5MB
-  allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf"],
+  maxSize = FILE_VALIDATION.CERTIFICATE.maxSize,
+  allowedTypes = [...FILE_VALIDATION.CERTIFICATE.allowedTypes, ...FILE_VALIDATION.PROFILE_PICTURE.allowedTypes],
   placeholder = "Drag & drop a file here, or click to browse",
   helperText,
   error,
@@ -40,8 +42,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
   className,
   isUploading = false,
   uploadProgress = 0,
+  onError,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const triggerId = useId();
+  const [objectPreviewUrl, setObjectPreviewUrl] = useState<string | null>(null);
 
   const validateFile = useCallback(
     (file: File): string | null => {
@@ -64,14 +70,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       const validationError = validateFile(file);
       if (validationError) {
-        // You might want to show this error via a toast or callback
         console.error("File validation error:", validationError);
+        onError?.(validationError);
         return;
       }
 
       onChange(file);
     },
-    [disabled, isUploading, validateFile, onChange]
+    [disabled, isUploading, validateFile, onChange, onError]
   );
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -125,7 +131,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
   }, [disabled, isUploading, onChange]);
 
   const isImage = value && value.type.startsWith("image/");
-  const previewUrl = value && isImage ? URL.createObjectURL(value) : null;
+  useEffect(() => {
+    if (value && isImage) {
+      const url = URL.createObjectURL(value);
+      setObjectPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setObjectPreviewUrl(null);
+    }
+  }, [value, isImage]);
+  const previewUrl = value && isImage ? objectPreviewUrl : null;
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes";
@@ -155,14 +170,26 @@ const FileUpload: React.FC<FileUploadProps> = ({
           !disabled && "cursor-pointer hover:border-primary-300",
           isUploading && "pointer-events-none"
         )}
+        role='button'
+        aria-label='Upload file'
+        aria-describedby={`${triggerId}-help`}
+        tabIndex={disabled || isUploading ? -1 : 0}
+        onKeyDown={(e) => {
+          if (disabled || isUploading) return;
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={() => !disabled && !isUploading && document.getElementById("file-input")?.click()}
+        onClick={() => !disabled && !isUploading && inputRef.current?.click()}
       >
         <input
-          id='file-input'
+          ref={inputRef}
+          id={`${triggerId}-input`}
           type='file'
           accept={accept}
           onChange={handleFileInput}
@@ -283,21 +310,22 @@ const FileUpload: React.FC<FileUploadProps> = ({
         </div>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <p className='text-sm text-red-600 flex items-center space-x-1'>
-          <span>⚠️</span>
-          <span>{error}</span>
-        </p>
-      )}
-
-      {/* Helper Info */}
-      {!error && !helperText && (
-        <p className='text-xs text-neutral-500'>
-          Max file size: {Math.round(maxSize / (1024 * 1024))}MB
-          {required && <span className='text-red-500 ml-1'>*</span>}
-        </p>
-      )}
+      {/* Helper / Error Info */}
+      <div id={`${triggerId}-help`}>
+        {error ? (
+          <p className='text-sm text-red-600 flex items-center gap-1'>
+            <span>⚠️</span>
+            <span>{error}</span>
+          </p>
+        ) : helperText ? (
+          <p className='text-xs text-neutral-500'>{helperText}</p>
+        ) : (
+          <p className='text-xs text-neutral-500'>
+            Max file size: {Math.round(maxSize / (1024 * 1024))}MB
+            {required && <span className='text-red-500 ml-1'>*</span>}
+          </p>
+        )}
+      </div>
     </div>
   );
 };

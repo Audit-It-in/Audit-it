@@ -1,6 +1,5 @@
 "use client";
-import { Button } from "@/src/components/ui/button";
-import { GraduationCapIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { GraduationCapIcon } from "@phosphor-icons/react";
 import { educationListSchema, educationSchema, ProfileDefaults } from "@/src/helpers/profile-validation.helper";
 import { SaveContinueButton } from "./SaveContinueButton.component";
 import { Profile, ProfileStep } from "@/src/types/profile.type";
@@ -8,13 +7,15 @@ import { ProfileFormField } from "../shared/ProfileFormField.component";
 import { ProfileFormSection } from "../shared/ProfileFormSection.component";
 import { StatusMessage } from "@/src/types/common.type";
 import { deleteEducation, saveEducation, useEducations } from "@/src/services/profile.service";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useProfileFormState } from "@/src/hooks/useProfileFormState";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { DatePicker } from "@/src/components/ui/date-picker";
 import { Separator } from "@/src/components/ui/separator";
 import { z } from "zod";
+import { useArrayForm } from "@/src/hooks/useArrayForm";
+import { ArrayRowActions } from "../shared/ArrayRowActions.component";
 
 interface EducationStepProps {
   userId: string;
@@ -56,7 +57,11 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
     },
   });
 
-  const { fields, append, remove } = useFieldArray({ name: "educations", control });
+  const { fields, appendEmpty, removeAt, saveAll } = useArrayForm<EducationFormRow>({
+    control,
+    name: "educations",
+    defaultItem: { ...ProfileDefaults.education },
+  });
 
   // Load existing education data into form
   useEffect(() => {
@@ -79,8 +84,7 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
   const onSubmit = async (data: EducationListFormInput) => {
     await withSubmitting(async () => {
       try {
-        // Save each education row
-        for (const ed of data.educations) {
+        await saveAll(data.educations, async (ed) => {
           const basePayload = {
             profile_id: (existingProfile?.id as string) ?? "",
             institute_name: ed.institute_name,
@@ -91,12 +95,11 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
             grade: ed.grade,
             description: ed.description,
           } as const;
-
           const payload: Parameters<typeof saveEducation>[0] = ed.id
             ? { id: ed.id, ...basePayload }
             : { ...basePayload };
-          await saveEducation(payload);
-        }
+          return saveEducation(payload);
+        });
 
         await handleFormSubmit({});
         showSuccess("Education saved successfully!");
@@ -185,26 +188,15 @@ export function EducationStep({ userId, onStepComplete, onMessage, existingProfi
                 />
 
                 <div className='flex items-center justify-between gap-3 sm:col-span-2'>
-                  <Button
-                    type='button'
-                    variant='ghost'
-                    size='sm'
-                    className='text-red-600 hover:bg-red-50'
-                    onClick={async () => {
+                  <ArrayRowActions
+                    canAdd={index === fields.length - 1}
+                    onAdd={() => appendEmpty()}
+                    onRemove={async () => {
                       const id = (fields[index] as unknown as { id?: string }).id;
                       if (id && existingProfile?.id) await deleteEducation(id, existingProfile.id);
-                      remove(index);
+                      removeAt(index);
                     }}
-                  >
-                    <TrashIcon className='h-4 w-4' weight='bold' />
-                    Remove
-                  </Button>
-                  {index === fields.length - 1 && (
-                    <Button type='button' variant='outline' onClick={() => append({ ...ProfileDefaults.education })}>
-                      <PlusIcon className='h-4 w-4' weight='bold' />
-                      Add another education
-                    </Button>
-                  )}
+                  />
                 </div>
               </div>
               {index < fields.length - 1 && <Separator className='mt-6' />}

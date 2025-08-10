@@ -6,22 +6,19 @@ import { Profile, ProfileStep } from "@/src/types/profile.type";
 import { ProfileFormField } from "../shared/ProfileFormField.component";
 import { ProfileFormSection } from "../shared/ProfileFormSection.component";
 import { StatusMessage } from "@/src/types/common.type";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useProfileFormState } from "@/src/hooks/useProfileFormState";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BriefcaseIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { BriefcaseIcon } from "@phosphor-icons/react";
 import { useEffect } from "react";
-import { Button } from "@/src/components/ui/button";
 // Removed per-experience Card to simplify visuals
 import { deleteExperience, saveExperience, useExperiences } from "@/src/services/profile.service";
-import { DatePicker } from "@/src/components/ui/date-picker";
-{
-  /* Separator for lightweight division between experiences */
-}
-import { Controller } from "react-hook-form";
+import { DateRangeFields } from "@/src/components/profile/shared/DateRangeFields.component";
 import { Separator } from "@/src/components/ui/separator";
 import { Checkbox } from "@/src/components/ui/checkbox";
 import { cn } from "@/src/helpers/tailwind.helper";
+import { ArrayRowActions } from "@/src/components/profile/shared/ArrayRowActions.component";
+import { useArrayForm } from "@/src/hooks/useArrayForm";
 
 interface ProfessionalStepProps {
   userId: string;
@@ -71,7 +68,28 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage, existingPr
     },
   });
 
-  const { fields, append, remove } = useFieldArray({ name: "experiences", control });
+  const { fields, appendEmpty, removeAt, saveAll } = useArrayForm<{
+    id?: string;
+    title: string;
+    company_name: string;
+    location?: string;
+    is_current?: boolean;
+    start_date: string;
+    end_date?: string;
+    description?: string;
+  }>({
+    control,
+    name: "experiences",
+    defaultItem: {
+      title: "",
+      company_name: "",
+      location: "",
+      is_current: false,
+      start_date: "",
+      end_date: "",
+      description: "",
+    },
+  });
   const watchedExperiences = useWatch({ control, name: "experiences" });
 
   const { data: existingExperiences } = useExperiences(existingProfile?.id);
@@ -99,8 +117,8 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage, existingPr
           throw new Error("Profile not found");
         }
 
-        for (const exp of data.experiences) {
-          await saveExperience({
+        await saveAll(data.experiences, async (exp) =>
+          saveExperience({
             id: exp.id!,
             profile_id: existingProfile.id,
             title: exp.title,
@@ -110,8 +128,8 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage, existingPr
             start_date: exp.start_date,
             end_date: exp.end_date,
             description: exp.description,
-          });
-        }
+          })
+        );
 
         await handleFormSubmit({});
         showSuccess("Experiences saved successfully!");
@@ -127,25 +145,14 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage, existingPr
       if (field?.id && existingProfile?.id) {
         await deleteExperience(field.id, existingProfile.id);
       }
-      remove(index);
+      removeAt(index);
       showSuccess("Experience removed");
     } catch (err) {
       showError(err instanceof Error ? err.message : "Failed to remove experience");
     }
   };
 
-  const handleAdd = () => {
-    append({
-      id: undefined,
-      title: "",
-      company_name: "",
-      location: "",
-      is_current: false,
-      start_date: "",
-      end_date: "",
-      description: "",
-    });
-  };
+  const handleAdd = () => appendEmpty();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
@@ -178,38 +185,14 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage, existingPr
                   {...register(`experiences.${index}.location` as const)}
                 />
 
-                <div className='grid grid-cols-2 gap-4'>
-                  <Controller
-                    control={control}
-                    name={`experiences.${index}.start_date` as const}
-                    render={({ field }) => (
-                      <ProfileFormField label='Start Date' error={errors.experiences?.[index]?.start_date?.message}>
-                        <DatePicker
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder='dd/mm/yyyy'
-                          max={new Date().toISOString().slice(0, 10)}
-                        />
-                      </ProfileFormField>
-                    )}
-                  />
-
-                  <Controller
-                    control={control}
-                    name={`experiences.${index}.end_date` as const}
-                    render={({ field }) => (
-                      <ProfileFormField label='End Date' error={errors.experiences?.[index]?.end_date?.message}>
-                        <DatePicker
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder='dd/mm/yyyy'
-                          disabled={!!watchedExperiences?.[index]?.is_current}
-                          max={new Date().toISOString().slice(0, 10)}
-                        />
-                      </ProfileFormField>
-                    )}
-                  />
-                </div>
+                <DateRangeFields
+                  control={control}
+                  startName={`experiences.${index}.start_date` as const}
+                  endName={`experiences.${index}.end_date` as const}
+                  startError={errors.experiences?.[index]?.start_date?.message as string | undefined}
+                  endError={errors.experiences?.[index]?.end_date?.message as string | undefined}
+                  disableEnd={!!watchedExperiences?.[index]?.is_current}
+                />
 
                 <div className='sm:col-span-2'>
                   <label
@@ -243,24 +226,11 @@ export function ProfessionalStep({ userId, onStepComplete, onMessage, existingPr
                   {...register(`experiences.${index}.description` as const)}
                 />
 
-                <div className='flex items-center justify-between gap-3 sm:col-span-2'>
-                  <Button
-                    type='button'
-                    variant='ghost'
-                    size='sm'
-                    className='text-red-600 hover:bg-red-50'
-                    onClick={() => handleDelete(index)}
-                  >
-                    <TrashIcon className='h-4 w-4' weight='bold' />
-                    Remove
-                  </Button>
-                  {index === fields.length - 1 && (
-                    <Button type='button' variant='outline' onClick={handleAdd}>
-                      <PlusIcon className='h-4 w-4' weight='bold' />
-                      Add another experience
-                    </Button>
-                  )}
-                </div>
+                <ArrayRowActions
+                  canAdd={index === fields.length - 1}
+                  onAdd={handleAdd}
+                  onRemove={() => handleDelete(index)}
+                />
               </div>
               {index < fields.length - 1 && <Separator className='mt-6' />}
             </div>

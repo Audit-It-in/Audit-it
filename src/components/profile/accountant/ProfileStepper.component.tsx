@@ -13,14 +13,9 @@ import { StepCard } from "@/src/components/ui/step-card";
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { VerificationStep } from "./VerificationStep.component";
-import {
-  UserIcon,
-  ShieldCheckIcon,
-  BriefcaseIcon,
-  GraduationCapIcon,
-  ArrowLeftIcon,
-  ArrowRightIcon,
-} from "@phosphor-icons/react";
+import { ArrowLeftIcon, ArrowRightIcon } from "@phosphor-icons/react";
+import { PROFILE_STEP_ORDER, PROFILE_STEP_META } from "@/src/constants/profile-step.constants";
+import { getCompletedStepsFromProfile, calculateProgress, syncUrlWithStep } from "./ProfileStepper.util";
 
 // Step components (to be created)
 
@@ -30,52 +25,7 @@ interface ProfileStepperProps {
   existingProfile: Profile | null;
 }
 
-interface StepConfig {
-  step: ProfileStep;
-  title: string;
-  description: string;
-  icon: React.ComponentType<{
-    className?: string;
-    weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
-  }>;
-  required: boolean;
-  weight: number;
-}
-
-const STEP_CONFIG: StepConfig[] = [
-  {
-    step: ProfileStep.PERSONAL_INFO,
-    title: "Personal Information",
-    description: "Basic details and profile setup",
-    icon: UserIcon,
-    required: true,
-    weight: 40,
-  },
-  {
-    step: ProfileStep.VERIFICATION,
-    title: "CA Verification",
-    description: "Professional credentials and documents",
-    icon: ShieldCheckIcon,
-    required: true,
-    weight: 30,
-  },
-  {
-    step: ProfileStep.EXPERIENCE,
-    title: "Professional Details",
-    description: "Work experience and expertise",
-    icon: BriefcaseIcon,
-    required: false,
-    weight: 20,
-  },
-  {
-    step: ProfileStep.EDUCATION,
-    title: "Education & Qualifications",
-    description: "Academic background and certifications",
-    icon: GraduationCapIcon,
-    required: false,
-    weight: 10,
-  },
-];
+const STEP_ORDER = PROFILE_STEP_ORDER;
 
 export function ProfileStepper({ userId, initialStep, existingProfile }: ProfileStepperProps) {
   const router = useRouter();
@@ -84,49 +34,34 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
     new Set(existingProfile?.last_completed_section ? getCompletedStepsFromProfile(existingProfile) : [])
   );
   const [message, setMessage] = useState<StatusMessage | null>(null);
-  const currentStepIndex = STEP_CONFIG.findIndex((config) => config.step === currentStep);
+  const currentStepIndex = STEP_ORDER.findIndex((step) => step === currentStep);
 
   // Calculate progress
-  const totalWeight = STEP_CONFIG.reduce((sum, config) => sum + config.weight, 0);
-  const completedWeight = Array.from(completedSteps).reduce((sum, step) => {
-    const config = STEP_CONFIG.find((c) => c.step === step);
-    return sum + (config?.weight || 0);
-  }, 0);
-  const progressPercentage = Math.round((completedWeight / totalWeight) * 100);
+  const progressPercentage = calculateProgress(completedSteps);
 
   const navigateToStep = useCallback((targetStep: ProfileStep) => {
     setCurrentStep(targetStep);
     setMessage(null);
 
     // Update URL without navigation
-    const url = new URL(window.location.href);
-    url.searchParams.set("step", targetStep);
-    window.history.replaceState({}, "", url.toString());
+    syncUrlWithStep(targetStep);
   }, []);
 
   const handleStepComplete = useCallback(
     (step: ProfileStep) => {
       setCompletedSteps((prev) => {
         const next = new Set([...prev, step]);
-        const totalWeight = STEP_CONFIG.reduce((sum, c) => sum + c.weight, 0);
-        const completedWeight = Array.from(next).reduce((sum, s) => {
-          const cfg = STEP_CONFIG.find((c) => c.step === s);
-          return sum + (cfg?.weight || 0);
-        }, 0);
-        // Only show success toast when 100% completed
-        if (Math.round((completedWeight / totalWeight) * 100) >= 100) {
-          setMessage({ type: StatusMessageType.SUCCESS, text: "Woohoo! profile saved successfully" });
-        } else {
-          setMessage(null);
-        }
+        const pct = calculateProgress(next);
+        if (pct >= 100) setMessage({ type: StatusMessageType.SUCCESS, text: "Woohoo! profile saved successfully" });
+        else setMessage(null);
         return next;
       });
 
       // Auto-advance to next step if not the last one
-      const nextStepIndex = STEP_CONFIG.findIndex((config) => config.step === step) + 1;
-      if (nextStepIndex < STEP_CONFIG.length) {
+      const nextStepIndex = STEP_ORDER.findIndex((s) => s === step) + 1;
+      if (nextStepIndex < STEP_ORDER.length) {
         setTimeout(() => {
-          navigateToStep(STEP_CONFIG[nextStepIndex].step);
+          navigateToStep(STEP_ORDER[nextStepIndex]);
         }, 1500);
       } else {
         // Finished last step – navigate to dashboard
@@ -140,7 +75,7 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
 
   const canNavigateToStep = useCallback(
     (targetStep: ProfileStep): boolean => {
-      const targetIndex = STEP_CONFIG.findIndex((config) => config.step === targetStep);
+      const targetIndex = STEP_ORDER.findIndex((s) => s === targetStep);
 
       // Always allow navigation to completed steps
       if (completedSteps.has(targetStep)) {
@@ -149,8 +84,9 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
 
       // Allow navigation if all previous required steps are completed
       for (let i = 0; i < targetIndex; i++) {
-        const prevConfig = STEP_CONFIG[i];
-        if (prevConfig.required && !completedSteps.has(prevConfig.step)) {
+        const prevStep = STEP_ORDER[i];
+        const isRequired = PROFILE_STEP_META[prevStep].required;
+        if (isRequired && !completedSteps.has(prevStep)) {
           return false;
         }
       }
@@ -172,18 +108,18 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
 
       {/* Step Cards */}
       <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
-        {STEP_CONFIG.map((config, index) => (
+        {STEP_ORDER.map((step, index) => (
           <StepCard
-            key={config.step}
+            key={step}
             stepNumber={index + 1}
-            title={getStepTitle(config.step)}
-            description={getStepDescription(config.step)}
-            icon={config.icon}
-            required={config.required}
-            completed={completedSteps.has(config.step)}
-            active={config.step === currentStep}
-            clickable={canNavigateToStep(config.step)}
-            onClick={() => navigateToStep(config.step)}
+            title={PROFILE_STEP_META[step].title}
+            description={PROFILE_STEP_META[step].description}
+            icon={PROFILE_STEP_META[step].icon}
+            required={PROFILE_STEP_META[step].required}
+            completed={completedSteps.has(step)}
+            active={step === currentStep}
+            clickable={canNavigateToStep(step)}
+            onClick={() => navigateToStep(step)}
           />
         ))}
       </div>
@@ -219,13 +155,13 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
     const nextStepIndex = currentStepIndex + 1;
 
     const canGoPrev = prevStepIndex >= 0;
-    const canGoNext = nextStepIndex < STEP_CONFIG.length && canNavigateToStep(STEP_CONFIG[nextStepIndex].step);
+    const canGoNext = nextStepIndex < STEP_ORDER.length && canNavigateToStep(STEP_ORDER[nextStepIndex]);
 
     return (
       <div className='flex items-center justify-between mt-6 pt-6 border-t border-neutral-200'>
         <Button
           variant='outline'
-          onClick={() => canGoPrev && navigateToStep(STEP_CONFIG[prevStepIndex].step)}
+          onClick={() => canGoPrev && navigateToStep(STEP_ORDER[prevStepIndex])}
           disabled={!canGoPrev}
           className='flex items-center gap-2'
         >
@@ -235,13 +171,13 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
 
         <div className='flex items-center gap-2'>
           <span className='text-sm text-neutral-500'>
-            Step {currentStepIndex + 1} of {STEP_CONFIG.length}
+            Step {currentStepIndex + 1} of {STEP_ORDER.length}
           </span>
         </div>
 
         <Button
           variant='outline'
-          onClick={() => canGoNext && navigateToStep(STEP_CONFIG[nextStepIndex].step)}
+          onClick={() => canGoNext && navigateToStep(STEP_ORDER[nextStepIndex])}
           disabled={!canGoNext}
           className='flex items-center gap-2'
         >
@@ -268,49 +204,4 @@ export function ProfileStepper({ userId, initialStep, existingProfile }: Profile
       </Card>
     </div>
   );
-}
-
-// Helper functions
-function getCompletedStepsFromProfile(profile: Profile): ProfileStep[] {
-  const byOrder: ProfileStep[] = [
-    ProfileStep.PERSONAL_INFO,
-    ProfileStep.VERIFICATION,
-    ProfileStep.EXPERIENCE,
-    ProfileStep.EDUCATION,
-  ];
-
-  // If backend tracked last_completed_section, trust it and mark all steps up to it as complete
-  if (profile.last_completed_section) {
-    const lastIndex = byOrder.indexOf(profile.last_completed_section as ProfileStep);
-    if (lastIndex >= 0) {
-      return byOrder.slice(0, lastIndex + 1);
-    }
-  }
-
-  // Fallback heuristic for legacy profiles (pre-completion tracking)
-  const steps: ProfileStep[] = [];
-  if (profile.first_name && profile.username && profile.state_id && profile.district_id) {
-    steps.push(ProfileStep.PERSONAL_INFO);
-  }
-  return steps;
-}
-
-function getStepTitle(step: ProfileStep): string {
-  const stepTitles = {
-    [ProfileStep.PERSONAL_INFO]: "Personal Info",
-    [ProfileStep.VERIFICATION]: "CA Verification",
-    [ProfileStep.EXPERIENCE]: "Professional",
-    [ProfileStep.EDUCATION]: "Education",
-  };
-  return stepTitles[step] || step.replace("_", " ");
-}
-
-function getStepDescription(step: ProfileStep): string {
-  const stepDescriptions = {
-    [ProfileStep.PERSONAL_INFO]: "Basic details",
-    [ProfileStep.VERIFICATION]: "ICAI credentials",
-    [ProfileStep.EXPERIENCE]: "Work experience",
-    [ProfileStep.EDUCATION]: "Academic background",
-  };
-  return stepDescriptions[step] || "";
 }

@@ -112,6 +112,19 @@ When reviewing PRs, check:
 - Architecture Guidelines ↔ Database Schema (type alignment)
 - All documents ↔ Overview (project objectives)
 
+### Progress Docs Naming Convention
+
+- Use strict filename format: `SerialNumber-TaskName-Date.md`
+  - SerialNumber: zero-padded sequential number (e.g., `001`, `002`)
+  - TaskName: concise PascalCase summary (no spaces)
+  - Date: `YYYY-MM-DD` in IST (Asia/Kolkata) — always verify online for current IST
+- Examples:
+  - `001-Avatar-Revamp-2025-08-10.md`
+  - `002-Profile-Refactor-2025-08-10.md`
+- Rules:
+  - No vague names like `next-tasks.md` or undated files
+  - No index files; explicit imports/links only
+
 ## Getting Help
 
 ### Common Scenarios

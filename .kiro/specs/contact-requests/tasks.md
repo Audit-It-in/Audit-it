@@ -16,17 +16,17 @@
   - Create database view for optimized contact request queries with profile joins
   - _Requirements: 3.4, 4.1, 5.1, 6.2_
 
-- [ ] 3. Create CA discovery and search functionality
+- [x] 3. Create accountant discovery and search functionality
 
-  - Implement CADiscoveryPage component with search and filtering capabilities
+  - Implement AccountantDiscoveryPage component with search and filtering capabilities
   - Create SearchFilters component for location, specialization, and keyword filtering
-  - Build CAProfileCard component for displaying CA information in search results
+  - Build AccountantProfileCard component for displaying CA information in search results
   - Add infinite scroll and real-time search functionality
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 4. Build detailed CA profile view with contact capability
+- [x] 4. Build detailed accountant profile view with contact capability
 
-  - Create CAProfileView component showing complete CA profile information
+  - Create AccountantProfileView component showing complete CA profile information
   - Display CA's experience, education, verification status, and specializations
   - Add prominent "Contact CA" button for authenticated customers
   - Implement profile URL routing and SEO optimization
@@ -50,19 +50,19 @@
   - Display request status, CA responses, and timestamps
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 7. Implement CA request management dashboard
+- [ ] 7. Implement accountant request management dashboard
 
-  - Create CARequestsDashboard component for CA's incoming request management
-  - Build CARequestCard component showing customer request information
+  - Create AccountantRequestsDashboard component for CA's incoming request management
+  - Build AccountantRequestCard component showing customer request information
   - Add filtering by status, urgency, and date range
   - Implement sorting by creation date, urgency level, and status
   - Add notification badge for new unread requests
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 8. Create CA request response and management system
+- [ ] 8. Create accountant request response and management system
 
-  - Build CARequestDetails component for detailed request viewing
-  - Implement CARequestResponse component for CA replies
+  - Build AccountantRequestDetails component for detailed request viewing
+  - Implement AccountantRequestResponse component for CA replies
   - Add functionality to update request status (replied, closed)
   - Create private notes system for CA internal tracking
   - Add response timestamp tracking and status updates
@@ -77,7 +77,7 @@
   - Create responsive design components following neumorphic design principles
   - _Requirements: 4.2, 4.4, 5.4, 6.1_
 
-- [ ] 10. Add request analytics and reporting for CAs
+- [ ] 10. Add request analytics and reporting for accountants
 
   - Create RequestAnalytics component showing CA performance metrics
   - Implement analytics queries for request volume, response rates, and trends
@@ -96,10 +96,10 @@
 
 - [ ] 12. Add navigation and routing for contact request pages
 
-  - Create Next.js app router pages for CA discovery (/cas)
-  - Add CA profile view page (/cas/[state]/[district]/[username])
+  - Create Next.js app router pages for CA discovery (/accountants)
+  - Add CA profile view page (/accountants/[state]/[district]/[username])
   - Implement customer dashboard page (/dashboard/requests)
-  - Create CA dashboard page (/ca/requests)
+  - Create CA dashboard page (/accountant/requests)
   - Add proper SEO metadata and Open Graph tags for CA profiles
   - _Requirements: 1.1, 2.1, 4.1, 5.1_
 

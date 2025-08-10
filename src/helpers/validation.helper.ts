@@ -187,3 +187,8 @@ export const ValidationMessages = {
   futureDate: () => "Cannot be a future date",
   pastDate: () => "Cannot be a past date",
 };
+
+// Utilities
+export function formatMembershipNumber(value: string): string {
+  return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+}

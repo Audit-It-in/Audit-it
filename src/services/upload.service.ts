@@ -1,5 +1,6 @@
 import { supabase } from "@/src/helpers/supabase.helper";
 import { STORAGE_BUCKETS } from "@/src/constants/storage.constants";
+import { useQuery } from "@tanstack/react-query";
 
 // File validation constants
 export const FILE_VALIDATION = {
@@ -18,8 +19,8 @@ export const FILE_VALIDATION = {
 // Types
 export interface UploadResult {
   success: boolean;
-  url?: string;
-  path?: string;
+  path?: string; // storage path only (no public url)
+  url?: string; // optional public/signed URL when applicable
   error?: string;
 }
 
@@ -96,14 +97,11 @@ export async function uploadProfilePicture(file: File, userId: string): Promise<
       return { success: false, error: "Failed to upload profile picture" };
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage.from(STORAGE_BUCKETS.PROFILE_PICTURES).getPublicUrl(filePath);
+    // Return storage path only; consumers should resolve signed URLs
+    // Clear any cached signed URL for this path
+    clearUrlCache(STORAGE_BUCKETS.PROFILE_PICTURES, filePath);
 
-    return {
-      success: true,
-      url: urlData.publicUrl,
-      path: filePath,
-    };
+    return { success: true, path: filePath };
   } catch (error) {
     console.error("Profile picture upload error:", error);
     return { success: false, error: "Failed to upload profile picture" };
@@ -160,6 +158,7 @@ export async function deleteProfilePicture(userId: string): Promise<boolean> {
     for (const ext of extensions) {
       const filePath = `${userId}/avatar.${ext}`;
       await supabase.storage.from(STORAGE_BUCKETS.PROFILE_PICTURES).remove([filePath]);
+      clearUrlCache(STORAGE_BUCKETS.PROFILE_PICTURES, filePath);
     }
 
     return true;
@@ -186,21 +185,6 @@ export async function deleteCertificate(userId: string, certificateType = "membe
   }
 }
 
-// Get file URL functions
-export function getProfilePictureUrl(userId: string, extension: string): string {
-  const filePath = `${userId}/avatar.${extension}`;
-  const { data } = supabase.storage.from(STORAGE_BUCKETS.PROFILE_PICTURES).getPublicUrl(filePath);
-
-  return data.publicUrl;
-}
-
-export function getCertificateUrl(userId: string, certificateType = "membership", extension: string): string {
-  const filePath = `${userId}/${certificateType}.${extension}`;
-  const { data } = supabase.storage.from(STORAGE_BUCKETS.ACCOUNTANT_CERTIFICATES).getPublicUrl(filePath);
-
-  return data.publicUrl;
-}
-
 // Helper function to extract file info from URL
 export function extractFileInfoFromUrl(url: string): { fileName: string; extension: string } | null {
   try {
@@ -213,4 +197,51 @@ export function extractFileInfoFromUrl(url: string): { fileName: string; extensi
   } catch {
     return null;
   }
+}
+
+// === Signed URL utilities and caching ===
+
+type UrlCacheValue = { url: string; expires: number };
+const urlCache = new Map<string, UrlCacheValue>();
+
+function getCacheKey(bucket: string, path: string): string {
+  return `${bucket}:${path}`;
+}
+
+export function clearUrlCache(bucket?: string, path?: string): void {
+  if (bucket && path) {
+    urlCache.delete(getCacheKey(bucket, path));
+  } else {
+    urlCache.clear();
+  }
+}
+
+export async function getSignedUrl(bucket: string, path: string, expiresInSeconds = 15 * 60): Promise<string> {
+  const now = Date.now();
+  const key = getCacheKey(bucket, path);
+  const cached = urlCache.get(key);
+  if (cached && cached.expires > now + 5_000) {
+    return cached.url;
+  }
+
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresInSeconds);
+  if (error || !data?.signedUrl) {
+    throw new Error("Failed to generate signed URL");
+  }
+  const value: UrlCacheValue = { url: data.signedUrl, expires: now + expiresInSeconds * 1000 };
+  urlCache.set(key, value);
+  return value.url;
+}
+
+export async function getSignedProfilePictureUrl(path: string, expiresInSeconds = 15 * 60): Promise<string> {
+  return getSignedUrl(STORAGE_BUCKETS.PROFILE_PICTURES, path, expiresInSeconds);
+}
+
+export function useProfilePictureUrl(path?: string | null) {
+  return useQuery<string>({
+    queryKey: ["profile-picture-url", path],
+    queryFn: () => getSignedProfilePictureUrl(path!),
+    enabled: !!path,
+    staleTime: 15 * 60 * 1000,
+  });
 }

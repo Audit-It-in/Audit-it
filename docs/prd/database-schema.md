@@ -299,6 +299,106 @@ LEFT JOIN public.specialization_categories c ON s.category_id = c.id
 ORDER BY c.display_order, s.display_order;
 ```
 
+### contact_requests_with_details
+
+Optimized view joining `contact_requests` with CA/customer profile and location details, plus computed fields:
+
+```sql
+CREATE OR REPLACE VIEW contact_requests_with_details AS
+SELECT
+    cr.*,
+    -- CA Profile Details
+    ca.first_name as ca_first_name,
+    ca.last_name as ca_last_name,
+    ca.profile_picture_url as ca_profile_picture,
+    ca.bio as ca_bio,
+    ca.username as ca_username,
+    ca_state.name as ca_state_name,
+    ca_district.name as ca_district_name,
+    -- Customer Profile Details (if available)
+    customer.first_name as customer_first_name,
+    customer.last_name as customer_last_name,
+    customer.profile_picture_url as customer_profile_picture,
+    -- Specialization Details
+    ARRAY(
+        SELECT s.name
+        FROM specializations s
+        WHERE s.code = cr.service_needed
+    ) as service_specialization_names,
+    -- Additional computed fields
+    CASE 
+        WHEN cr.replied_at IS NOT NULL THEN 
+            EXTRACT(EPOCH FROM (cr.replied_at - cr.created_at)) / 3600
+        ELSE NULL
+    END as response_time_hours,
+    -- Urgency priority for sorting (urgent=4, high=3, medium=2, low=1)
+    CASE cr.urgency
+        WHEN 'urgent' THEN 4
+        WHEN 'high' THEN 3
+        WHEN 'medium' THEN 2
+        WHEN 'low' THEN 1
+        ELSE 0
+    END as urgency_priority
+FROM contact_requests cr
+LEFT JOIN profiles ca ON cr.ca_profile_id = ca.id
+LEFT JOIN profiles customer ON cr.customer_profile_id = customer.id
+LEFT JOIN states ca_state ON ca.state_id = ca_state.id
+LEFT JOIN districts ca_district ON ca.district_id = ca_district.id;
+```
+
+## Database Functions
+
+### get_contact_request_stats
+
+Analytics function to compute request counts, response rate, and average response time for a CA (optional date window):
+
+```sql
+CREATE OR REPLACE FUNCTION get_contact_request_stats(
+    p_ca_profile_id uuid,
+    p_start_date timestamp with time zone DEFAULT NULL,
+    p_end_date timestamp with time zone DEFAULT NULL
+)
+RETURNS TABLE (
+    total_requests bigint,
+    new_requests bigint,
+    replied_requests bigint,
+    closed_requests bigint,
+    response_rate numeric,
+    avg_response_time_hours numeric
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        COUNT(*) as total_requests,
+        COUNT(*) FILTER (WHERE status = 'new') as new_requests,
+        COUNT(*) FILTER (WHERE status = 'replied') as replied_requests,
+        COUNT(*) FILTER (WHERE status = 'closed') as closed_requests,
+        CASE 
+            WHEN COUNT(*) > 0 THEN 
+                ROUND(
+                    (COUNT(*) FILTER (WHERE status IN ('replied', 'closed'))::numeric / COUNT(*)::numeric) * 100, 
+                    2
+                )
+            ELSE 0
+        END as response_rate,
+        ROUND(
+            AVG(
+                CASE 
+                    WHEN replied_at IS NOT NULL THEN 
+                        EXTRACT(EPOCH FROM (replied_at - created_at)) / 3600
+                    ELSE NULL
+                END
+            )::numeric, 
+            2
+        ) as avg_response_time_hours
+    FROM contact_requests
+    WHERE ca_profile_id = p_ca_profile_id
+        AND (p_start_date IS NULL OR created_at >= p_start_date)
+        AND (p_end_date IS NULL OR created_at <= p_end_date);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
 ## Storage Buckets
 
 ### profile-pictures
@@ -306,10 +406,10 @@ ORDER BY c.display_order, s.display_order;
 - **Purpose:** User profile pictures
 - **Access:** Private (users can only access their own)
 - **File Size Limit:** 5MB
-- **Allowed MIME Types:** image/jpeg, image/jpg, image/png
+- **Allowed MIME Types:** image/jpeg, image/jpg, image/png, image/webp
 - **Naming Convention:** `{auth_user_id}/avatar.{ext}`
 
-### ca-certificates
+### accountant-certificates
 
 - **Purpose:** CA membership certificates
 - **Access:** Private (users can only access their own)
@@ -336,6 +436,22 @@ CREATE INDEX idx_contact_requests_ca_profile_id ON contact_requests(ca_profile_i
 CREATE INDEX idx_contact_requests_status ON contact_requests(status);
 CREATE INDEX idx_contact_requests_created_at ON contact_requests(created_at);
 
+-- Additional optimized contact request indexes
+CREATE INDEX IF NOT EXISTS idx_contact_requests_ca_profile_status 
+  ON contact_requests(ca_profile_id, status);
+CREATE INDEX IF NOT EXISTS idx_contact_requests_customer_profile_status 
+  ON contact_requests(customer_profile_id, status) 
+  WHERE customer_profile_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_contact_requests_urgency_created 
+  ON contact_requests(urgency, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_requests_status_updated 
+  ON contact_requests(status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_requests_ca_dashboard 
+  ON contact_requests(ca_profile_id, status, urgency, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_requests_customer_dashboard 
+  ON contact_requests(customer_profile_id, status, created_at DESC) 
+  WHERE customer_profile_id IS NOT NULL;
+
 -- Lookup table indexes
 CREATE INDEX idx_languages_name ON languages(name);
 CREATE INDEX idx_specializations_category_id ON specializations(category_id);
@@ -344,12 +460,14 @@ CREATE INDEX idx_districts_state_id ON districts(state_id);
 
 ## Row Level Security (RLS)
 
-All tables have RLS enabled with appropriate policies:
+RLS is enabled with the following policies:
 
-- **Public Read Access:** Languages, specializations, states, districts
-- **User-Specific Access:** Profiles, experiences, educations (users can only access their own)
-- **Contact Request Access:** CAs can view requests sent to them, customers can view their own requests
-- **Service Role Access:** Full access for server-side operations
+- Public read access (enabled): `languages`, `specialization_categories`, `specializations`, `states`, `districts`
+  - SELECT allowed for everyone; full access for service role
+- Contact requests (enabled): `contact_requests`
+  - CAs can view/update requests sent to them; customers can view their own; both authenticated and anonymous inserts allowed (with constraints)
+- Profiles and related (planned/controlled via service layer): `profiles`, `experiences`, `educations`
+  - No explicit RLS policies in current migrations
 
 ## Migration History
 
@@ -361,6 +479,7 @@ All tables have RLS enabled with appropriate policies:
 6. **006-normalize-schema-2025-01-16.sql** - Languages table and cleanup
 7. **007-profile-picture-storage-2025-07-13.sql** - Profile picture storage
 8. **008-specializations-normalization-2025-07-22.sql** - Specializations normalization
+9. **009-contact-requests-view-2025-01-16.sql** - Contact requests optimized view, indexes, RLS, analytics function
 
 ## TypeScript Integration
 

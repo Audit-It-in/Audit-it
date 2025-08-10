@@ -647,6 +647,8 @@ export function useSaveProfileStep() {
       queryClient.invalidateQueries({ queryKey: ["verification", data.id] });
       queryClient.invalidateQueries({ queryKey: ["education", data.id] });
       queryClient.invalidateQueries({ queryKey: ["experiences", data.id] });
+      // Ensure any signed avatar URLs refetch after profile updates
+      queryClient.invalidateQueries({ queryKey: ["profile-picture-url"] });
     },
   });
 }
