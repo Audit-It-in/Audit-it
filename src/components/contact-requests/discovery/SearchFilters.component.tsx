@@ -108,7 +108,14 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ filters, onFilters
   const activeFilterCount = getActiveFilterCount();
 
   return (
-    <Card variant='subtle' className={cn("space-y-4", className)}>
+    <Card
+      variant='subtle'
+      className={cn(
+        "space-y-4",
+        "shadow-neumorphic-md border border-primary-200/50 bg-gradient-to-br from-white to-primary-50/20",
+        className
+      )}
+    >
       {/* Search Bar */}
       <div className='relative'>
         <MagnifyingGlassIcon
@@ -117,15 +124,23 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ filters, onFilters
         />
         <Input
           placeholder='Search accountants by name, location, or specialization...'
+          aria-label='Search accountants'
           value={searchInput}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className='pl-10'
+          className='pl-10 shadow-neumorphic-inset focus:shadow-neumorphic-focus'
         />
       </div>
 
       {/* Filter Toggle and Clear */}
       <div className='flex items-center justify-between'>
-        <Button variant='ghost' size='sm' onClick={() => setShowAdvanced(!showAdvanced)} className='gap-2'>
+        <Button
+          variant='ghost'
+          size='sm'
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className='gap-2'
+          aria-expanded={showAdvanced}
+          aria-controls='advanced-filters'
+        >
           <FunnelIcon className='h-4 w-4' weight='bold' />
           Advanced Filters
           {activeFilterCount > 0 && (
@@ -143,18 +158,112 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ filters, onFilters
         )}
       </div>
 
+      {/* Active filter chips */}
+      {activeFilterCount > 0 && (
+        <div className='flex flex-wrap gap-2'>
+          {filters.searchQuery && (
+            <Badge className='shadow-neumorphic-sm bg-primary-100 text-primary-800 border border-primary-200/60'>
+              {`"${filters.searchQuery}"`}
+              <button
+                aria-label='Remove search filter'
+                title='Remove'
+                className='ml-2 inline-flex items-center justify-center rounded-full hover:bg-primary-200/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 h-11 w-11'
+                onClick={() => onFiltersChange({ ...filters, searchQuery: undefined })}
+              >
+                <XIcon className='h-3 w-3' weight='bold' />
+              </button>
+            </Badge>
+          )}
+          {filters.location?.stateId && (
+            <Badge className='shadow-neumorphic-sm bg-primary-50 text-primary-800 border border-primary-200/60'>
+              {states.find((s) => s.id === filters.location?.stateId)?.name || "State"}
+              <button
+                aria-label='Remove state filter'
+                title='Remove'
+                className='ml-2 inline-flex items-center justify-center rounded-full hover:bg-primary-200/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 h-11 w-11'
+                onClick={() => onFiltersChange({ ...filters, location: { districtId: undefined } })}
+              >
+                <XIcon className='h-3 w-3' weight='bold' />
+              </button>
+            </Badge>
+          )}
+          {filters.location?.districtId && (
+            <Badge className='shadow-neumorphic-sm bg-primary-50 text-primary-800 border border-primary-200/60'>
+              {districts.find((d) => d.id === filters.location?.districtId)?.name || "District"}
+              <button
+                aria-label='Remove district filter'
+                title='Remove'
+                className='ml-2 inline-flex items-center justify-center rounded-full hover:bg-primary-200/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 h-11 w-11'
+                onClick={() =>
+                  onFiltersChange({ ...filters, location: { ...filters.location, districtId: undefined } })
+                }
+              >
+                <XIcon className='h-3 w-3' weight='bold' />
+              </button>
+            </Badge>
+          )}
+          {filters.specializations?.map((id) => (
+            <Badge
+              key={`spec-chip-${id}`}
+              className='shadow-neumorphic-sm bg-primary-100 text-primary-800 border border-primary-200/60'
+            >
+              {specializations.find((s) => s.id === id)?.name || id}
+              <button
+                aria-label='Remove specialization'
+                title='Remove'
+                className='ml-2 inline-flex items-center justify-center rounded-full hover:bg-primary-200/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 h-11 w-11'
+                onClick={() => handleSpecializationToggle(id)}
+              >
+                <XIcon className='h-3 w-3' weight='bold' />
+              </button>
+            </Badge>
+          ))}
+          {filters.languages?.map((id) => (
+            <Badge
+              key={`lang-chip-${id}`}
+              className='shadow-neumorphic-sm bg-accent-100 text-accent-900 border border-accent-200/60'
+            >
+              {languages.find((l) => l.id === id)?.name || id}
+              <button
+                aria-label='Remove language'
+                title='Remove'
+                className='ml-2 inline-flex items-center justify-center rounded-full hover:bg-accent-200/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-400 h-11 w-11'
+                onClick={() => handleLanguageToggle(id)}
+              >
+                <XIcon className='h-3 w-3' weight='bold' />
+              </button>
+            </Badge>
+          ))}
+          {filters.verified && (
+            <Badge className='shadow-neumorphic-sm bg-green-100 text-green-800 border border-green-200/60'>
+              Verified
+              <button
+                aria-label='Remove verified filter'
+                title='Remove'
+                className='ml-2 inline-flex items-center justify-center rounded-full hover:bg-green-200/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 h-11 w-11'
+                onClick={() => onFiltersChange({ ...filters, verified: undefined })}
+              >
+                <XIcon className='h-3 w-3' weight='bold' />
+              </button>
+            </Badge>
+          )}
+        </div>
+      )}
+
       {/* Advanced Filters */}
       {showAdvanced && (
-        <div className='space-y-4 pt-4 border-t border-neutral-200'>
+        <div id='advanced-filters' className='space-y-4 pt-4 border-t border-primary-200/50'>
           {/* Location Filters */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium text-neutral-700 mb-2'>State</label>
+              <label className='block text-sm font-medium text-neutral-700 mb-2' htmlFor='filter-state'>
+                State
+              </label>
               <Select
                 value={filters.location?.stateId?.toString() || ""}
                 onValueChange={(value) => handleLocationChange("stateId", value)}
               >
-                <SelectTrigger>
+                <SelectTrigger id='filter-state' className='shadow-neumorphic-inset focus:shadow-neumorphic-focus'>
                   <SelectValue placeholder='Select state' />
                 </SelectTrigger>
                 <SelectContent>
@@ -169,13 +278,15 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ filters, onFilters
             </div>
 
             <div>
-              <label className='block text-sm font-medium text-neutral-700 mb-2'>District</label>
+              <label className='block text-sm font-medium text-neutral-700 mb-2' htmlFor='filter-district'>
+                District
+              </label>
               <Select
                 value={filters.location?.districtId?.toString() || ""}
                 onValueChange={(value) => handleLocationChange("districtId", value)}
                 disabled={!filters.location?.stateId}
               >
-                <SelectTrigger>
+                <SelectTrigger id='filter-district' className='shadow-neumorphic-inset focus:shadow-neumorphic-focus'>
                   <SelectValue placeholder='Select district' />
                 </SelectTrigger>
                 <SelectContent>
@@ -193,7 +304,9 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ filters, onFilters
           {/* Sorting */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <label className='block text-sm font-medium text-neutral-700 mb-2'>Sort By</label>
+              <label className='block text-sm font-medium text-neutral-700 mb-2' htmlFor='filter-sort-by'>
+                Sort By
+              </label>
               <Select
                 value={filters.sortBy || ""}
                 onValueChange={(value) =>
@@ -203,8 +316,8 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ filters, onFilters
                   })
                 }
               >
-                <SelectTrigger>
-                  <SelectValue placeholder='Sort by relevance' />
+                <SelectTrigger id='filter-sort-by' className='shadow-neumorphic-inset focus:shadow-neumorphic-focus'>
+                  <SelectValue placeholder='Sort by' />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(CA_DISCOVERY_SORT_LABELS).map(([key, label]) => (
@@ -218,26 +331,34 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ filters, onFilters
 
             <div>
               <label className='block text-sm font-medium text-neutral-700 mb-2'>Order</label>
-              <Select
-                value={filters.sortOrder || ""}
-                onValueChange={(value) =>
-                  onFiltersChange({
-                    ...filters,
-                    sortOrder: (value as SortOrder) || undefined,
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder='Select order' />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(SORT_ORDER_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
+              <div className='flex gap-2'>
+                {Object.entries(SORT_ORDER_LABELS).map(([key, label]) => {
+                  const isActive = filters.sortOrder === (key as SortOrder);
+                  return (
+                    <button
+                      key={key}
+                      type='button'
+                      onClick={() =>
+                        onFiltersChange({
+                          ...filters,
+                          sortOrder: key as SortOrder,
+                        })
+                      }
+                      className={cn(
+                        "px-3 py-1.5 rounded-full border text-sm transition-all duration-200",
+                        "shadow-neumorphic-inset hover:shadow-neumorphic-md",
+                        isActive
+                          ? "bg-primary-100 text-primary-800 border-primary-300 ring-2 ring-primary-400"
+                          : "bg-white text-primary-700 border-primary-200"
+                      )}
+                      aria-pressed={isActive}
+                      aria-label={`Sort order: ${label}`}
+                    >
                       {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -252,7 +373,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ filters, onFilters
                     checked={filters.specializations?.includes(spec.id) || false}
                     onCheckedChange={() => handleSpecializationToggle(spec.id)}
                   />
-                  <label htmlFor={`spec-${spec.id}`} className='text-sm text-neutral-700 cursor-pointer'>
+                  <label htmlFor={`spec-${spec.id}`} className='text-sm text-primary-800 cursor-pointer'>
                     {spec.name}
                   </label>
                 </div>
@@ -271,7 +392,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({ filters, onFilters
                     checked={filters.languages?.includes(lang.id) || false}
                     onCheckedChange={() => handleLanguageToggle(lang.id)}
                   />
-                  <label htmlFor={`lang-${lang.id}`} className='text-sm text-neutral-700 cursor-pointer'>
+                  <label htmlFor={`lang-${lang.id}`} className='text-sm text-primary-800 cursor-pointer'>
                     {lang.name}
                   </label>
                 </div>

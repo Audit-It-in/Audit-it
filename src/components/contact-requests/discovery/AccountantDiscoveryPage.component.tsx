@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useInView } from "react-intersection-observer";
-import { MagnifyingGlassIcon, UsersIcon, WarningIcon } from "@phosphor-icons/react";
+import { MagnifyingGlassIcon, WarningIcon } from "@phosphor-icons/react";
 import { SearchFilters } from "./SearchFilters.component";
-import { AccountantProfileCard } from "./AccountantProfileCard.component";
 import { Loader, InlineLoader } from "@/src/components/common/Loader.component";
+import { DiscoveryGridSkeleton } from "@/src/components/contact-requests/skeletons/DiscoveryGridSkeleton.component";
 import { Card } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/helpers/tailwind.helper";
@@ -13,6 +12,11 @@ import { useInfiniteAccountants } from "@/src/services/accountant-discovery.serv
 import type { CADiscoveryFilters } from "@/src/types/contact-request.type";
 import type { ProfileDetails } from "@/src/types/profile.type";
 import { LoadingAction, SpinnerSize } from "@/src/types/ui.type";
+import { ResultsHeader } from "./ResultsHeader.component";
+import { AccountantGrid } from "./AccountantGrid.component";
+import { LoadMoreTrigger } from "./LoadMoreTrigger.component";
+import { FilterRail } from "./FilterRail.component";
+import { MobileFilterSheet } from "./MobileFilterSheet.component";
 
 interface AccountantDiscoveryPageProps {
   initialFilters?: CADiscoveryFilters;
@@ -32,18 +36,10 @@ export const AccountantDiscoveryPage: React.FC<AccountantDiscoveryPageProps> = (
   const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError, refetch } =
     useInfiniteAccountants(filters);
 
-  // Intersection observer for infinite scroll
-  const { ref: loadMoreRef, inView } = useInView({
-    threshold: 0.1,
-    rootMargin: "100px",
-  });
-
   // Auto-fetch next page when scrolling
   useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage && hasUserInteracted) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage, hasUserInteracted]);
+    // no-op here; handled inside LoadMoreTrigger component to throttle per viewport
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, hasUserInteracted]);
 
   // Mark user interaction on first filter change
   const handleFiltersChange = useCallback((newFilters: CADiscoveryFilters) => {
@@ -80,14 +76,9 @@ export const AccountantDiscoveryPage: React.FC<AccountantDiscoveryPageProps> = (
   // Loading state for initial load
   if (isLoading && !hasUserInteracted) {
     return (
-      <div className={cn("space-y-6", className)}>
+      <div className={cn("container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6", className)}>
         <SearchFilters filters={filters} onFiltersChange={handleFiltersChange} />
-        <Loader
-          action={LoadingAction.LOADING}
-          title='Loading Accountant Profiles'
-          subtitle='Finding qualified Chartered Accountants for you...'
-          fullScreen={false}
-        />
+        <DiscoveryGridSkeleton />
       </div>
     );
   }
@@ -121,92 +112,70 @@ export const AccountantDiscoveryPage: React.FC<AccountantDiscoveryPageProps> = (
   }
 
   return (
-    <div className={cn("space-y-6", className)}>
-      {/* Search and Filters */}
-      <SearchFilters filters={filters} onFiltersChange={handleFiltersChange} />
+    <div className={cn("container mx-auto px-4 sm:px-6 lg:px-8 py-6", className)}>
+      <div className='space-y-4'>
+        {/* Mobile Filter Sheet trigger */}
+        <MobileFilterSheet filters={filters} onFiltersChange={handleFiltersChange} />
 
-      {/* Results Header */}
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-2'>
-          <UsersIcon className='h-5 w-5 text-neutral-600' weight='bold' />
-          <span className='text-sm text-neutral-600'>
-            {isLoading ? "Searching..." : `${totalCount} Chartered Accountant${totalCount !== 1 ? "s" : ""} found`}
-          </span>
-        </div>
+        <div className='grid grid-cols-1 lg:grid-cols-[320px,1fr] gap-6'>
+          {/* Left filter rail (desktop) */}
+          <FilterRail filters={filters} onFiltersChange={handleFiltersChange} />
 
-        {/* Quick filter indicators */}
-        {(filters.location?.stateId || filters.specializations?.length || filters.searchQuery) && (
-          <div className='flex items-center gap-2 text-xs text-neutral-500'>
-            <span>Filtered results</span>
-            {filters.searchQuery && (
-              <span className='bg-primary-100 text-primary-700 px-2 py-1 rounded'>{`"${filters.searchQuery}"`}</span>
-            )}
-          </div>
-        )}
-      </div>
+          {/* Right content */}
+          <div className='space-y-6'>
+            <ResultsHeader totalCount={totalCount} filters={filters} />
 
-      {/* Results Grid */}
-      {allAccountants.length > 0 ? (
-        <div className='space-y-4'>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {allAccountants.map((profile, index) => (
-              <AccountantProfileCard
-                key={`${profile.id}-${index}`}
-                profile={profile}
-                onContactClick={handleContactAccountant}
-                className='h-full'
-              />
-            ))}
-          </div>
+            {allAccountants.length > 0 ? (
+              <div className='space-y-4'>
+                <AccountantGrid profiles={allAccountants} onContactClick={handleContactAccountant} />
 
-          {/* Load More Trigger */}
-          {hasNextPage && (
-            <div ref={loadMoreRef} className='flex justify-center py-8'>
-              {isFetchingNextPage ? (
-                <div className='flex items-center gap-2 text-neutral-600'>
-                  <InlineLoader action={LoadingAction.LOADING} size={SpinnerSize.SMALL} />
-                  <span className='text-sm'>Loading more accountants...</span>
+                <LoadMoreTrigger
+                  hasNextPage={hasNextPage}
+                  isFetchingNextPage={isFetchingNextPage}
+                  onLoadMore={() => hasUserInteracted && fetchNextPage()}
+                  rootMargin='160px'
+                />
+
+                {!hasNextPage && allAccountants.length > 0 && (
+                  <div className='text-center py-8 text-neutral-500 text-sm'>
+                    You&apos;ve seen all available accountant profiles
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Card
+                variant='subtle'
+                className='text-center py-16 shadow-neumorphic-md border border-primary-200/50 bg-gradient-to-br from-white to-primary-50/20'
+              >
+                <div className='space-y-4'>
+                  <div className='flex justify-center'>
+                    <MagnifyingGlassIcon className='h-16 w-16 text-neutral-400' weight='bold' />
+                  </div>
+
+                  <div className='space-y-2'>
+                    <h3 className='text-xl font-semibold text-primary-900'>No Accountants Found</h3>
+                    <p className='text-primary-700/80 max-w-md mx-auto'>
+                      {filters.searchQuery || filters.location?.stateId || filters.specializations?.length
+                        ? "No Chartered Accountants match your current filters. Adjust your filters or clear them to see more results."
+                        : "No Chartered Accountants are currently available. Please check back later."}
+                    </p>
+                  </div>
+
+                  {(filters.searchQuery || filters.location?.stateId || filters.specializations?.length) && (
+                    <Button
+                      variant='outline'
+                      onClick={() => handleFiltersChange({})}
+                      className='gap-2 shadow-neumorphic-sm hover:shadow-neumorphic-md'
+                    >
+                      Clear All Filters
+                    </Button>
+                  )}
                 </div>
-              ) : (
-                <Button variant='outline' onClick={() => fetchNextPage()} className='gap-2'>
-                  Load More Accountants
-                </Button>
-              )}
-            </div>
-          )}
-
-          {/* End of Results */}
-          {!hasNextPage && allAccountants.length > 0 && (
-            <div className='text-center py-8 text-neutral-500 text-sm'>
-              You&apos;ve seen all available accountant profiles
-            </div>
-          )}
-        </div>
-      ) : (
-        // Empty State
-        <Card variant='subtle' className='text-center py-16'>
-          <div className='space-y-4'>
-            <div className='flex justify-center'>
-              <MagnifyingGlassIcon className='h-16 w-16 text-neutral-400' weight='bold' />
-            </div>
-
-            <div className='space-y-2'>
-              <h3 className='text-xl font-semibold text-neutral-900'>No Accountants Found</h3>
-              <p className='text-neutral-600 max-w-md mx-auto'>
-                {filters.searchQuery || filters.location?.stateId || filters.specializations?.length
-                  ? "No Chartered Accountants match your current search criteria. Try adjusting your filters or search terms."
-                  : "No Chartered Accountants are currently available. Please check back later."}
-              </p>
-            </div>
-
-            {(filters.searchQuery || filters.location?.stateId || filters.specializations?.length) && (
-              <Button variant='outline' onClick={() => handleFiltersChange({})} className='gap-2'>
-                Clear All Filters
-              </Button>
+              </Card>
             )}
           </div>
-        </Card>
-      )}
+        </div>
+      </div>
     </div>
   );
 };

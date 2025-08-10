@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { QueryProvider } from "@/src/providers/QueryProvider";
+import { Header } from "@/src/components/layout/Header.component";
+import { Footer } from "@/src/components/layout/Footer.component";
 import { APP_CONFIG } from "@/src/constants/app.constants";
 
 export const metadata: Metadata = {
@@ -35,7 +37,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang='en' suppressHydrationWarning>
       <body className='min-h-screen bg-background font-sans antialiased'>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <div className='flex min-h-screen flex-col'>
+            <Header />
+            <main role='main' className='flex-1'>
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </QueryProvider>
       </body>
     </html>
   );

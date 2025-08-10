@@ -20,8 +20,6 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <div className='min-h-screen bg-white'>
-      <Header />
-
       <main>
         {/* Hero Section */}
         <section className='relative bg-primary-900 overflow-hidden'>
@@ -191,8 +189,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }
