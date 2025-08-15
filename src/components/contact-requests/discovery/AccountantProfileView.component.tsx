@@ -8,18 +8,18 @@ import { useProfilePictureUrl } from "@/src/services/upload.service";
 import Link from "next/link";
 import { cn } from "@/src/helpers/tailwind.helper";
 import { useAccountantProfile } from "@/src/services/accountant-discovery.service";
-import { useExperiences, useEducations, useVerification } from "@/src/services/profile.service";
+import { useExperiences, useVerification } from "@/src/services/profile.service";
 import { useAuth } from "@/src/hooks/useAuth";
 import type { ProfileDetails } from "@/src/types/profile.type";
 import { LoadingAction } from "@/src/types/ui.type";
 import { ContactRequestModal } from "@/src/components/contact-requests/ContactRequestModal.component";
 import { ProfileNav } from "./profile/ProfileNav.component";
 import { ProfileHeader } from "./profile/ProfileHeader.component";
-import { ProfileHighlights } from "./profile/ProfileHighlights.component";
-import { ExperienceList } from "./profile/ExperienceList.component";
-import { EducationList } from "./profile/EducationList.component";
+
 import { SidebarDetails } from "./profile/SidebarDetails.component";
 import { ProfileCTA } from "./profile/ProfileCTA.component";
+import { ProfessionalAuditTrail } from "./profile/ProfessionalAuditTrail.component";
+import { ProfileNotFound } from "./profile/ProfileNotFound.component";
 
 interface AccountantProfileViewProps {
   state: string;
@@ -42,7 +42,7 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
   // Fetch accountant profile data
   const { data: profile, isLoading, error } = useAccountantProfile(state, district, username);
   const { data: experiences = [] } = useExperiences(profile?.id);
-  const { data: educations = [] } = useEducations(profile?.id);
+
   const { data: verification } = useVerification(profile?.id);
 
   // Prepare hooks/derived state that must be called consistently across renders
@@ -71,40 +71,7 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
   }
 
   if (error || !profile) {
-    return (
-      <div className={cn("space-y-6", className)}>
-        {/* Breadcrumb Navigation */}
-        <nav className='flex items-center space-x-2 text-sm text-neutral-600 mb-4'>
-          <Link href='/accountants' className='hover:text-primary-600 transition-colors'>
-            Find CAs
-          </Link>
-          <span>/</span>
-          <span className='capitalize'>{state.replace("-", " ")}</span>
-          <span>/</span>
-          <span className='capitalize'>{district.replace("-", " ")}</span>
-          <span>/</span>
-          <span className='text-neutral-900 font-medium'>{username}</span>
-        </nav>
-
-        <Card variant='subtle' className='text-center py-16'>
-          <div className='space-y-4'>
-            <h3 className='text-xl font-semibold text-neutral-900'>Chartered Accountant Profile Not Found</h3>
-            <p className='text-neutral-600 max-w-md mx-auto'>
-              The requested Chartered Accountant profile could not be found. It may have been removed or the URL is
-              incorrect.
-            </p>
-            <div className='flex gap-3 justify-center'>
-              <Button variant='outline' onClick={() => window.history.back()}>
-                Go Back
-              </Button>
-              <Button asChild>
-                <Link href='/accountants'>Browse All CAs</Link>
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
+    return <ProfileNotFound state={state} district={district} username={username} className={className} />;
   }
 
   const fullName = `${profile.first_name || ""} ${profile.last_name || ""}`.trim();
@@ -191,32 +158,13 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         <div className='lg:col-span-2 space-y-6'>
-          <Card className='shadow-neumorphic-md border border-primary-100 bg-white'>
-            <div className='p-6 space-y-6'>
-              <div className='flex items-center gap-3'>
-                <div className='w-2 h-8 bg-primary-500 rounded-full shadow-neumorphic-sm'></div>
-                <h2 className='text-2xl font-bold text-primary-900'>Professional Summary</h2>
-              </div>
-              <div className='p-4 rounded-xl shadow-neumorphic-inset bg-neutral-50 border border-primary-100'>
-                {profile.bio ? (
-                  <p className='text-primary-800 leading-relaxed font-medium'>{profile.bio}</p>
-                ) : (
-                  <p className='text-primary-700 italic font-medium'>
-                    {fullName} is a verified Chartered Accountant providing professional services in {location}.
-                  </p>
-                )}
-              </div>
-              <ProfileHighlights
-                numExperiences={experiences.length}
-                numSpecializations={profile.specialization_names?.length || 0}
-                isVerified={isVerified}
-                hasWhatsapp={Boolean(profile.whatsapp_available)}
-              />
-            </div>
-          </Card>
-
-          <ExperienceList experiences={experiences} />
-          <EducationList educations={educations} />
+          <ProfessionalAuditTrail
+            fullName={fullName}
+            location={location}
+            bio={profile.bio}
+            experiences={experiences}
+            isVerified={isVerified}
+          />
         </div>
 
         <SidebarDetails

@@ -32,21 +32,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   const displaySpecializations = specializations.slice(0, 5);
 
   return (
-    <Card
-      className={cn(
-        "relative overflow-hidden transition-all duration-500 neumorphic-optimized",
-        // Enhanced neumorphic shadows with deeper effect
-        "shadow-neumorphic-xl hover:shadow-neumorphic-primary-xl",
-        "border-2 border-primary-100/60 bg-gradient-to-br from-neutral-50 via-white to-primary-50/40",
-        // Enhanced hover effects
-        "hover:bg-gradient-to-br hover:from-primary-50/30 hover:via-white hover:to-accent-50/20",
-        "hover:border-primary-200/80 transition-all duration-500",
-        // Enhanced padding and rounded corners
-        "p-6 rounded-2xl",
-        // Subtle inner glow effect
-        "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/60 before:via-transparent before:to-primary-100/20 before:opacity-50"
-      )}
-    >
+    <Card variant='enhanced' size='default'>
       <div className='flex gap-6'>
         {/* Left Side: Profile Picture + Name + Location - Equal Width */}
         <div className='flex-1 flex gap-3 items-start'>
