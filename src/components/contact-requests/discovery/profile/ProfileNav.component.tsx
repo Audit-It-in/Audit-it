@@ -14,35 +14,40 @@ interface ProfileNavProps {
 
 export const ProfileNav: React.FC<ProfileNavProps> = ({ fullName, onBack, onShare }) => {
   return (
-    <div className='flex items-center justify-between mb-6'>
-      <nav className='flex items-center space-x-3 p-3 rounded-full shadow-neumorphic-inset bg-neutral-50 border border-primary-100'>
+    <div className='flex items-center justify-between mb-4'>
+      <nav className='flex items-center space-x-2 p-2 rounded-lg shadow-neumorphic-inset bg-neutral-50/80 border border-primary-100/50'>
         <button
           onClick={onBack}
           className={cn(
-            "flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200",
+            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-200",
             "shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset",
-            "bg-white text-primary-700 hover:text-primary-800 font-medium"
+            "bg-white/80 text-primary-600 hover:text-primary-700 text-sm font-medium"
           )}
           aria-label='Go back'
         >
-          <ArrowLeftIcon className='h-4 w-4' weight='bold' />
+          <ArrowLeftIcon className='h-3.5 w-3.5' weight='bold' />
           Back
         </button>
-        <div className='w-1 h-1 bg-primary-400 rounded-full' />
-        <Link href='/accountants' className='text-primary-600 hover:text-primary-700 font-medium transition-colors'>
+        <div className='w-0.5 h-0.5 bg-primary-300 rounded-full' />
+        <Link
+          href='/accountants'
+          className='text-primary-500 hover:text-primary-600 text-sm font-medium transition-colors'
+        >
           Find CAs
         </Link>
-        <div className='w-1 h-1 bg-primary-400 rounded-full' />
-        <span className='text-primary-800 font-bold capitalize truncate max-w-[40vw]'>{fullName}</span>
+        <div className='w-0.5 h-0.5 bg-primary-300 rounded-full' />
+        <span className='text-primary-700 font-semibold text-sm capitalize truncate max-w-[40vw]'>{fullName}</span>
       </nav>
 
       <Button
         onClick={onShare}
+        size='sm'
         className={cn(
-          "gap-2 shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset bg-accent-600 hover:bg-accent-700 text-white border-0 transition-all duration-200"
+          "gap-1.5 px-3 py-2 text-xs shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset",
+          "bg-accent-600 hover:bg-accent-700 text-white border-0 transition-all duration-200 rounded-lg"
         )}
       >
-        <ShareIcon className='h-4 w-4' weight='bold' />
+        <ShareIcon className='h-3.5 w-3.5' weight='bold' />
         Share Profile
       </Button>
     </div>

@@ -111,9 +111,6 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
 
   // Mock data for features not yet implemented
   const isVerified = !!verification?.verified_at;
-  const rating = 4.5;
-  const responseTime = "2 hours";
-  const totalReviews = 23;
 
   const handleContactClick = () => {
     if (!isAuthenticated) {
@@ -187,12 +184,8 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
         initials={initials}
         avatarUrl={avatarUrl}
         isVerified={isVerified}
-        rating={rating}
-        totalReviews={totalReviews}
-        responseTime={responseTime}
+        specializations={profile?.specialization_names || []}
         onPrimaryCTA={handleContactClick}
-        secondaryPhone={profile.phone}
-        secondaryEmail={profile.email}
         isAuthenticated={isAuthenticated}
       />
 

@@ -314,52 +314,185 @@ interface Verification {
 2. **Accessibility**: Fine-tune neumorphic elements for accessibility compliance
 3. **Cross-browser**: Ensure consistent neumorphic rendering across browsers
 
-## Design Tokens
+## Enhanced Design Tokens
 
-### Enhanced Neumorphic Shadows
+### Deep Neumorphic Shadow System
 
 ```css
-/* Primary brand-colored shadows */
-.shadow-neumorphic-primary: 4px 4px 12px rgba(37, 99, 235, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.8)
-.shadow-neumorphic-primary-lg: 6px 6px 16px rgba(37, 99, 235, 0.12), -6px -6px 16px rgba(255, 255, 255, 0.9)
+/* Enhanced primary brand-colored shadows with deeper effects */
+.shadow-neumorphic-primary-xl: 8px 8px 20px rgba(37, 99, 235, 0.15), -8px -8px 20px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(37, 99, 235, 0.1)
+.shadow-neumorphic-primary-lg: 6px 6px 16px rgba(37, 99, 235, 0.12), -6px -6px 16px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(37, 99, 235, 0.08)
+.shadow-neumorphic-primary: 4px 4px 12px rgba(37, 99, 235, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.8), inset 0 0 0 1px rgba(37, 99, 235, 0.05)
 
-/* Accent emerald shadows */
-.shadow-neumorphic-accent: 4px 4px 12px rgba(16, 185, 129, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.8)
+/* Enhanced accent emerald shadows */
+.shadow-neumorphic-accent-xl: 8px 8px 20px rgba(16, 185, 129, 0.15), -8px -8px 20px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(16, 185, 129, 0.1)
+.shadow-neumorphic-accent-lg: 6px 6px 16px rgba(16, 185, 129, 0.12), -6px -6px 16px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(16, 185, 129, 0.08)
+.shadow-neumorphic-accent: 4px 4px 12px rgba(16, 185, 129, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.8), inset 0 0 0 1px rgba(16, 185, 129, 0.05)
 
-/* Interactive state shadows */
-.shadow-neumorphic-focus: 0 0 0 3px rgba(37, 99, 235, 0.2), 4px 4px 12px rgba(0, 0, 0, 0.08)
-.shadow-neumorphic-hover: 6px 6px 16px rgba(0, 0, 0, 0.12), -6px -6px 16px rgba(255, 255, 255, 0.9)
+/* Deep inset effects for pressed states */
+.shadow-neumorphic-inset-deep: inset 6px 6px 16px rgba(0, 0, 0, 0.15), inset -3px -3px 10px rgba(255, 255, 255, 0.8)
+.shadow-neumorphic-inset-primary: inset 4px 4px 12px rgba(37, 99, 235, 0.1), inset -2px -2px 8px rgba(255, 255, 255, 0.7), 0 0 0 1px rgba(37, 99, 235, 0.1)
+.shadow-neumorphic-inset-accent: inset 4px 4px 12px rgba(16, 185, 129, 0.1), inset -2px -2px 8px rgba(255, 255, 255, 0.7), 0 0 0 1px rgba(16, 185, 129, 0.1)
+
+/* Enhanced interactive state shadows */
+.shadow-neumorphic-focus: 4px 4px 12px rgba(0, 0, 0, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.8), 0 0 0 3px rgba(37, 99, 235, 0.2)
+.shadow-neumorphic-focus-accent: 4px 4px 12px rgba(0, 0, 0, 0.08), -4px -4px 12px rgba(255, 255, 255, 0.8), 0 0 0 3px rgba(16, 185, 129, 0.2)
 ```
 
-### Brand Color Integration
+### Enhanced Brand Color Integration
 
 ```css
-/* Primary blue spectrum for neumorphic elements */
---primary-neumorphic-bg: #eff6ff;
---primary-neumorphic-border: #bfdbfe;
---primary-neumorphic-accent: #2563eb;
+/* Multi-layer gradient backgrounds for depth */
+--primary-neumorphic-gradient: linear-gradient(135deg, #ffffff 0%, #eff6ff 50%, #dbeafe 100%);
+--primary-neumorphic-gradient-hover: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%);
+--accent-neumorphic-gradient: linear-gradient(135deg, #ffffff 0%, #ecfdf5 50%, #d1fae5 100%);
+--accent-neumorphic-gradient-hover: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
 
-/* Accent emerald for success states */
---accent-neumorphic-bg: #ecfdf5;
---accent-neumorphic-border: #a7f3d0;
---accent-neumorphic-accent: #10b981;
+/* Enhanced border system with opacity variations */
+--primary-neumorphic-border-light: rgba(191, 219, 254, 0.3);
+--primary-neumorphic-border-medium: rgba(191, 219, 254, 0.6);
+--primary-neumorphic-border-strong: rgba(147, 197, 253, 0.8);
+
+--accent-neumorphic-border-light: rgba(167, 243, 208, 0.3);
+--accent-neumorphic-border-medium: rgba(167, 243, 208, 0.6);
+--accent-neumorphic-border-strong: rgba(110, 231, 183, 0.8);
+
+/* Pseudo-element effects for inner glow */
+--inner-glow-primary: linear-gradient(
+  135deg,
+  rgba(255, 255, 255, 0.6) 0%,
+  transparent 50%,
+  rgba(37, 99, 235, 0.1) 100%
+);
+--inner-glow-accent: linear-gradient(
+  135deg,
+  rgba(255, 255, 255, 0.6) 0%,
+  transparent 50%,
+  rgba(16, 185, 129, 0.1) 100%
+);
 ```
 
-### Responsive Breakpoints
+### Enhanced Responsive Neumorphic System
 
 ```css
-/* Neumorphic shadow adjustments by screen size */
-@media (max-width: 768px) {
-  .shadow-neumorphic-md {
-    /* Reduced intensity for mobile */
+/* Mobile-optimized neumorphic effects (320px - 767px) */
+@media (max-width: 767px) {
+  .shadow-neumorphic-mobile-lg: 3px 3px 12px rgba(0, 0, 0, 0.08), -3px -3px 12px rgba(255, 255, 255, 0.8);
+  .shadow-neumorphic-mobile-primary: 2px 2px 8px rgba(37, 99, 235, 0.06), -2px -2px 8px rgba(255, 255, 255, 0.7);
+
+  /* Enhanced touch targets with stronger feedback */
+  .touch-target-enhanced {
+    min-height: 44px;
+    min-width: 44px;
+    transform: scale(1);
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+  }
+
+  .touch-target-enhanced:active {
+    transform: scale(0.95);
+    box-shadow: inset 4px 4px 12px rgba(0, 0, 0, 0.2);
   }
 }
 
+/* Tablet-optimized neumorphic effects (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .shadow-neumorphic-tablet-xl: 6px 6px 18px rgba(0, 0, 0, 0.12), -6px -6px 18px rgba(255, 255, 255, 0.9);
+  .shadow-neumorphic-tablet-primary: 4px 4px 14px rgba(37, 99, 235, 0.1), -4px -4px 14px rgba(255, 255, 255, 0.85);
+}
+
+/* Desktop-enhanced neumorphic effects (1024px+) */
 @media (min-width: 1024px) {
-  .shadow-neumorphic-xl {
-    /* Enhanced depth for desktop */
+  .shadow-neumorphic-desktop-xl: 10px 10px 24px rgba(0, 0, 0, 0.18), -10px -10px 24px rgba(255, 255, 255, 0.98);
+  .shadow-neumorphic-desktop-primary: 8px 8px 20px rgba(37, 99, 235, 0.15), -8px -8px 20px rgba(255, 255, 255, 0.95);
+
+  /* Enhanced hover effects for desktop */
+  .desktop-hover-enhanced:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 12px 12px 28px rgba(0, 0, 0, 0.2), -12px -12px 28px rgba(255, 255, 255, 1);
   }
 }
+
+/* Hardware acceleration for smooth neumorphic animations */
+.neumorphic-optimized {
+  transform: translate3d(0, 0, 0);
+  will-change: box-shadow, transform;
+  backface-visibility: hidden;
+}
+
+/* Enhanced transition system */
+.transition-neumorphic-smooth {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-neumorphic-bounce {
+  transition: all 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
 ```
+
+## Enhanced Neumorphic Design Patterns
+
+### Established Component Patterns
+
+Based on the ProfileHeader implementation, the following enhanced neumorphic patterns should be consistently applied across all components:
+
+#### Container Pattern
+
+```typescript
+<Card className={cn(
+  "relative overflow-hidden transition-all duration-500 neumorphic-optimized",
+  "shadow-neumorphic-xl hover:shadow-neumorphic-primary-xl",
+  "border-2 border-primary-100/60 bg-gradient-to-br from-neutral-50 via-white to-primary-50/40",
+  "hover:bg-gradient-to-br hover:from-primary-50/30 hover:via-white hover:to-accent-50/20",
+  "hover:border-primary-200/80 transition-all duration-500",
+  "p-6 rounded-2xl",
+  "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/60 before:via-transparent before:to-primary-100/20 before:opacity-50"
+)}>
+```
+
+#### Interactive Element Pattern
+
+```typescript
+<div className={cn(
+  "px-4 py-3 rounded-xl text-xs font-semibold transition-all duration-300 cursor-default",
+  "shadow-neumorphic-md hover:shadow-neumorphic-lg active:shadow-neumorphic-inset",
+  "border-2 hover:border-opacity-80 transform hover:scale-110 active:scale-95",
+  "bg-gradient-to-br from-primary-50 via-primary-100/80 to-primary-200/60",
+  "border-primary-200/60 text-primary-800 hover:from-primary-100 hover:to-primary-200"
+)}>
+```
+
+#### Avatar/Profile Picture Pattern
+
+```typescript
+<div className='relative flex-shrink-0 group'>
+  <div className='p-2 rounded-full shadow-neumorphic-inset-deep bg-gradient-to-br from-primary-50/80 via-white to-primary-100/60 border border-primary-200/40'>
+    <div className='p-1 rounded-full shadow-neumorphic-lg bg-gradient-to-br from-white to-primary-50/30'>
+      <Avatar className='h-34 w-34 shadow-neumorphic-primary-lg border-3 border-white/80 transition-all duration-300 group-hover:shadow-neumorphic-accent-lg'>
+```
+
+#### Button Pattern
+
+```typescript
+<Button className={cn(
+  "px-8 py-4 text-sm font-bold relative overflow-hidden group",
+  "bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800",
+  "hover:from-primary-700 hover:via-primary-800 hover:to-primary-900",
+  "text-white shadow-neumorphic-primary-xl hover:shadow-neumorphic-primary-xl",
+  "transform hover:scale-110 active:scale-95 transition-all duration-300",
+  "rounded-2xl border-2 border-primary-500/50 hover:border-primary-400/60",
+  "before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/20 before:via-transparent before:to-white/10 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300"
+)}>
+```
+
+### Design Consistency Rules
+
+1. **Shadow Hierarchy**: Use `shadow-neumorphic-xl` for main containers, `shadow-neumorphic-lg` for sections, `shadow-neumorphic-md` for cards
+2. **Border Enhancement**: Always use `border-2` or `border-3` with opacity variations for stronger definition
+3. **Gradient Backgrounds**: Implement 3-stop gradients (`from-X via-Y to-Z`) for rich visual depth
+4. **Rounded Corners**: Prefer `rounded-xl` and `rounded-2xl` for softer, more organic appearance
+5. **Interactive Scaling**: Use `hover:scale-110` and `active:scale-95` for dramatic feedback
+6. **Transition Duration**: Use `duration-300` for interactions, `duration-500` for container changes
+7. **Pseudo-elements**: Implement `before:` and `after:` elements for inner glow and depth effects
+8. **Hardware Acceleration**: Apply `neumorphic-optimized` class for smooth performance
 
 This design document provides a comprehensive blueprint for transforming the accountant profile page into a sophisticated neumorphic experience while maintaining all existing functionality and data structures.

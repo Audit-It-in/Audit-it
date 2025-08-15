@@ -1,15 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  MapPinIcon,
-  StarIcon,
-  ClockIcon,
-  CheckCircleIcon,
-  ChatCircleIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-} from "@phosphor-icons/react";
+import { MapPinIcon, CheckCircleIcon, ChatCircleIcon } from "@phosphor-icons/react";
 import { Card } from "@/src/components/ui/card";
 import { Button } from "@/src/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
@@ -21,12 +13,8 @@ interface ProfileHeaderProps {
   initials: string;
   avatarUrl?: string | null;
   isVerified?: boolean;
-  rating?: number;
-  totalReviews?: number;
-  responseTime?: string;
+  specializations?: string[];
   onPrimaryCTA: () => void;
-  secondaryPhone?: string | null;
-  secondaryEmail?: string | null;
   isAuthenticated: boolean;
 }
 
@@ -36,115 +24,157 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   initials,
   avatarUrl,
   isVerified,
-  rating = 4.5,
-  totalReviews = 0,
-  responseTime = "",
+  specializations = [],
   onPrimaryCTA,
-  secondaryPhone,
-  secondaryEmail,
   isAuthenticated,
 }) => {
+  // Get first 5 specializations for display (3 in first row, 2 in second row)
+  const displaySpecializations = specializations.slice(0, 5);
+
   return (
-    <Card className={cn("relative overflow-hidden shadow-neumorphic-lg border border-primary-100 bg-white")}>
-      <div className='relative p-8 space-y-8'>
-        <div className='flex flex-col lg:flex-row gap-8'>
-          <div className='flex-shrink-0'>
-            <div className='relative'>
-              <div className='p-2 rounded-full shadow-neumorphic-inset bg-white'>
-                <Avatar className='h-32 w-32 shadow-neumorphic-md border-2 border-white/50'>
+    <Card
+      className={cn(
+        "relative overflow-hidden transition-all duration-500 neumorphic-optimized",
+        // Enhanced neumorphic shadows with deeper effect
+        "shadow-neumorphic-xl hover:shadow-neumorphic-primary-xl",
+        "border-2 border-primary-100/60 bg-gradient-to-br from-neutral-50 via-white to-primary-50/40",
+        // Enhanced hover effects
+        "hover:bg-gradient-to-br hover:from-primary-50/30 hover:via-white hover:to-accent-50/20",
+        "hover:border-primary-200/80 transition-all duration-500",
+        // Enhanced padding and rounded corners
+        "p-6 rounded-2xl",
+        // Subtle inner glow effect
+        "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/60 before:via-transparent before:to-primary-100/20 before:opacity-50"
+      )}
+    >
+      <div className='flex gap-6'>
+        {/* Left Side: Profile Picture + Name + Location - Equal Width */}
+        <div className='flex-1 flex gap-3 items-start'>
+          {/* Enhanced Profile Picture with deeper neumorphic effect */}
+          <div className='relative flex-shrink-0 group'>
+            {/* Outer neumorphic frame with enhanced depth */}
+            <div className='p-2 rounded-full shadow-neumorphic-inset-deep bg-gradient-to-br from-primary-50/80 via-white to-primary-100/60 border border-primary-200/40'>
+              {/* Inner neumorphic frame */}
+              <div className='p-1 rounded-full shadow-neumorphic-lg bg-gradient-to-br from-white to-primary-50/30'>
+                <Avatar className='h-34 w-34 shadow-neumorphic-primary-lg border-3 border-white/80 transition-all duration-300 group-hover:shadow-neumorphic-accent-lg'>
                   <AvatarImage src={avatarUrl || undefined} alt={fullName} className='object-cover' />
-                  <AvatarFallback className='bg-primary-200 text-primary-800 font-bold text-3xl'>
+                  <AvatarFallback className='bg-gradient-to-br from-primary-200 via-primary-300 to-primary-400 text-primary-900 font-bold text-lg shadow-inner'>
                     {initials}
                   </AvatarFallback>
                 </Avatar>
               </div>
-              {isVerified && (
-                <div className='absolute -bottom-2 -right-2 rounded-full shadow-neumorphic-md bg-accent-600 ring-4 ring-white p-1'>
-                  <CheckCircleIcon className='h-6 w-6 text-white' weight='fill' />
-                </div>
-              )}
             </div>
+            {isVerified && (
+              <div className='absolute -bottom-2 -right-2 rounded-full shadow-neumorphic-accent-xl bg-gradient-to-br from-accent-500 to-accent-700 ring-4 ring-white p-1.5 transform hover:scale-110 transition-all duration-300'>
+                <CheckCircleIcon className='h-4 w-4 text-white drop-shadow-sm' weight='fill' />
+              </div>
+            )}
           </div>
 
-          <div className='flex-1 space-y-6'>
-            <div className='space-y-4'>
-              <h1 className='text-4xl font-bold text-primary-900 leading-tight'>{fullName}</h1>
-              {location && (
-                <div className='flex items-center gap-3 p-3 rounded-full shadow-neumorphic-inset bg-neutral-50 border border-primary-100 w-fit'>
-                  <div className='p-2 rounded-full shadow-neumorphic-sm bg-white'>
-                    <MapPinIcon className='h-10 w-10 text-primary-600' weight='bold' />
+          {/* Name and Location beside profile picture */}
+          <div className='space-y-2 flex-1'>
+            <h1 className='text-lg font-bold text-primary-900 leading-tight'>{fullName}</h1>
+            {location && (
+              <div className='space-y-2'>
+                <div className='flex items-center gap-2 px-4 py-2 rounded-xl shadow-neumorphic-inset-primary bg-gradient-to-r from-primary-50/80 to-primary-100/60 border border-primary-200/50 w-fit hover:shadow-neumorphic-primary transition-all duration-300'>
+                  <div className='p-1 rounded-full shadow-neumorphic-sm bg-white/80'>
+                    <MapPinIcon className='h-3 w-3 text-primary-600' weight='bold' />
                   </div>
-                  <span className='text-lg font-bold text-primary-800'>{location}</span>
+                  <span className='text-xs font-semibold text-primary-800'>{location.split(", ")[0]}</span>
                 </div>
-              )}
-
-              <div className='flex flex-wrap gap-4'>
-                <div className='flex items-center gap-3 p-3 rounded-full shadow-neumorphic-inset bg-yellow-50 border border-yellow-200/50'>
-                  <div className='flex items-center gap-1'>
-                    {[...Array(5)].map((_, i) => (
-                      <StarIcon
-                        key={i}
-                        className={cn("h-4 w-4", i < Math.floor(rating) ? "text-yellow-600" : "text-yellow-300")}
-                        weight='fill'
-                      />
-                    ))}
-                  </div>
-                  <span className='font-bold text-yellow-800'>{rating}</span>
-                  <span className='text-yellow-700 font-medium'>({totalReviews} reviews)</span>
-                </div>
-                {responseTime && (
-                  <div className='flex items-center gap-3 p-3 rounded-full shadow-neumorphic-inset bg-accent-50 border border-accent-200/50'>
-                    <div className='p-1 rounded-full shadow-neumorphic-sm bg-white'>
-                      <ClockIcon className='h-4 w-4 text-accent-600' weight='bold' />
-                    </div>
-                    <span className='font-bold text-accent-800'>Responds in {responseTime}</span>
+                {location.includes(", ") && (
+                  <div className='flex items-center gap-2 px-4 py-2 rounded-xl shadow-neumorphic-inset bg-gradient-to-r from-neutral-50 to-neutral-100/60 border border-neutral-200/50 w-fit ml-6 hover:shadow-neumorphic-md transition-all duration-300'>
+                    <span className='text-xs font-semibold text-neutral-700'>{location.split(", ")[1]}</span>
                   </div>
                 )}
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
-            <div className='flex flex-wrap gap-4'>
-              <Button
-                size='lg'
-                onClick={onPrimaryCTA}
-                variant='primary'
-                className={cn(
-                  "gap-3 px-8 py-4 shadow-neumorphic-md hover:shadow-neumorphic-lg active:shadow-neumorphic-sm",
-                  "text-white border-0 transition-all duration-300 font-bold text-lg"
-                )}
-              >
-                <ChatCircleIcon className='h-6 w-6' weight='bold' />
-                {!isAuthenticated ? "Sign In to Contact" : "Contact Accountant"}
-              </Button>
+        {/* Right Side: Specializations + Contact Button - Equal Width */}
+        <div className='flex-1 space-y-3'>
+          {/* Specializations Heading */}
+          <h3 className='text-sm font-semibold text-primary-700 uppercase tracking-wide text-center'>
+            Specializations
+          </h3>
 
-              {secondaryPhone && (
-                <Button
-                  size='lg'
-                  className={cn(
-                    "gap-3 px-6 py-4 shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset",
-                    "bg-white text-primary-700 hover:text-primary-800 border border-primary-200/50",
-                    "transition-all duration-300 font-bold"
+          {/* Specializations Grid: 3 in first row, 2 in second row */}
+          {displaySpecializations.length > 0 && (
+            <div className='space-y-2'>
+              {/* First Row - 3 specializations */}
+              <div className='flex gap-2 justify-center'>
+                {displaySpecializations.slice(0, 3).map((specialization, index) => (
+                  <div
+                    key={index}
+                    className={cn(
+                      "px-4 py-3 rounded-xl text-xs font-semibold transition-all duration-300 cursor-default",
+                      "shadow-neumorphic-md hover:shadow-neumorphic-lg active:shadow-neumorphic-inset",
+                      "border-2 hover:border-opacity-80 transform hover:scale-110 active:scale-95",
+                      // Enhanced color variations with deeper neumorphic effects
+                      index % 3 === 0
+                        ? "bg-gradient-to-br from-primary-50 via-primary-100/80 to-primary-200/60 border-primary-200/60 text-primary-800 hover:from-primary-100 hover:to-primary-200"
+                        : index % 3 === 1
+                        ? "bg-gradient-to-br from-accent-50 via-accent-100/80 to-accent-200/60 border-accent-200/60 text-accent-800 hover:from-accent-100 hover:to-accent-200"
+                        : "bg-gradient-to-br from-neutral-50 via-neutral-100/80 to-neutral-200/60 border-neutral-200/60 text-neutral-800 hover:from-neutral-100 hover:to-neutral-200"
+                    )}
+                  >
+                    {specialization}
+                  </div>
+                ))}
+              </div>
+
+              {/* Second Row - 2 specializations */}
+              {displaySpecializations.length > 3 && (
+                <div className='flex gap-2 justify-center'>
+                  {displaySpecializations.slice(3, 5).map((specialization, index) => (
+                    <div
+                      key={index + 3}
+                      className={cn(
+                        "px-4 py-3 rounded-xl text-xs font-semibold transition-all duration-300 cursor-default",
+                        "shadow-neumorphic-md hover:shadow-neumorphic-lg active:shadow-neumorphic-inset",
+                        "border-2 hover:border-opacity-80 transform hover:scale-110 active:scale-95",
+                        // Continue enhanced color pattern
+                        index % 2 === 0
+                          ? "bg-gradient-to-br from-accent-50 via-accent-100/80 to-accent-200/60 border-accent-200/60 text-accent-800 hover:from-accent-100 hover:to-accent-200"
+                          : "bg-gradient-to-br from-primary-50 via-primary-100/80 to-primary-200/60 border-primary-200/60 text-primary-800 hover:from-primary-100 hover:to-primary-200"
+                      )}
+                    >
+                      {specialization}
+                    </div>
+                  ))}
+
+                  {/* More specializations indicator */}
+                  {specializations.length > 5 && (
+                    <div className='px-3 py-2 rounded-lg text-xs font-medium border border-dashed border-primary-300 bg-primary-50/30 text-primary-600'>
+                      +{specializations.length - 5} more
+                    </div>
                   )}
-                >
-                  <PhoneIcon className='h-5 w-5' weight='bold' />
-                  Call
-                </Button>
-              )}
-
-              {secondaryEmail && (
-                <Button
-                  size='lg'
-                  className={cn(
-                    "gap-3 px-6 py-4 shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset",
-                    "bg-white text-accent-700 hover:text-accent-800 border border-accent-200/50",
-                    "transition-all duration-300 font-bold"
-                  )}
-                >
-                  <EnvelopeIcon className='h-5 w-5' weight='bold' />
-                  Email
-                </Button>
+                </div>
               )}
             </div>
+          )}
+
+          {/* Contact Us Button */}
+          <div className='pt-2 flex justify-center'>
+            <Button
+              onClick={onPrimaryCTA}
+              className={cn(
+                "px-8 py-4 text-sm font-bold relative overflow-hidden group",
+                "bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 hover:from-primary-700 hover:via-primary-800 hover:to-primary-900",
+                "text-white shadow-neumorphic-primary-xl hover:shadow-neumorphic-primary-xl",
+                "transform hover:scale-110 active:scale-95 transition-all duration-300",
+                "rounded-2xl border-2 border-primary-500/50 hover:border-primary-400/60",
+                // Enhanced button effects
+                "before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/20 before:via-transparent before:to-white/10 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300",
+                "after:absolute after:inset-0 after:bg-primary-400/20 after:blur-xl after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-300"
+              )}
+            >
+              <span className='relative z-10 flex items-center gap-3'>
+                <ChatCircleIcon className='h-5 w-5' weight='bold' />
+                {!isAuthenticated ? "Sign In to Contact" : "Contact Us"}
+              </span>
+            </Button>
           </div>
         </div>
       </div>
