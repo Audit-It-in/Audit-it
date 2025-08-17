@@ -26,7 +26,6 @@ export function useTelemetry() {
 
       // Fallback: silent debug for development
       if (process.env.NODE_ENV !== "production") {
-        // eslint-disable-next-line no-console
         console.debug(`[telemetry] ${event}`, props || {});
       }
     } catch {

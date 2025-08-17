@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   robots: (() => {
@@ -16,8 +17,12 @@ export default function HomePage() {
   return (
     <div className='min-h-screen bg-primary-50'>
       <main>
-        <LandingHero />
-        <ServicesRail />
+        <Suspense fallback={null}>
+          <LandingHero />
+        </Suspense>
+        <Suspense fallback={null}>
+          <ServicesRail />
+        </Suspense>
         <HowItWorks />
         <BottomCTA />
       </main>

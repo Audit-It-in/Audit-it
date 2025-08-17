@@ -1,14 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { AccountantDiscoveryPage } from "@/src/components/contact-requests/discovery/AccountantDiscoveryPage.component";
 import { parseFiltersFromQuery } from "@/src/helpers/search-url.helper";
 import { useSearchParams } from "next/navigation";
 import { toSlug } from "@/src/helpers/slug.helper";
 import { useLanguages, useSpecializations, useAllDistricts } from "@/src/services/profile.service";
 import type { CADiscoveryFilters } from "@/src/types/contact-request.type";
+import { Loader } from "@/src/components/common/Loader.component";
+import { LoadingAction } from "@/src/types/ui.type";
 
-export default function AccountantsPage() {
+function AccountantsPageContent() {
   const searchParams = useSearchParams();
   const { district, languages, specializations } = parseFiltersFromQuery(searchParams?.toString() || "");
 
@@ -34,4 +36,14 @@ export default function AccountantsPage() {
   };
 
   return <AccountantDiscoveryPage initialFilters={initialFilters} />;
+}
+
+export default function AccountantsPage() {
+  return (
+    <Suspense
+      fallback={<Loader action={LoadingAction.LOADING} title='Loading Accountants' subtitle='Preparing results' />}
+    >
+      <AccountantsPageContent />
+    </Suspense>
+  );
 }
