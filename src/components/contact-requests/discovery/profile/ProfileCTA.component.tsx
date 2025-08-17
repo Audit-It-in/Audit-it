@@ -29,7 +29,7 @@ export const ProfileCTA: React.FC<ProfileCTAProps> = ({ isAuthenticated, onConta
           </Button>
 
           {phone && (
-            <Button variant='outline' size='lg' className='gap-2'>
+            <Button variant='outline' size='lg' className='gap-2 md:hidden'>
               <PhoneIcon className='h-5 w-5' weight='bold' />
               Call Now
             </Button>

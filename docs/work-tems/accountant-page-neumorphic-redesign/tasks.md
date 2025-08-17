@@ -2,7 +2,7 @@
 
 > Status snapshot
 >
-> - Completed: 1–7
+> - Completed: 1–7 (incl. header grid + metrics, dynamic specializations summary + sidebar full list)
 > - Next up: 8–15
 
 ## Development Constraints and Standards
@@ -60,6 +60,9 @@
   - Add neumorphic verification badge with accent color integration
   - Create primary CTA button with enhanced neumorphic hover effects
   - Implement responsive layout adjustments for mobile and tablet
+  - Convert layout to 12-col grid; balance left (avatar + identity + compact metrics) and right (specializations panel + CTA)
+  - Add compact metrics row (derived years of experience + top languages) under name/location
+  - Specializations rail: clamp to max 6; horizontal scroll on mobile; show "+N" chip that smooth-scrolls to full list
   - _Requirements: 1.1, 1.2, 3.1, 3.3, 4.1, 4.2, 4.3_
 
 - [x] 3. Redesign ProfessionalSummary section with enhanced neumorphic containers
@@ -97,6 +100,7 @@
   - Contact blocks use inset shadows; specialization pills use `Badge` on solid tints
   - Verification indicator uses inset + accent border; languages use outline badges
   - Rounded corners and smooth transitions maintained
+  - Add conditional `All Specializations` section (id: `all-specializations`) when count > 6; dense grid; anchor target for header "+N" chip
   - _Requirements: 1.1, 1.3, 2.4, 3.4, 4.1, 4.2, 4.3_
 
 - [x] 7. Create enhanced ProfileCTA component with deep neumorphic responsive design
@@ -105,6 +109,10 @@
   - Primary/secondary buttons use existing variants; consistent neumorphic shadows
   - Rounded corners; smooth transitions; touch targets validated
   - _Requirements: 1.1, 3.2, 3.3, 4.1, 4.4, 5.4_
+
+### Post-task refinements
+
+- Fixed hooks order issue by moving `useMemo` (years of experience) before early returns in `AccountantProfileView`.
 
 - [ ] 8. Implement enhanced neumorphic loading states and skeleton components
 

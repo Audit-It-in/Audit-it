@@ -21,7 +21,6 @@ interface ProfessionalAuditTrailProps {
   location: string;
   bio?: string | null;
   experiences: Experience[];
-  isVerified: boolean;
 }
 
 export const ProfessionalAuditTrail: React.FC<ProfessionalAuditTrailProps> = ({
@@ -29,7 +28,6 @@ export const ProfessionalAuditTrail: React.FC<ProfessionalAuditTrailProps> = ({
   location,
   bio,
   experiences,
-  isVerified,
 }) => {
   return (
     <Card variant='default' size='default' className='shadow-neumorphic-xl rounded-2xl border-2 border-primary-100/60'>
@@ -127,22 +125,7 @@ export const ProfessionalAuditTrail: React.FC<ProfessionalAuditTrailProps> = ({
           </div>
         )}
 
-        {/* Verification badge */}
-        {isVerified && (
-          <div className='flex justify-center'>
-            <div className='group cursor-default transition-all duration-300 neumorphic-optimized shadow-neumorphic-lg hover:shadow-neumorphic-accent-lg rounded-2xl p-4 max-w-xs bg-white border-2 border-accent-100/60'>
-              <div className='flex items-center gap-3'>
-                <div className='p-3 rounded-2xl shadow-neumorphic-inset-deep bg-white border-2 border-accent-100/60'>
-                  <CheckCircleIcon className='h-5 w-5 text-accent-600' weight='fill' />
-                </div>
-                <div>
-                  <div className='font-bold text-accent-900 text-lg'>Verified CA</div>
-                  <div className='text-xs font-semibold text-accent-600'>ICAI Membership Verified</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Verification removed in redesign */}
       </div>
     </Card>
   );

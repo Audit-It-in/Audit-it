@@ -4,12 +4,11 @@ import React from "react";
 import { Card } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/helpers/tailwind.helper";
-import { CertificateIcon, EnvelopeIcon, PhoneIcon, GlobeIcon, CheckCircleIcon } from "@phosphor-icons/react";
+import { EnvelopeIcon, PhoneIcon, GlobeIcon } from "@phosphor-icons/react";
 
 interface SidebarDetailsProps {
-  specializations?: string[] | null;
   languages?: string[] | null;
-  verification?: { membership_number?: string | null; verified_at?: string | null } | null;
+  specializations?: string[] | null;
   location: string;
   email?: string | null;
   phone?: string | null;
@@ -17,9 +16,8 @@ interface SidebarDetailsProps {
 }
 
 export const SidebarDetails: React.FC<SidebarDetailsProps> = ({
-  specializations,
   languages,
-  verification,
+  specializations,
   location,
   email,
   phone,
@@ -27,13 +25,21 @@ export const SidebarDetails: React.FC<SidebarDetailsProps> = ({
 }) => {
   return (
     <div className='space-y-6'>
-      {specializations && specializations.length > 0 && (
-        <Card variant='default' className='rounded-2xl border-2 border-primary-100/60 shadow-neumorphic-xl'>
+      {specializations && specializations.length > 6 && (
+        <Card
+          id='all-specializations'
+          variant='default'
+          className='rounded-2xl border-2 border-primary-100/60 shadow-neumorphic-xl'
+        >
           <div className='p-2'>
-            <h3 className='text-lg font-semibold text-primary-900 mb-3'>Specializations</h3>
-            <div className='flex flex-wrap gap-2'>
+            <h3 className='text-lg font-semibold text-primary-900 mb-3'>All Specializations</h3>
+            <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
               {specializations.map((spec, index) => (
-                <Badge key={index} variant='tag' className='bg-primary-50 text-primary-800 border-primary-200/60'>
+                <Badge
+                  key={index}
+                  variant='tag'
+                  className='rounded-xl bg-primary-50 text-primary-800 border-primary-200/60'
+                >
                   {spec}
                 </Badge>
               ))}
@@ -41,48 +47,20 @@ export const SidebarDetails: React.FC<SidebarDetailsProps> = ({
           </div>
         </Card>
       )}
-
       {languages && languages.length > 0 && (
         <Card variant='default' className='rounded-2xl border-2 border-primary-100/60 shadow-neumorphic-xl'>
           <div className='p-2'>
             <h3 className='text-lg font-semibold text-primary-900 mb-3'>Languages</h3>
             <div className='flex flex-wrap gap-2'>
               {languages.map((lang, index) => (
-                <Badge key={index} variant='outline' className='rounded-xl'>
+                <Badge
+                  key={index}
+                  variant='tag'
+                  className='rounded-xl bg-neutral-100 text-neutral-800 border-neutral-300/70'
+                >
                   {lang}
                 </Badge>
               ))}
-            </div>
-          </div>
-        </Card>
-      )}
-
-      {verification && (
-        <Card variant='default' className='rounded-2xl border-2 border-primary-100/60 shadow-neumorphic-xl'>
-          <div className='p-2'>
-            <h3 className='text-lg font-semibold text-primary-900 mb-3 flex items-center gap-2'>
-              <CertificateIcon className='h-5 w-5 text-primary-700' weight='bold' />
-              Verification
-            </h3>
-            <div className='space-y-3'>
-              {verification.membership_number && (
-                <div className='p-3 rounded-xl shadow-neumorphic-inset-deep bg-neutral-50 border-2 border-primary-100/60'>
-                  <span className='text-sm font-medium text-primary-700'>Membership Number:</span>
-                  <p className='text-primary-900 font-mono'>{verification.membership_number}</p>
-                </div>
-              )}
-
-              {verification.verified_at && (
-                <div
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-2 rounded-xl",
-                    "shadow-neumorphic-inset-deep bg-white border-2 border-accent-100/60"
-                  )}
-                >
-                  <CheckCircleIcon className='h-4 w-4 text-accent-600' weight='fill' />
-                  <span className='text-sm font-semibold text-accent-700'>Verified Accountant</span>
-                </div>
-              )}
             </div>
           </div>
         </Card>
@@ -125,5 +103,3 @@ export const SidebarDetails: React.FC<SidebarDetailsProps> = ({
     </div>
   );
 };
-
-

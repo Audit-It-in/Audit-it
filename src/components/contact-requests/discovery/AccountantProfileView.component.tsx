@@ -1,14 +1,11 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/src/components/ui/button";
-import { Card } from "@/src/components/ui/card";
 import { Loader } from "@/src/components/common/Loader.component";
 import { useProfilePictureUrl } from "@/src/services/upload.service";
-import Link from "next/link";
 import { cn } from "@/src/helpers/tailwind.helper";
 import { useAccountantProfile } from "@/src/services/accountant-discovery.service";
-import { useExperiences, useVerification, useEducations } from "@/src/services/profile.service";
+import { useExperiences, useEducations } from "@/src/services/profile.service";
 import { useAuth } from "@/src/hooks/useAuth";
 import type { ProfileDetails } from "@/src/types/profile.type";
 import { LoadingAction } from "@/src/types/ui.type";
@@ -45,7 +42,16 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
   const { data: experiences = [] } = useExperiences(profile?.id);
   const { data: educations = [] } = useEducations(profile?.id);
 
-  const { data: verification } = useVerification(profile?.id);
+  // Derive years of experience from earliest start_date (must be before any early returns)
+  const yearsExperience = React.useMemo(() => {
+    const startYears = experiences
+      .map((e) => (e.start_date ? new Date(e.start_date).getFullYear() : undefined))
+      .filter((y): y is number => typeof y === "number");
+    if (startYears.length === 0) return 0;
+    const earliest = Math.min(...startYears);
+    const currentYear = new Date().getFullYear();
+    return Math.max(0, currentYear - earliest);
+  }, [experiences]);
 
   // Prepare hooks/derived state that must be called consistently across renders
   const initials = `${profile?.first_name?.[0] || ""}${profile?.last_name?.[0] || ""}`.toUpperCase();
@@ -78,8 +84,7 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
 
   const fullName = `${profile.first_name || ""} ${profile.last_name || ""}`.trim();
 
-  // Mock data for features not yet implemented
-  const isVerified = !!verification?.verified_at;
+  // Verification not shown in redesigned page
 
   const handleContactClick = () => {
     if (!isAuthenticated) {
@@ -152,29 +157,23 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
         location={location}
         initials={initials}
         avatarUrl={avatarUrl}
-        isVerified={isVerified}
         specializations={profile?.specialization_names || []}
         onPrimaryCTA={handleContactClick}
         isAuthenticated={isAuthenticated}
+        yearsExperience={yearsExperience}
+        languages={profile.language_names}
       />
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         <div className='lg:col-span-2 space-y-6'>
-          <ProfessionalAuditTrail
-            fullName={fullName}
-            location={location}
-            bio={profile.bio}
-            experiences={experiences}
-            isVerified={isVerified}
-          />
+          <ProfessionalAuditTrail fullName={fullName} location={location} bio={profile.bio} experiences={experiences} />
 
           <EducationList educations={educations} />
         </div>
 
         <SidebarDetails
-          specializations={profile.specialization_names}
           languages={profile.language_names}
-          verification={verification}
+          specializations={profile.specialization_names}
           location={location}
           email={profile.email}
           phone={profile.phone}
