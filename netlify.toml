@@ -11,3 +11,15 @@
 
 [functions]
   node_bundler = "esbuild" 
+
+# Context-specific environment to drive SEO behavior
+[context.production.environment]
+  NEXT_PUBLIC_APP_URL = "https://auditit.in"
+
+[context.deploy-preview.environment]
+  # Netlify-provided preview URL (e.g., https://deploy-preview-123--site.netlify.app)
+  NEXT_PUBLIC_APP_URL = "${DEPLOY_PRIME_URL}"
+
+[context.branch-deploy.environment]
+  # Netlify-provided branch URL (e.g., https://feature-branch--site.netlify.app)
+  NEXT_PUBLIC_APP_URL = "${URL}"

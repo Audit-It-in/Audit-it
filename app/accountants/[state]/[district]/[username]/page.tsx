@@ -43,6 +43,8 @@ export async function generateMetadata({ params }: AccountantProfilePageProps): 
 
     // Prefer absolute URLs in metadata; if stored value is a storage path, omit images to avoid broken OG images.
     const isAbsoluteUrl = Boolean(profile.profile_picture_url && profile.profile_picture_url.startsWith("http"));
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const isProd = appUrl.includes("auditit.in");
     return {
       title,
       description,
@@ -82,6 +84,10 @@ export async function generateMetadata({ params }: AccountantProfilePageProps): 
       },
       alternates: {
         canonical: `/accountants/${toSlug(decodedState)}/${toSlug(decodedDistrict)}/${decodedUsername}`,
+      },
+      robots: {
+        index: isProd,
+        follow: isProd,
       },
     };
   } catch (error) {

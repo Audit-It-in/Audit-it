@@ -6,6 +6,7 @@ import { Footer } from "@/src/components/layout/Footer.component";
 import { APP_CONFIG } from "@/src/constants/app.constants";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(APP_CONFIG.url),
   title: {
     default: APP_CONFIG.name,
     template: `%s | ${APP_CONFIG.name}`,
@@ -27,10 +28,19 @@ export const metadata: Metadata = {
     title: APP_CONFIG.name,
     description: APP_CONFIG.description,
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: (() => {
+    const isProd = APP_CONFIG.url.includes("auditit.in");
+    return {
+      index: isProd,
+      follow: isProd,
+      nocache: !isProd,
+      googleBot: {
+        index: isProd,
+        follow: isProd,
+        noimageindex: !isProd,
+      },
+    } as const;
+  })(),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

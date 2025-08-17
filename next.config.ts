@@ -24,6 +24,18 @@ try {
 
 const nextConfig: NextConfig = {
   images,
+  async headers() {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+    const isProd = appUrl.includes("auditit.in");
+    if (isProd) return [];
+    // Add X-Robots-Tag to all routes on non-prod to discourage indexing
+    return [
+      {
+        source: "/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow, noimageindex, noarchive" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
