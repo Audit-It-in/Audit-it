@@ -24,26 +24,36 @@ export const EducationList: React.FC<EducationListProps> = ({ educations }) => {
   if (!educations || educations.length === 0) return null;
 
   return (
-    <Card variant='default' size='default' className='shadow-neumorphic-xl rounded-2xl border-2 border-primary-100/60'>
+    <Card
+      variant='default'
+      size='default'
+      role='region'
+      aria-labelledby='education-heading'
+      className='shadow-neumorphic-mobile-lg md:shadow-neumorphic-xl lg:shadow-neumorphic-desktop-xl hover:shadow-neumorphic-primary-xl rounded-2xl border-2 border-primary-100/60 neumorphic-optimized transition-neumorphic'
+    >
       <div className='p-2 space-y-4'>
         <div className='flex items-center gap-3'>
           <div className='p-3 rounded-2xl shadow-neumorphic-inset-deep bg-white border-2 border-primary-100/60'>
             <GraduationCapIcon className='h-5 w-5 text-primary-600' weight='bold' />
           </div>
-          <h3 className='text-lg font-bold text-primary-900'>Education</h3>
+          <h3 id='education-heading' className='text-lg font-bold text-primary-900'>
+            Education
+          </h3>
         </div>
 
-        <div className='grid grid-cols-1 gap-4'>
+        <div className='grid grid-cols-1 gap-4' role='list' aria-label='Education list'>
           {educations.map((edu) => {
             const startYear = edu.start_date ? new Date(edu.start_date).getFullYear() : undefined;
             const endYear = edu.end_date ? new Date(edu.end_date).getFullYear() : undefined;
             return (
               <div
                 key={edu.id}
+                role='listitem'
                 className={cn(
                   "group transition-all duration-300",
                   "p-4 rounded-2xl shadow-neumorphic-md hover:shadow-neumorphic-lg",
-                  "bg-white border-2 border-primary-100/60 hover:border-primary-200/80"
+                  "bg-white border-2 border-primary-100/60 hover:border-primary-200/80",
+                  "transform hover:scale-105 active:scale-95 focus-within:shadow-neumorphic-focus transition-neumorphic"
                 )}
               >
                 <div className='flex items-start justify-between gap-3'>
@@ -54,7 +64,7 @@ export const EducationList: React.FC<EducationListProps> = ({ educations }) => {
                         {[edu.degree, edu.field_of_study].filter(Boolean).join(" • ")}
                       </p>
                     )}
-                    {edu.grade && <p className='text-xs text-primary-600 font-semibold'>Grade: {edu.grade}</p>}
+                    {edu.grade && <p className='text-xs text-primary-700 font-semibold'>Grade: {edu.grade}</p>}
                   </div>
                   <div className='flex items-center gap-2 px-3 py-1 rounded-2xl shadow-neumorphic-inset-deep bg-white border-2 border-primary-100/60'>
                     <CalendarIcon className='h-3 w-3 text-primary-600' weight='bold' />

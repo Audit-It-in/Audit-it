@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Card } from "@/src/components/ui/card";
-import { BriefcaseIcon, CheckCircleIcon, CalendarIcon } from "@phosphor-icons/react";
+import { BriefcaseIcon, CalendarIcon } from "@phosphor-icons/react";
 import { cn } from "@/src/helpers/tailwind.helper";
 
 interface Experience {
@@ -30,12 +30,20 @@ export const ProfessionalAuditTrail: React.FC<ProfessionalAuditTrailProps> = ({
   experiences,
 }) => {
   return (
-    <Card variant='default' size='default' className='shadow-neumorphic-xl rounded-2xl border-2 border-primary-100/60'>
+    <Card
+      variant='default'
+      size='default'
+      role='region'
+      aria-labelledby='professional-audit-trail-heading'
+      className='shadow-neumorphic-mobile-lg md:shadow-neumorphic-xl lg:shadow-neumorphic-desktop-xl hover:shadow-neumorphic-primary-xl rounded-2xl border-2 border-primary-100/60 neumorphic-optimized transition-neumorphic'
+    >
       <div className='p-2 space-y-6'>
         {/* Section Header */}
         <div className='flex items-center gap-3'>
           <div className='w-2 h-6 bg-primary-600 rounded-xl shadow-neumorphic-sm' />
-          <h2 className='text-xl font-bold text-primary-900'>Professional Audit Trail</h2>
+          <h2 id='professional-audit-trail-heading' className='text-xl font-bold text-primary-900'>
+            Professional Audit Trail
+          </h2>
         </div>
 
         {/* Bio - solid surface, deep inset */}
@@ -56,7 +64,7 @@ export const ProfessionalAuditTrail: React.FC<ProfessionalAuditTrailProps> = ({
 
         {/* Experience Timeline */}
         {experiences.length > 0 && (
-          <div className='space-y-4'>
+          <div className='space-y-4' role='list' aria-label='Career journey timeline'>
             <div className='flex items-center gap-3'>
               <div className='p-3 rounded-2xl shadow-neumorphic-inset-deep bg-white border-2 border-primary-100/60'>
                 <BriefcaseIcon className='h-5 w-5 text-primary-600' weight='bold' />
@@ -70,7 +78,7 @@ export const ProfessionalAuditTrail: React.FC<ProfessionalAuditTrailProps> = ({
 
               <div className='space-y-4'>
                 {experiences.slice(0, 3).map((exp) => (
-                  <div key={exp.id} className='relative'>
+                  <div key={exp.id} className='relative' role='listitem'>
                     {/* Node */}
                     <div className='absolute -left-0.5 top-2 h-3 w-3 rounded-full bg-primary-600 border-2 border-white shadow-neumorphic-sm' />
 
@@ -78,7 +86,8 @@ export const ProfessionalAuditTrail: React.FC<ProfessionalAuditTrailProps> = ({
                       className={cn(
                         "group transition-all duration-300",
                         "p-4 rounded-2xl shadow-neumorphic-md hover:shadow-neumorphic-lg",
-                        "bg-white border-2 border-primary-100/60 hover:border-primary-200/80"
+                        "bg-white border-2 border-primary-100/60 hover:border-primary-200/80",
+                        "transform hover:scale-105 active:scale-95 focus-within:shadow-neumorphic-focus transition-neumorphic"
                       )}
                     >
                       <div className='space-y-2'>

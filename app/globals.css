@@ -142,3 +142,31 @@
     animation: flip 2s ease-in-out infinite;
   }
 }
+
+/* Lite Neumorphic Mode: reduce shadow intensity for constrained devices */
+[data-neumo-mode="lite"] .shadow-neumorphic-desktop-xl,
+[data-neumo-mode="lite"] .shadow-neumorphic-xl,
+[data-neumo-mode="lite"] .shadow-neumorphic-lg,
+[data-neumo-mode="lite"] .shadow-neumorphic-md,
+[data-neumo-mode="lite"] .shadow-neumorphic-primary-xl,
+[data-neumo-mode="lite"] .shadow-neumorphic-primary-lg,
+[data-neumo-mode="lite"] .shadow-neumorphic-primary,
+[data-neumo-mode="lite"] .shadow-neumorphic-accent-xl,
+[data-neumo-mode="lite"] .shadow-neumorphic-accent-lg,
+[data-neumo-mode="lite"] .shadow-neumorphic-accent,
+[data-neumo-mode="lite"] .shadow-neumorphic-inset,
+[data-neumo-mode="lite"] .shadow-neumorphic-inset-deep,
+[data-neumo-mode="lite"] .shadow-neumorphic-inset-primary,
+[data-neumo-mode="lite"] .shadow-neumorphic-inset-accent {
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.06), -2px -2px 8px rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-neumo-mode="lite"] .transition-neumorphic,
+[data-neumo-mode="lite"] .transition-neumorphic-bounce,
+[data-neumo-mode="lite"] .transition-neumorphic-elastic {
+  transition-duration: 120ms !important;
+}
+
+[data-neumo-mode="lite"] .transform:hover {
+  transform: scale(1.02) !important;
+}

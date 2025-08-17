@@ -1,14 +1,13 @@
 "use client";
 
 import React from "react";
-import { Loader } from "@/src/components/common/Loader.component";
+// Removed generic Loader in favor of neumorphic skeletons
 import { useProfilePictureUrl } from "@/src/services/upload.service";
 import { cn } from "@/src/helpers/tailwind.helper";
 import { useAccountantProfile } from "@/src/services/accountant-discovery.service";
 import { useExperiences, useEducations } from "@/src/services/profile.service";
 import { useAuth } from "@/src/hooks/useAuth";
 import type { ProfileDetails } from "@/src/types/profile.type";
-import { LoadingAction } from "@/src/types/ui.type";
 import { ContactRequestModal } from "@/src/components/contact-requests/ContactRequestModal.component";
 import { ProfileNav } from "./profile/ProfileNav.component";
 import { ProfileHeader } from "./profile/ProfileHeader.component";
@@ -18,6 +17,12 @@ import { ProfileCTA } from "./profile/ProfileCTA.component";
 import { ProfessionalAuditTrail } from "./profile/ProfessionalAuditTrail.component";
 import { ProfileNotFound } from "./profile/ProfileNotFound.component";
 import { EducationList } from "./profile/EducationList.component";
+import { ProfileHeaderSkeleton } from "@/src/components/contact-requests/skeletons/ProfileHeaderSkeleton.component";
+import { ProfessionalAuditTrailSkeleton } from "@/src/components/contact-requests/skeletons/ProfessionalAuditTrailSkeleton.component";
+import { EducationListSkeleton } from "@/src/components/contact-requests/skeletons/EducationListSkeleton.component";
+import { SidebarDetailsSkeleton } from "@/src/components/contact-requests/skeletons/SidebarDetailsSkeleton.component";
+import { ProfileCTASkeleton } from "@/src/components/contact-requests/skeletons/ProfileCTASkeleton.component";
+import { ProfileErrorState } from "./profile/ProfileErrorState.component";
 
 interface AccountantProfileViewProps {
   state: string;
@@ -66,19 +71,54 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
   // Modal open state (single declaration)
   const [isContactOpen, setIsContactOpen] = React.useState(false);
 
+  // Enable lite neumorphic mode on constrained devices to improve performance
+  React.useEffect(() => {
+    try {
+      const navAny = navigator as unknown as { connection?: { saveData?: boolean }; deviceMemory?: number };
+      const saveData = navAny?.connection?.saveData === true;
+      const lowMemory = typeof navAny?.deviceMemory === "number" && navAny.deviceMemory <= 2;
+      const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (saveData || lowMemory || prefersReducedMotion) {
+        document.documentElement.setAttribute("data-neumo-mode", "lite");
+      } else {
+        document.documentElement.removeAttribute("data-neumo-mode");
+      }
+    } catch {
+      // no-op
+    }
+  }, []);
+
   if (isLoading) {
     return (
-      <Loader
-        action={LoadingAction.LOADING}
-        title='Loading Accountant Profile'
-        subtitle='Getting detailed information about this Chartered Accountant...'
-        fullScreen={false}
-        className={className}
-      />
+      <div className={cn("space-y-6", className)}>
+        {/* Optional top spacer to align with nav area */}
+        <div className='h-4' />
+
+        <ProfileHeaderSkeleton />
+
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+          <div className='lg:col-span-2 space-y-6'>
+            <ProfessionalAuditTrailSkeleton />
+            <EducationListSkeleton />
+          </div>
+          <SidebarDetailsSkeleton />
+        </div>
+
+        <ProfileCTASkeleton />
+      </div>
     );
   }
 
-  if (error || !profile) {
+  if (error) {
+    return (
+      <div className={cn("space-y-6", className)}>
+        <ProfileErrorState message={(error as Error)?.message} onRetry={() => window.location.reload()} />
+      </div>
+    );
+  }
+
+  if (!profile) {
     return <ProfileNotFound state={state} district={district} username={username} className={className} />;
   }
 

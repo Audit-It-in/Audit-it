@@ -15,13 +15,18 @@ interface ProfileNavProps {
 export const ProfileNav: React.FC<ProfileNavProps> = ({ fullName, onBack, onShare }) => {
   return (
     <div className='flex items-center justify-between mb-4'>
-      <nav className='flex items-center space-x-2 p-2 rounded-lg shadow-neumorphic-inset bg-neutral-50/80 border border-primary-100/50'>
+      <nav
+        role='navigation'
+        aria-label='Profile navigation'
+        className='flex items-center space-x-2 p-2 rounded-lg shadow-neumorphic-inset bg-neutral-50/80 border border-primary-100/50'
+      >
         <button
           onClick={onBack}
           className={cn(
             "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-200",
-            "shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset",
-            "bg-white/80 text-primary-600 hover:text-primary-700 text-sm font-medium"
+            "shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset focus:shadow-neumorphic-focus",
+            "bg-white/80 text-primary-600 hover:text-primary-700 text-sm font-medium",
+            "min-h-[44px] transition-neumorphic"
           )}
           aria-label='Go back'
         >
@@ -43,9 +48,11 @@ export const ProfileNav: React.FC<ProfileNavProps> = ({ fullName, onBack, onShar
         onClick={onShare}
         size='sm'
         className={cn(
-          "gap-1.5 px-3 py-2 text-xs shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset",
-          "bg-accent-600 hover:bg-accent-700 text-white border-0 transition-all duration-200 rounded-lg"
+          "gap-1.5 px-3 py-2 text-xs shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset focus:shadow-neumorphic-focus",
+          "bg-accent-600 hover:bg-accent-700 text-white border-0 transition-all duration-200 rounded-lg",
+          "min-h-[44px] transition-neumorphic"
         )}
+        aria-label='Share profile'
       >
         <ShareIcon className='h-3.5 w-3.5' weight='bold' />
         Share Profile
