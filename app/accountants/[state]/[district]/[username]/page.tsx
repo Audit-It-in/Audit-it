@@ -1,5 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
+import { toSlug, fromSlug } from "@/src/helpers/slug.helper";
 import { AccountantProfilePageClient } from "@/src/components/contact-requests/discovery/AccountantProfilePageClient.component";
 import { fetchAccountantProfileServer } from "@/src/services/accountant-discovery-server.service";
 
@@ -16,10 +17,14 @@ export async function generateMetadata({ params }: AccountantProfilePageProps): 
   const { state, district, username } = await params;
 
   try {
+    const decodedState = decodeURIComponent(state);
+    const decodedDistrict = decodeURIComponent(district);
+    const decodedUsername = decodeURIComponent(username);
+
     const profile = await fetchAccountantProfileServer(
-      decodeURIComponent(state),
-      decodeURIComponent(district),
-      decodeURIComponent(username)
+      fromSlug(decodedState),
+      fromSlug(decodedDistrict),
+      decodedUsername
     );
 
     if (!profile) {
@@ -76,7 +81,7 @@ export async function generateMetadata({ params }: AccountantProfilePageProps): 
         images: isAbsoluteUrl && profile.profile_picture_url ? [profile.profile_picture_url] : [],
       },
       alternates: {
-        canonical: `/accountants/${state}/${district}/${username}`,
+        canonical: `/accountants/${toSlug(decodedState)}/${toSlug(decodedDistrict)}/${decodedUsername}`,
       },
     };
   } catch (error) {
@@ -91,10 +96,15 @@ export async function generateMetadata({ params }: AccountantProfilePageProps): 
 export default async function AccountantProfilePage({ params }: AccountantProfilePageProps) {
   const { state, district, username } = await params;
 
-  // Decode URL parameters
+  // Decode URL parameters and de-slugify state/district (username unchanged)
   const decodedState = decodeURIComponent(state);
   const decodedDistrict = decodeURIComponent(district);
   const decodedUsername = decodeURIComponent(username);
 
-  return <AccountantProfilePageClient state={decodedState} district={decodedDistrict} username={decodedUsername} />;
+  const normalizedState = fromSlug(decodedState);
+  const normalizedDistrict = fromSlug(decodedDistrict);
+
+  return (
+    <AccountantProfilePageClient state={normalizedState} district={normalizedDistrict} username={decodedUsername} />
+  );
 }

@@ -5,7 +5,7 @@ import React from "react";
 import { useProfilePictureUrl } from "@/src/services/upload.service";
 import { cn } from "@/src/helpers/tailwind.helper";
 import { useAccountantProfile } from "@/src/services/accountant-discovery.service";
-import { useExperiences, useEducations } from "@/src/services/profile.service";
+import { useExperiences, useEducations, useVerification } from "@/src/services/profile.service";
 import { useAuth } from "@/src/hooks/useAuth";
 import type { ProfileDetails } from "@/src/types/profile.type";
 import { ContactRequestModal } from "@/src/components/contact-requests/ContactRequestModal.component";
@@ -46,6 +46,7 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
   const { data: profile, isLoading, error } = useAccountantProfile(state, district, username);
   const { data: experiences = [] } = useExperiences(profile?.id);
   const { data: educations = [] } = useEducations(profile?.id);
+  const { data: verification } = useVerification(profile?.id);
 
   // Derive years of experience from earliest start_date (must be before any early returns)
   const yearsExperience = React.useMemo(() => {
@@ -202,6 +203,7 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
         isAuthenticated={isAuthenticated}
         yearsExperience={yearsExperience}
         languages={profile.language_names}
+        isVerified={Boolean(verification?.verified_at)}
       />
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>

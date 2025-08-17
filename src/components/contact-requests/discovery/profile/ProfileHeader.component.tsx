@@ -18,6 +18,7 @@ interface ProfileHeaderProps {
   isAuthenticated: boolean;
   yearsExperience?: number;
   languages?: string[];
+  isVerified?: boolean;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
@@ -30,6 +31,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   isAuthenticated,
   yearsExperience = 0,
   languages = [],
+  isVerified = false,
 }) => {
   // Get specializations for header rail (summary)
   const MAX_HEADER_SPECS = 6;
@@ -55,7 +57,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <div className='relative flex-shrink-0 group'>
             <div className='p-2 rounded-full shadow-neumorphic-inset-deep bg-primary-50/80 border border-primary-200/40'>
               <div className='p-1 rounded-full shadow-neumorphic-lg bg-white'>
-                <Avatar className='h-34 w-34 shadow-neumorphic-primary-lg border-3 border-white/80 transition-all duration-300 group-hover:shadow-neumorphic-accent-lg'>
+                <Avatar
+                  className='h-34 w-34 shadow-neumorphic-primary-lg border-3 border-white/80 transition-all duration-300 group-hover:shadow-neumorphic-accent-lg'
+                  verified={isVerified}
+                  verifiedLabel='Verified CA'
+                >
                   <AvatarImage src={avatarUrl || undefined} alt={fullName} className='object-cover' />
                   <AvatarFallback className='bg-primary-200 text-primary-900 font-bold text-lg shadow-inner'>
                     {initials}

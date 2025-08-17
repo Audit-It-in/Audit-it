@@ -4,6 +4,7 @@ import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/src/helpers/tailwind.helper";
+import { ShieldCheckIcon } from "@phosphor-icons/react";
 
 const avatarVariants = cva(
   [
@@ -51,11 +52,87 @@ const avatarVariants = cva(
   }
 );
 
-interface AvatarProps extends React.ComponentProps<typeof AvatarPrimitive.Root>, VariantProps<typeof avatarVariants> {}
+type VerifiedStampPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+type VerifiedStampSize = "sm" | "md" | "lg";
 
-function Avatar({ className, size, variant, ...props }: AvatarProps) {
+export interface AvatarProps
+  extends React.ComponentProps<typeof AvatarPrimitive.Root>,
+    VariantProps<typeof avatarVariants> {
+  verified?: boolean;
+  verifiedLabel?: string;
+  stampPosition?: VerifiedStampPosition;
+  stampSize?: VerifiedStampSize;
+}
+
+function Avatar({
+  className,
+  size,
+  variant,
+  verified,
+  verifiedLabel,
+  stampPosition = "bottom-right",
+  stampSize,
+  children,
+  ...props
+}: AvatarProps) {
+  const defaultStampSize: VerifiedStampSize = React.useMemo(() => {
+    switch (size) {
+      case "xs":
+      case "sm":
+        return "sm";
+      case "md":
+      case "lg":
+        return "md";
+      case "xl":
+      case "2xl":
+        return "lg";
+      default:
+        return "md";
+    }
+  }, [size]);
+
+  const resolvedStampSize: VerifiedStampSize = stampSize ?? defaultStampSize;
+
+  const positionClasses: Record<VerifiedStampPosition, string> = {
+    "top-left": "-top-1 -left-1",
+    "top-right": "-top-1 -right-1",
+    "bottom-left": "-bottom-1 -left-1",
+    "bottom-right": "-bottom-1 -right-1",
+  };
+
+  const sizeClasses: Record<VerifiedStampSize, { container: string; icon: string }> = {
+    sm: { container: "h-4 w-4 p-0.5", icon: "h-3 w-3" },
+    md: { container: "h-5 w-5 p-0.5", icon: "h-4 w-4" },
+    lg: { container: "h-6 w-6 p-1", icon: "h-4 w-4" },
+  };
+
   return (
-    <AvatarPrimitive.Root data-slot='avatar' className={cn(avatarVariants({ size, variant }), className)} {...props} />
+    <AvatarPrimitive.Root
+      data-slot='avatar'
+      className={cn("neumorphic-optimized", avatarVariants({ size, variant }), className)}
+      {...props}
+    >
+      {children}
+
+      {verified && (
+        <div
+          className={cn(
+            "absolute z-20 rounded-full flex items-center justify-center",
+            "text-white bg-emerald-600",
+            "shadow-neumorphic-accent-lg border-2 border-white/90",
+            positionClasses[stampPosition],
+            sizeClasses[resolvedStampSize].container,
+            "transition-neumorphic-smooth opacity-100"
+          )}
+          aria-hidden={!verifiedLabel}
+          aria-label={verifiedLabel}
+          data-show
+        >
+          <ShieldCheckIcon className={cn("block", sizeClasses[resolvedStampSize].icon)} weight='bold' />
+          {!verifiedLabel ? <span className='sr-only'>Verified</span> : null}
+        </div>
+      )}
+    </AvatarPrimitive.Root>
   );
 }
 

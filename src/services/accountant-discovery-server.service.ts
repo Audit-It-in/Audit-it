@@ -14,8 +14,8 @@ export async function fetchAccountantProfileServer(
       .eq("role", "accountant")
       .eq("is_active", true)
       .eq("username", username)
-      .ilike("state_name", state.replace("-", " "))
-      .ilike("district_name", district.replace("-", " "))
+      .ilike("state_name", state.replace(/-/g, " "))
+      .ilike("district_name", district.replace(/-/g, " "))
       .single();
 
     if (error && error.code !== "PGRST116") {

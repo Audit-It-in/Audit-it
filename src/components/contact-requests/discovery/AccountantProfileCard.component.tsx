@@ -9,6 +9,7 @@ import type { ProfileDetails } from "@/src/types/profile.type";
 import { ProfileCardHeader } from "./ProfileCardHeader.component";
 import { ProfileCardMetrics } from "./ProfileCardMetrics.component";
 import { ProfileCardFooter } from "./ProfileCardFooter.component";
+import { toSlug } from "@/src/helpers/slug.helper";
 
 interface AccountantProfileCardProps {
   profile: ProfileDetails;
@@ -37,9 +38,7 @@ export const AccountantProfileCard: React.FC<AccountantProfileCardProps> = ({
   // Generate profile URL
   const profileUrl =
     profile.username && profile.state_name && profile.district_name
-      ? `/accountants/${profile.state_name.toLowerCase().replace(/\s+/g, "-")}/${profile.district_name
-          .toLowerCase()
-          .replace(/\s+/g, "-")}/${profile.username}`
+      ? `/accountants/${toSlug(profile.state_name)}/${toSlug(profile.district_name)}/${profile.username}`
       : "#";
 
   // Get first few specializations to display

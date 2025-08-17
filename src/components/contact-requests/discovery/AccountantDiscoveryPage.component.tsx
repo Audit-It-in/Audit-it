@@ -15,6 +15,7 @@ import { AccountantGrid } from "./AccountantGrid.component";
 import { LoadMoreTrigger } from "./LoadMoreTrigger.component";
 import { FilterRail } from "./FilterRail.component";
 import { MobileFilterSheet } from "./MobileFilterSheet.component";
+import { toSlug } from "@/src/helpers/slug.helper";
 
 interface AccountantDiscoveryPageProps {
   initialFilters?: CADiscoveryFilters;
@@ -58,9 +59,7 @@ export const AccountantDiscoveryPage: React.FC<AccountantDiscoveryPageProps> = (
         // Default behavior: navigate to accountant profile
         const profileUrl =
           profile.username && profile.state_name && profile.district_name
-            ? `/accountants/${profile.state_name.toLowerCase().replace(/\s+/g, "-")}/${profile.district_name
-                .toLowerCase()
-                .replace(/\s+/g, "-")}/${profile.username}`
+            ? `/accountants/${toSlug(profile.state_name)}/${toSlug(profile.district_name)}/${profile.username}`
             : "#";
 
         if (profileUrl !== "#") {
