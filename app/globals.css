@@ -183,6 +183,19 @@
   }
 }
 
+/* Disable idle motion for reduced-motion and lite mode */
+@media (prefers-reduced-motion: reduce) {
+  .neumorphic-idle-motion {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+[data-neumo-mode="lite"] .neumorphic-idle-motion {
+  animation: none !important;
+}
+
 /* Lite Neumorphic Mode: reduce shadow intensity for constrained devices */
 [data-neumo-mode="lite"] .shadow-neumorphic-desktop-xl,
 [data-neumo-mode="lite"] .shadow-neumorphic-xl,

@@ -163,6 +163,17 @@ module.exports = {
         "fade-in": "fade-in 0.3s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
         "scale-in": "scale-in 0.2s ease-out",
+        // Landing Hero motion tokens
+        "float-slow": "float-slow var(--float-duration, 8s) ease-in-out infinite",
+        "chip-orbit": "chip-orbit var(--orbit-duration, 14s) linear infinite",
+        "reveal-up": "reveal-up 0.5s ease-out both",
+        "pulse-shadow-primary": "pulse-shadow-primary 2.4s ease-in-out infinite",
+        // Illustration extras
+        "scan-slow": "scan-slow 3.5s ease-in-out infinite",
+        sparkle: "sparkle 2.2s ease-in-out infinite",
+        "wiggle-tiny": "wiggle-tiny 2.8s ease-in-out infinite",
+        "bar-grow": "bar-grow 2.4s ease-in-out infinite",
+        "plane-fly": "plane-fly 6s ease-in-out infinite",
       },
       keyframes: {
         "neumorphic-pulse": {
@@ -194,6 +205,55 @@ module.exports = {
         "scale-in": {
           "0%": { transform: "scale(0.95)", opacity: "0" },
           "100%": { transform: "scale(1)", opacity: "1" },
+        },
+        // Landing Hero keyframes
+        "float-slow": {
+          "0%": { transform: "translateY(0) rotate(0deg)" },
+          "50%": { transform: "translateY(-2px) rotate(-0.3deg)" },
+          "100%": { transform: "translateY(0) rotate(0deg)" },
+        },
+        "chip-orbit": {
+          "0%": { transform: "rotate(0deg) translateX(var(--orbit-radius, 60px)) rotate(0deg)" },
+          "100%": { transform: "rotate(360deg) translateX(var(--orbit-radius, 60px)) rotate(-360deg)" },
+        },
+        "reveal-up": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "pulse-shadow-primary": {
+          "0%, 100%": {
+            boxShadow:
+              "4px 4px 12px rgba(0,0,0,0.08), -4px -4px 12px rgba(255,255,255,0.8), 0 0 0 2px rgba(37,99,235,0.12)",
+          },
+          "50%": {
+            boxShadow:
+              "6px 6px 16px rgba(0,0,0,0.12), -6px -6px 16px rgba(255,255,255,0.9), 0 0 0 3px rgba(37,99,235,0.18)",
+          },
+        },
+        // Illustration extras
+        "scan-slow": {
+          "0%": { transform: "translateX(-10%)", opacity: "0.0" },
+          "20%": { opacity: "0.15" },
+          "50%": { transform: "translateX(110%)", opacity: "0.15" },
+          "100%": { transform: "translateX(110%)", opacity: "0.0" },
+        },
+        sparkle: {
+          "0%, 100%": { opacity: "0.2", transform: "scale(0.9)" },
+          "50%": { opacity: "1", transform: "scale(1)" },
+        },
+        "wiggle-tiny": {
+          "0%, 100%": { transform: "rotate(0deg)" },
+          "50%": { transform: "rotate(-1.2deg)" },
+        },
+        "bar-grow": {
+          "0%, 100%": { transform: "scaleY(0.92)" },
+          "50%": { transform: "scaleY(1)" },
+        },
+        "plane-fly": {
+          "0%": { transform: "translate(0px, 0px) rotate(0deg)" },
+          "40%": { transform: "translate(56px, -36px) rotate(-6deg)" },
+          "60%": { transform: "translate(72px, -44px) rotate(-4deg)" },
+          "100%": { transform: "translate(0px, 0px) rotate(0deg)" },
         },
       },
       // Enhanced Transition System

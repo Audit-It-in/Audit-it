@@ -628,6 +628,20 @@ export const fetchDistricts = async (stateId: number): Promise<{ id: number; nam
   return data || [];
 };
 
+export const fetchAllDistricts = async (): Promise<{ id: number; name: string; state_id: number }[]> => {
+  const { data, error } = await supabase
+    .from("districts")
+    .select("id, name, state_id")
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching all districts:", error);
+    throw error;
+  }
+
+  return data || [];
+};
+
 export function useSaveProfileStep() {
   const queryClient = useQueryClient();
 
@@ -652,8 +666,6 @@ export function useSaveProfileStep() {
     },
   });
 }
-
-
 
 export function useLanguages() {
   return useQuery({
@@ -684,6 +696,14 @@ export function useDistricts(stateId?: number) {
     queryKey: ["districts", stateId],
     queryFn: () => fetchDistricts(stateId!),
     enabled: !!stateId,
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours (static data)
+  });
+}
+
+export function useAllDistricts() {
+  return useQuery<{ id: number; name: string; state_id: number }[]>({
+    queryKey: ["districts", "all"],
+    queryFn: fetchAllDistricts,
     staleTime: 24 * 60 * 60 * 1000, // 24 hours (static data)
   });
 }

@@ -2,102 +2,101 @@
 
 import Link from "next/link";
 import { useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/src/components/ui/button";
 import { Card } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
-import { Input } from "@/src/components/ui/input";
-import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { AnimatedReveal } from "@/src/components/landing/AnimatedReveal.component";
 import { KineticHeadline } from "@/src/components/landing/KineticHeadline.component";
-import { OrbitRing } from "@/src/components/landing/OrbitRing.component";
 import { MagneticContainer } from "@/src/components/landing/MagneticContainer.component";
+import { HeroIllustration } from "@/src/components/landing/HeroIllustration.component";
+import { HeroSearchBar, type HeroSearchFormValues } from "@/src/components/landing/HeroSearchBar.component";
+import { encodeFiltersToQuery } from "@/src/helpers/search-url.helper";
 
 export function LandingHero() {
   const heroRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleHeroSearchSubmit = (values: HeroSearchFormValues) => {
+    const current = new URLSearchParams(searchParams?.toString());
+    const params = encodeFiltersToQuery(values);
+
+    // Preserve unrelated params
+    ["district", "specializations", "languages"].forEach((k) => current.delete(k));
+    params.forEach((v, k) => current.set(k, v));
+
+    const query = current.toString();
+    router.push(query ? `/accountants?${query}` : "/accountants");
+  };
 
   return (
-    <section aria-label='Hero' className='py-10 sm:py-14'>
-      <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
+    <section role='region' aria-label='Hero' className='py-4'>
+      <div className='container mx-auto px-4 sm:px-4 lg:px-6'>
         <Card
           variant='default'
           size='lg'
-          className='relative overflow-hidden rounded-2xl border-2 border-primary-100/60 bg-white shadow-neumorphic-xl md:shadow-neumorphic-xl lg:shadow-neumorphic-desktop-xl'
+          className='relative overflow-hidden rounded-2xl border-2 border-primary-100/60 bg-white shadow-neumorphic-mobile-lg md:shadow-neumorphic-xl lg:shadow-neumorphic-desktop-xl neumorphic-optimized p-0'
         >
-          <div ref={heroRef} className='relative p-8 md:p-10 lg:p-12 text-center space-y-6'>
-            <AnimatedReveal>
-              <Badge className='inline-block bg-primary-50 text-primary-800 border-primary-200/60 shadow-neumorphic-md'>
-                Your Finance, Crafted, Clear, Connected
-              </Badge>
-            </AnimatedReveal>
+          <div ref={heroRef} className='relative p-4 md:p-6 lg:p-8'>
+            <div className='md:grid md:grid-cols-12 md:gap-8 items-center'>
+              <div className='md:col-span-7 space-y-6 text-center md:text-left'>
+                <AnimatedReveal>
+                  <Badge className='inline-block bg-primary-50 text-primary-800 border-primary-200/60 shadow-neumorphic-md'>
+                    Your Finance, Crafted, Clear, Connected
+                  </Badge>
+                </AnimatedReveal>
 
-            <KineticHeadline
-              lines={["Meet Your Next", "Chartered Accountant"]}
-              className='text-3xl lg:text-5xl font-extrabold'
-            />
-
-            <AnimatedReveal delayMs={80}>
-              <p className='text-lg lg:text-xl text-primary-800 max-w-3xl mx-auto'>
-                Discover professionals who speak your business. Search by city or specialization and start a focused
-                conversation in minutes.
-              </p>
-            </AnimatedReveal>
-
-            <AnimatedReveal delayMs={120}>
-              <div className='flex items-center justify-center'>
-                <OrbitRing
-                  size={240}
-                  items={[
-                    { id: "1", label: "Tax Filing" },
-                    { id: "2", label: "GST" },
-                    { id: "3", label: "Audit & Assurance" },
-                    { id: "4", label: "Business Setup" },
-                    { id: "5", label: "Startup Finance" },
-                    { id: "6", label: "Compliance" },
-                  ]}
-                  className='hidden md:block'
+                <KineticHeadline
+                  lines={["Meet Your Next", "Chartered Accountant"]}
+                  className='text-3xl lg:text-5xl font-extrabold'
                 />
-              </div>
-            </AnimatedReveal>
 
-            <AnimatedReveal delayMs={180}>
-              <div className='max-w-2xl mx-auto w-full'>
-                <Card
-                  variant='inset'
-                  className='rounded-2xl border-primary-100/60 bg-white shadow-neumorphic-inset p-4 md:p-6'
-                >
-                  <div className='space-y-4'>
-                    <div className='relative'>
-                      <MagnifyingGlassIcon
-                        className='absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary-400'
-                        weight='bold'
-                      />
-                      <Input
-                        className='pl-12 h-12 md:h-14 text-base md:text-lg rounded-xl border-2 border-primary-100 focus-visible:ring-0 focus-visible:outline-none focus:border-primary-400'
-                        placeholder='Try "Bengaluru GST" or "Startup CFO"'
-                        aria-label='Search'
-                      />
-                    </div>
+                <AnimatedReveal delayMs={80}>
+                  <p className='text-lg lg:text-xl text-primary-800 md:max-w-xl'>Get clarity on your numbers, fast.</p>
+                </AnimatedReveal>
 
-                    <div className='flex flex-col sm:flex-row gap-3'>
-                      <MagneticContainer className='w-full'>
-                        <Link href='/accountants' className='w-full block'>
-                          <Button className='w-full min-h-[44px]' variant='primary'>
-                            Explore Experts
-                          </Button>
-                        </Link>
-                      </MagneticContainer>
-                      <MagneticContainer className='w-full'>
-                        <Link href='/auth?join=ca' className='w-full block'>
-                          <Button className='w-full min-h-[44px]' variant='outline'>
-                            Join as CA
-                          </Button>
-                        </Link>
-                      </MagneticContainer>
-                    </div>
+                <AnimatedReveal delayMs={140}>
+                  <div className='max-w-3xl md:max-w-none mx-auto md:mx-0'>
+                    <HeroSearchBar onSubmit={handleHeroSearchSubmit} />
                   </div>
-                </Card>
+                </AnimatedReveal>
+
+                <AnimatedReveal delayMs={180}>
+                  <div className='mt-2 flex flex-col sm:flex-row gap-3 max-w-3xl md:max-w-none mx-auto md:mx-0 justify-between'>
+                    <MagneticContainer className='w-full sm:w-[40%]'>
+                      <Link href='/accountants' className='w-full block'>
+                        <Button
+                          className='w-full min-h-[44px] transition-neumorphic hover:scale-110 active:scale-95 hover:shadow-neumorphic-hover active:shadow-neumorphic-inset'
+                          variant='outline'
+                        >
+                          Explore Experts
+                        </Button>
+                      </Link>
+                    </MagneticContainer>
+                    <div className='flex-1 hidden sm:block' />
+                    <MagneticContainer className='w-full sm:w-[40%]'>
+                      <Link href='/auth?join=ca' className='w-full block'>
+                        <Button
+                          className='w-full min-h-[44px] transition-neumorphic hover:scale-110 active:scale-95 hover:shadow-neumorphic-hover active:shadow-neumorphic-inset'
+                          variant='primary'
+                        >
+                          Join as CA
+                        </Button>
+                      </Link>
+                    </MagneticContainer>
+                  </div>
+                </AnimatedReveal>
               </div>
-            </AnimatedReveal>
+
+              <div className='md:col-span-5 hidden md:block lg:pb-14'>
+                <AnimatedReveal delayMs={120}>
+                  <div className='mx-auto max-w-4xl'>
+                    <HeroIllustration className='max-h-64 w-full' />
+                  </div>
+                </AnimatedReveal>
+              </div>
+            </div>
           </div>
         </Card>
       </div>

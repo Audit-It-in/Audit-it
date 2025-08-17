@@ -50,10 +50,7 @@ function DashboardContent() {
   const { data: signedAvatarUrl } = useProfilePictureUrl(isAbsoluteUrl ? undefined : picturePathOrUrl);
 
   // Derived UI flags for tiles
-  const profileCompletion =
-    (typeof (details as any)?.profile_completion_percentage === "number"
-      ? (details as any)?.profile_completion_percentage
-      : profile?.profile_completion_percentage) ?? 0;
+  const profileCompletion = details?.profile_completion_percentage ?? profile?.profile_completion_percentage ?? 0;
   const needsProfileSetup = Boolean(
     profileCompletion < 100 || !profile?.username || !details?.state_name || !details?.district_name
   );
