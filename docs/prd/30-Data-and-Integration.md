@@ -1,24 +1,155 @@
-# Database Schema Documentation
+# Data, Database, and Integration
 
-## Quick Reference
+## Quick Summary
 
-| **Entity**           | **Purpose**               | **Key Features**             |
-| -------------------- | ------------------------- | ---------------------------- |
-| **profiles**         | Core user data            | Normalized with foreign keys |
-| **languages**        | Language management       | Replaces text arrays         |
-| **specializations**  | Service categories        | Hierarchical with categories |
-| **states/districts** | Location management       | Normalized location data     |
-| **contact_requests** | Customer-CA communication | Status tracking and notes    |
+- Supabase client with auth auto-refresh and persisted session
+- Signed URL strategy with in-memory TTL cache and targeted invalidation
+- Standard query keys, stale times, and pagination contract
+- Normalized database schema with views, indexes, and RLS notes
 
-## Schema Overview
+---
 
-The database follows a normalized design with proper foreign key relationships, replacing text arrays with dedicated lookup tables for better performance and maintainability.
+## Supabase Client Configuration
+
+```typescript
+// src/helpers/supabase.helper.ts
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+  },
+});
+```
+
+---
+
+## Storage: Signed URL Strategy
+
+```typescript
+// src/services/upload.service.ts (excerpt)
+type UrlCacheValue = { url: string; expires: number };
+const urlCache = new Map<string, UrlCacheValue>();
+
+export async function getSignedUrl(bucket: string, path: string, expiresInSeconds = 15 * 60): Promise<string> {
+  const now = Date.now();
+  const key = `${bucket}:${path}`;
+  const cached = urlCache.get(key);
+  if (cached && cached.expires > now + 5_000) return cached.url;
+
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresInSeconds);
+  if (error || !data?.signedUrl) throw new Error("Failed to generate signed URL");
+  const value = { url: data.signedUrl, expires: now + expiresInSeconds * 1000 };
+  urlCache.set(key, value);
+  return value.url;
+}
+
+export function clearUrlCache(bucket?: string, path?: string): void {
+  if (bucket && path) urlCache.delete(`${bucket}:${path}`);
+  else urlCache.clear();
+}
+```
+
+```typescript
+// React Query hook (avatar URLs)
+export function useProfilePictureUrl(path?: string | null) {
+  return useQuery<string>({
+    queryKey: ["profile-picture-url", path],
+    queryFn: () => getSignedProfilePictureUrl(path!),
+    enabled: !!path,
+    staleTime: 15 * 60 * 1000,
+  });
+}
+```
+
+---
+
+## Query Keys and Cache Times
+
+- Profiles: `["profile", userId]` — stale 30m
+- Contact requests (all): `["contact-requests", filters, pagination]` — stale 5m
+- CA dashboard: `["contact-requests", "ca", caProfileId, filters, pagination]` — stale 2m
+- Customer requests: `["contact-requests", "customer", customerProfileId, filters, pagination]` — stale 5m
+- Single request: `["contact-request", requestId]` — stale 2m
+- Discovery: `["ca-discovery", filters, pagination]` — stale 10m
+- Analytics: `["contact-request-analytics", caProfileId, dateRange]` — stale 15m
+- Signed URLs: `["profile-picture-url", path]` — stale 15m
+
+### Real-time Invalidation Pattern
+
+Use a Postgres changes channel to invalidate relevant queries when `contact_requests` changes (CA dashboard and analytics). Invalidate:
+
+- `["contact-requests", "ca", caProfileId]`
+- `["contact-request-analytics", caProfileId]`
+
+### Cache Invalidation on Mutations
+
+On create/update contact requests, invalidate:
+
+- `["contact-requests"]`
+- `["contact-requests", "ca", caProfileId]`
+- `["contact-requests", "customer", customerProfileId]` (when present)
+- `["contact-request-analytics", caProfileId]`
+
+---
+
+## Pagination Contract
+
+```typescript
+export interface PaginationParams {
+  page: number;
+  limit: number;
+}
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: { page: number; limit: number; total: number; totalPages: number; hasNext: boolean; hasPrev: boolean };
+}
+
+// Supabase pattern
+const offset = (page - 1) * limit;
+const { data, count } = await supabase
+  .from("contact_requests_with_details")
+  .select("*", { count: "exact" })
+  .range(offset, offset + limit - 1);
+```
+
+---
+
+## Validation and Errors
+
+### Zod vs Service-Level Validation
+
+- Runtime form validation uses Zod.
+- Service functions perform defensive checks and sanitize inputs before insert/update.
+
+### Error Handling Contract (Normalization)
+
+Normalize Supabase and network errors to domain errors. Example mapping:
+
+```typescript
+if (error.message.includes("PGRST301")) // permission denied
+if (error.message.includes("PGRST116")) // not found
+if (error.message.includes("23503"))    // FK violation
+```
+
+Return user-friendly messages; never surface raw DB errors to UI.
+
+### Rate Limiting (Client-Side Guard)
+
+- Basic in-memory throttle for anonymous creates. For production, enforce server-side limits (edge functions).
+
+---
+
+## Database Schema (Normalized)
 
 ### Core Tables
 
 #### profiles
-
-Core user information with normalized references:
 
 ```sql
 CREATE TABLE public.profiles (
@@ -63,31 +194,27 @@ CREATE TABLE public.profiles (
 
 #### languages
 
-Normalized language management:
-
 ```sql
 CREATE TABLE public.languages (
   id serial PRIMARY KEY,
   name varchar(100) NOT NULL UNIQUE,
-  code varchar(10) UNIQUE,              -- ISO language codes
-  native_name varchar(100),             -- Language in native script
+  code varchar(10) UNIQUE,
+  native_name varchar(100),
   is_active boolean DEFAULT true,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now()
 );
 ```
 
-**Default Languages:** English, Hindi, Gujarati, Marathi, Tamil, Telugu, Kannada, Malayalam, Bengali, Punjabi, Urdu, Odia, Assamese
+Default languages include: English, Hindi, Gujarati, Marathi, Tamil, Telugu, Kannada, Malayalam, Bengali, Punjabi, Urdu, Odia, Assamese.
 
 #### specialization_categories
-
-Service category hierarchy:
 
 ```sql
 CREATE TABLE public.specialization_categories (
   id serial PRIMARY KEY,
   name varchar(100) NOT NULL UNIQUE,
-  code varchar(50) NOT NULL UNIQUE,     -- Programmatic access
+  code varchar(50) NOT NULL UNIQUE,
   description text,
   display_order integer DEFAULT 0,
   is_active boolean DEFAULT true,
@@ -96,11 +223,7 @@ CREATE TABLE public.specialization_categories (
 );
 ```
 
-**Categories:** Tax Services, GST Services, Registration Services, Audit Services, Compliance Services, Accounting Services, Planning Services, Advisory Services, Other Services
-
 #### specializations
-
-Individual services within categories:
 
 ```sql
 CREATE TABLE public.specializations (
@@ -118,8 +241,6 @@ CREATE TABLE public.specializations (
 ```
 
 #### states / districts
-
-Location management:
 
 ```sql
 CREATE TABLE states (
@@ -142,8 +263,6 @@ CREATE TABLE districts (
 
 #### experiences
 
-CA work history:
-
 ```sql
 CREATE TABLE public.experiences (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -162,8 +281,6 @@ CREATE TABLE public.experiences (
 
 #### educations
 
-CA education history:
-
 ```sql
 CREATE TABLE public.educations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -181,8 +298,6 @@ CREATE TABLE public.educations (
 ```
 
 #### contact_requests
-
-Customer-CA communication:
 
 ```sql
 CREATE TABLE public.contact_requests (
@@ -218,8 +333,6 @@ CREATE TABLE public.contact_requests (
 
 #### ca_verifications
 
-CA certification verification:
-
 ```sql
 CREATE TABLE public.ca_verifications (
   profile_id uuid PRIMARY KEY REFERENCES profiles(id),
@@ -231,8 +344,6 @@ CREATE TABLE public.ca_verifications (
 ```
 
 #### social_profile
-
-Social media and professional links:
 
 ```sql
 CREATE TABLE public.social_profile (
@@ -249,30 +360,25 @@ CREATE TABLE public.social_profile (
 );
 ```
 
+---
+
 ## Database Views
 
 ### profile_details
-
-Aggregated profile view with resolved names:
 
 ```sql
 CREATE VIEW public.profile_details AS
 SELECT
   p.*,
-  -- Location details
   s.name as state_name,
   d.name as district_name,
-  -- Language details (aggregated)
   ARRAY(
-    SELECT l.name
-    FROM public.languages l
+    SELECT l.name FROM public.languages l
     WHERE l.id = ANY(p.language_ids)
     ORDER BY l.name
   ) as language_names,
-  -- Specialization details (aggregated)
   ARRAY(
-    SELECT sp.name
-    FROM public.specializations sp
+    SELECT sp.name FROM public.specializations sp
     WHERE sp.id = ANY(p.specialization_ids)
     ORDER BY sp.display_order
   ) as specialization_names
@@ -282,8 +388,6 @@ LEFT JOIN public.districts d ON p.district_id = d.id;
 ```
 
 ### specializations_with_categories
-
-Specializations with category information:
 
 ```sql
 CREATE VIEW public.specializations_with_categories AS
@@ -301,13 +405,10 @@ ORDER BY c.display_order, s.display_order;
 
 ### contact_requests_with_details
 
-Optimized view joining `contact_requests` with CA/customer profile and location details, plus computed fields:
-
 ```sql
 CREATE OR REPLACE VIEW contact_requests_with_details AS
 SELECT
     cr.*,
-    -- CA Profile Details
     ca.first_name as ca_first_name,
     ca.last_name as ca_last_name,
     ca.profile_picture_url as ca_profile_picture,
@@ -315,23 +416,14 @@ SELECT
     ca.username as ca_username,
     ca_state.name as ca_state_name,
     ca_district.name as ca_district_name,
-    -- Customer Profile Details (if available)
     customer.first_name as customer_first_name,
     customer.last_name as customer_last_name,
     customer.profile_picture_url as customer_profile_picture,
-    -- Specialization Details
     ARRAY(
-        SELECT s.name
-        FROM specializations s
+        SELECT s.name FROM specializations s
         WHERE s.code = cr.service_needed
     ) as service_specialization_names,
-    -- Additional computed fields
-    CASE 
-        WHEN cr.replied_at IS NOT NULL THEN 
-            EXTRACT(EPOCH FROM (cr.replied_at - cr.created_at)) / 3600
-        ELSE NULL
-    END as response_time_hours,
-    -- Urgency priority for sorting (urgent=4, high=3, medium=2, low=1)
+    CASE WHEN cr.replied_at IS NOT NULL THEN EXTRACT(EPOCH FROM (cr.replied_at - cr.created_at)) / 3600 END as response_time_hours,
     CASE cr.urgency
         WHEN 'urgent' THEN 4
         WHEN 'high' THEN 3
@@ -346,11 +438,11 @@ LEFT JOIN states ca_state ON ca.state_id = ca_state.id
 LEFT JOIN districts ca_district ON ca.district_id = ca_district.id;
 ```
 
+---
+
 ## Database Functions
 
 ### get_contact_request_stats
-
-Analytics function to compute request counts, response rate, and average response time for a CA (optional date window):
 
 ```sql
 CREATE OR REPLACE FUNCTION get_contact_request_stats(
@@ -373,24 +465,8 @@ BEGIN
         COUNT(*) FILTER (WHERE status = 'new') as new_requests,
         COUNT(*) FILTER (WHERE status = 'replied') as replied_requests,
         COUNT(*) FILTER (WHERE status = 'closed') as closed_requests,
-        CASE 
-            WHEN COUNT(*) > 0 THEN 
-                ROUND(
-                    (COUNT(*) FILTER (WHERE status IN ('replied', 'closed'))::numeric / COUNT(*)::numeric) * 100, 
-                    2
-                )
-            ELSE 0
-        END as response_rate,
-        ROUND(
-            AVG(
-                CASE 
-                    WHEN replied_at IS NOT NULL THEN 
-                        EXTRACT(EPOCH FROM (replied_at - created_at)) / 3600
-                    ELSE NULL
-                END
-            )::numeric, 
-            2
-        ) as avg_response_time_hours
+        CASE WHEN COUNT(*) > 0 THEN ROUND((COUNT(*) FILTER (WHERE status IN ('replied', 'closed'))::numeric / COUNT(*)::numeric) * 100, 2) ELSE 0 END as response_rate,
+        ROUND(AVG(CASE WHEN replied_at IS NOT NULL THEN EXTRACT(EPOCH FROM (replied_at - created_at)) / 3600 END)::numeric, 2) as avg_response_time_hours
     FROM contact_requests
     WHERE ca_profile_id = p_ca_profile_id
         AND (p_start_date IS NULL OR created_at >= p_start_date)
@@ -399,27 +475,29 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
+---
+
 ## Storage Buckets
 
 ### profile-pictures
 
-- **Purpose:** User profile pictures
-- **Access:** Private (users can only access their own)
-- **File Size Limit:** 5MB
-- **Allowed MIME Types:** image/jpeg, image/jpg, image/png, image/webp
-- **Naming Convention:** `{auth_user_id}/avatar.{ext}`
+- Purpose: User profile pictures
+- Access: Private (per-user)
+- File Size Limit: 5MB
+- Allowed MIME Types: image/jpeg, image/jpg, image/png, image/webp
+- Naming: `{auth_user_id}/avatar.{ext}`
 
 ### accountant-certificates
 
-- **Purpose:** CA membership certificates
-- **Access:** Private (users can only access their own)
-- **File Size Limit:** 5MB
-- **Allowed MIME Types:** application/pdf, image/jpeg, image/jpg, image/png
-- **Naming Convention:** `{auth_user_id}/certificate.{ext}`
+- Purpose: CA membership certificates
+- Access: Private (per-user)
+- File Size Limit: 5MB
+- Allowed MIME Types: application/pdf, image/jpeg, image/jpg, image/png
+- Naming: `{auth_user_id}/certificate.{ext}`
+
+---
 
 ## Indexing Strategy
-
-### Performance Indexes
 
 ```sql
 -- Profile table indexes
@@ -436,21 +514,13 @@ CREATE INDEX idx_contact_requests_ca_profile_id ON contact_requests(ca_profile_i
 CREATE INDEX idx_contact_requests_status ON contact_requests(status);
 CREATE INDEX idx_contact_requests_created_at ON contact_requests(created_at);
 
--- Additional optimized contact request indexes
-CREATE INDEX IF NOT EXISTS idx_contact_requests_ca_profile_status 
-  ON contact_requests(ca_profile_id, status);
-CREATE INDEX IF NOT EXISTS idx_contact_requests_customer_profile_status 
-  ON contact_requests(customer_profile_id, status) 
-  WHERE customer_profile_id IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_contact_requests_urgency_created 
-  ON contact_requests(urgency, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_contact_requests_status_updated 
-  ON contact_requests(status, updated_at DESC);
-CREATE INDEX IF NOT EXISTS idx_contact_requests_ca_dashboard 
-  ON contact_requests(ca_profile_id, status, urgency, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_contact_requests_customer_dashboard 
-  ON contact_requests(customer_profile_id, status, created_at DESC) 
-  WHERE customer_profile_id IS NOT NULL;
+-- Optimized contact request indexes
+CREATE INDEX IF NOT EXISTS idx_contact_requests_ca_profile_status ON contact_requests(ca_profile_id, status);
+CREATE INDEX IF NOT EXISTS idx_contact_requests_customer_profile_status ON contact_requests(customer_profile_id, status) WHERE customer_profile_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_contact_requests_urgency_created ON contact_requests(urgency, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_requests_status_updated ON contact_requests(status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_requests_ca_dashboard ON contact_requests(ca_profile_id, status, urgency, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_requests_customer_dashboard ON contact_requests(customer_profile_id, status, created_at DESC) WHERE customer_profile_id IS NOT NULL;
 
 -- Lookup table indexes
 CREATE INDEX idx_languages_name ON languages(name);
@@ -458,43 +528,42 @@ CREATE INDEX idx_specializations_category_id ON specializations(category_id);
 CREATE INDEX idx_districts_state_id ON districts(state_id);
 ```
 
+---
+
 ## Row Level Security (RLS)
 
-RLS is enabled with the following policies:
-
-- Public read access (enabled): `languages`, `specialization_categories`, `specializations`, `states`, `districts`
-  - SELECT allowed for everyone; full access for service role
+- Public read (enabled): `languages`, `specialization_categories`, `specializations`, `states`, `districts`
 - Contact requests (enabled): `contact_requests`
   - CAs can view/update requests sent to them; customers can view their own; both authenticated and anonymous inserts allowed (with constraints)
-- Profiles and related (planned/controlled via service layer): `profiles`, `experiences`, `educations`
-  - No explicit RLS policies in current migrations
+- Profiles/related (planned/controlled via service layer): `profiles`, `experiences`, `educations`
+
+---
 
 ## Migration History
 
-1. **001-base.sql** - Initial schema
-2. **002-location-management-simple-2025-01-15.sql** - States and districts
-3. **003-profile-completion-tracking-2025-01-15.sql** - Completion tracking
-4. **004-profile-location-fields-2025-01-15.sql** - Foreign key location fields
-5. **005-setup-certificate-storage-2025-01-15.sql** - Certificate storage
-6. **006-normalize-schema-2025-01-16.sql** - Languages table and cleanup
-7. **007-profile-picture-storage-2025-07-13.sql** - Profile picture storage
-8. **008-specializations-normalization-2025-07-22.sql** - Specializations normalization
-9. **009-contact-requests-view-2025-01-16.sql** - Contact requests optimized view, indexes, RLS, analytics function
+1. 001-base.sql — Initial schema
+2. 002-location-management-simple-2025-01-15.sql — States and districts
+3. 003-profile-completion-tracking-2025-01-15.sql — Completion tracking
+4. 004-profile-location-fields-2025-01-15.sql — Foreign key location fields
+5. 005-setup-certificate-storage-2025-01-15.sql — Certificate storage
+6. 006-normalize-schema-2025-01-16.sql — Languages table and cleanup
+7. 007-profile-picture-storage-2025-07-13.sql — Profile picture storage
+8. 008-specializations-normalization-2025-07-22.sql — Specializations normalization
+9. 009-contact-requests-view-2025-01-16.sql — Optimized view, indexes, RLS, analytics function
+
+---
 
 ## TypeScript Integration
-
-The database schema is fully integrated with TypeScript types:
 
 ```typescript
 // Types match database schema exactly
 interface Profile {
   id: string;
   auth_user_id: string;
-  language_ids: number[]; // References languages.id[]
-  specialization_ids: number[]; // References specializations.id[]
-  state_id?: number; // References states.id
-  district_id?: number; // References districts.id
-  // ... other fields
+  language_ids: number[];
+  specialization_ids: number[];
+  state_id?: number;
+  district_id?: number;
 }
 
 // Extended type for display with resolved names
@@ -506,4 +575,10 @@ interface ProfileDetails extends Profile {
 }
 ```
 
-This schema provides a robust, normalized foundation for the CA platform with proper relationships, indexing, and type safety.
+---
+
+## Related Documentation
+
+- [10-Product](./10-Product.md)
+- [20-Architecture](./20-Architecture.md)
+- [40-Design-System](./40-Design-System.md)

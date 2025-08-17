@@ -8,7 +8,7 @@ import { useProfilePictureUrl } from "@/src/services/upload.service";
 import Link from "next/link";
 import { cn } from "@/src/helpers/tailwind.helper";
 import { useAccountantProfile } from "@/src/services/accountant-discovery.service";
-import { useExperiences, useVerification } from "@/src/services/profile.service";
+import { useExperiences, useVerification, useEducations } from "@/src/services/profile.service";
 import { useAuth } from "@/src/hooks/useAuth";
 import type { ProfileDetails } from "@/src/types/profile.type";
 import { LoadingAction } from "@/src/types/ui.type";
@@ -20,6 +20,7 @@ import { SidebarDetails } from "./profile/SidebarDetails.component";
 import { ProfileCTA } from "./profile/ProfileCTA.component";
 import { ProfessionalAuditTrail } from "./profile/ProfessionalAuditTrail.component";
 import { ProfileNotFound } from "./profile/ProfileNotFound.component";
+import { EducationList } from "./profile/EducationList.component";
 
 interface AccountantProfileViewProps {
   state: string;
@@ -42,6 +43,7 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
   // Fetch accountant profile data
   const { data: profile, isLoading, error } = useAccountantProfile(state, district, username);
   const { data: experiences = [] } = useExperiences(profile?.id);
+  const { data: educations = [] } = useEducations(profile?.id);
 
   const { data: verification } = useVerification(profile?.id);
 
@@ -165,6 +167,8 @@ export const AccountantProfileView: React.FC<AccountantProfileViewProps> = ({
             experiences={experiences}
             isVerified={isVerified}
           />
+
+          <EducationList educations={educations} />
         </div>
 
         <SidebarDetails

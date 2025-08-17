@@ -13,14 +13,17 @@ interface ProfileCTAProps {
 
 export const ProfileCTA: React.FC<ProfileCTAProps> = ({ isAuthenticated, onContactClick, phone }) => {
   return (
-    <Card variant='elevated' className='text-center py-8 bg-white'>
+    <Card
+      variant='default'
+      className='text-center py-8 bg-white rounded-2xl border-2 border-primary-100/60 shadow-neumorphic-xl'
+    >
       <div className='max-w-2xl mx-auto space-y-4'>
-        <h3 className='text-2xl font-bold text-neutral-900'>Ready to Connect?</h3>
-        <p className='text-neutral-700'>
+        <h3 className='text-2xl font-bold text-primary-900'>Ready to Connect?</h3>
+        <p className='text-primary-800'>
           Send a contact request to discuss your requirements with this Chartered Accountant.
         </p>
         <div className='flex flex-col sm:flex-row gap-3 justify-center items-center'>
-          <Button size='lg' onClick={onContactClick} className='gap-2' glow='primary'>
+          <Button size='lg' onClick={onContactClick} className='gap-2' variant='primary'>
             <ChatCircleIcon className='h-5 w-5' weight='bold' />
             {!isAuthenticated ? "Sign In to Contact" : "Send Contact Request"}
           </Button>
@@ -34,8 +37,8 @@ export const ProfileCTA: React.FC<ProfileCTAProps> = ({ isAuthenticated, onConta
         </div>
 
         {!isAuthenticated && (
-          <p className='text-sm text-neutral-600'>
-            <a href='/auth' className='text-primary-600 hover:underline'>
+          <p className='text-sm text-primary-700'>
+            <a href='/auth' className='text-primary-700 hover:underline'>
               Sign up for free
             </a>{" "}
             to connect with verified Chartered Accountants

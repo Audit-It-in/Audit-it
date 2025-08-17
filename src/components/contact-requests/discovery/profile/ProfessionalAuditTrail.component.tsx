@@ -32,157 +32,112 @@ export const ProfessionalAuditTrail: React.FC<ProfessionalAuditTrailProps> = ({
   isVerified,
 }) => {
   return (
-    <Card variant='enhanced' size='default'>
-      <div className='p-2 space-y-6 relative z-10'>
-        {/* Enhanced Section Header with Creative Name */}
+    <Card variant='default' size='default' className='shadow-neumorphic-xl rounded-2xl border-2 border-primary-100/60'>
+      <div className='p-2 space-y-6'>
+        {/* Section Header */}
         <div className='flex items-center gap-3'>
-          <div
-            className={cn(
-              "w-2 h-6 bg-gradient-to-b from-primary-500 to-primary-700 rounded-xl shadow-neumorphic-sm",
-              "relative overflow-hidden",
-              "before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/30 before:to-transparent before:rounded-xl"
-            )}
-          ></div>
+          <div className='w-2 h-6 bg-primary-600 rounded-xl shadow-neumorphic-sm' />
           <h2 className='text-xl font-bold text-primary-900'>Professional Audit Trail</h2>
         </div>
 
-        {/* Enhanced Bio Display with Deep Inset Container */}
+        {/* Bio - solid surface, deep inset */}
         <div
           className={cn(
-            "p-4 rounded-2xl shadow-neumorphic-inset-deep bg-gradient-to-br from-neutral-50 to-primary-50/30",
-            "border-2 border-primary-200/40 relative overflow-hidden transition-all duration-500",
-            "hover:shadow-neumorphic-inset-primary hover:border-primary-300/60",
-            "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/40 before:via-transparent before:to-primary-100/20 before:opacity-60 before:rounded-2xl"
+            "p-4 rounded-2xl shadow-neumorphic-inset-deep bg-neutral-50",
+            "border-2 border-primary-100/60 transition-all duration-300 hover:border-primary-200/80"
           )}
         >
-          <div className='relative z-10'>
-            {bio ? (
-              <p className='text-primary-800 leading-relaxed font-medium'>{bio}</p>
-            ) : (
-              <p className='text-primary-700 italic font-medium'>
-                {fullName} is a verified Chartered Accountant providing professional services in {location}.
-              </p>
-            )}
-          </div>
+          {bio ? (
+            <p className='text-primary-800 leading-relaxed font-medium'>{bio}</p>
+          ) : (
+            <p className='text-primary-700 italic font-medium'>
+              {fullName} is a verified Chartered Accountant providing professional services in {location}.
+            </p>
+          )}
         </div>
 
-        {/* Professional Experience Section - Only show if experiences exist */}
+        {/* Experience Timeline */}
         {experiences.length > 0 && (
           <div className='space-y-4'>
             <div className='flex items-center gap-3'>
-              <div
-                className={cn(
-                  "p-3 rounded-2xl shadow-neumorphic-inset-deep bg-white/90 border-2 border-primary-200/40"
-                )}
-              >
+              <div className='p-3 rounded-2xl shadow-neumorphic-inset-deep bg-white border-2 border-primary-100/60'>
                 <BriefcaseIcon className='h-5 w-5 text-primary-600' weight='bold' />
               </div>
               <h3 className='text-lg font-bold text-primary-900'>Career Journey</h3>
             </div>
 
-            <div className='space-y-3'>
-              {experiences.slice(0, 3).map((exp) => (
-                <div
-                  key={exp.id}
-                  className={cn(
-                    "group relative overflow-hidden transition-all duration-500",
-                    "p-4 rounded-2xl shadow-neumorphic-inset-deep bg-gradient-to-br from-white to-primary-50/30",
-                    "border-2 border-primary-200/40 hover:border-primary-300/60",
-                    "hover:shadow-neumorphic-inset-primary",
-                    "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/40 before:via-transparent before:to-primary-100/20 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500 before:rounded-2xl"
-                  )}
-                >
-                  <div className='relative z-10 space-y-2'>
-                    <div className='flex items-start justify-between'>
-                      <div className='space-y-1 flex-1'>
-                        <h4 className='font-bold text-primary-900 text-base group-hover:text-primary-800 transition-colors duration-300'>
-                          {exp.title || "Professional Role"}
-                        </h4>
-                        {exp.company_name && (
-                          <p className='text-primary-700 font-medium text-sm group-hover:text-primary-600 transition-colors duration-300'>
-                            {exp.company_name}
+            <div className='relative pl-6'>
+              {/* Vertical connector */}
+              <div className='absolute left-2 top-0 bottom-0 w-1 rounded-full bg-primary-50 border border-primary-100 shadow-neumorphic-inset-deep' />
+
+              <div className='space-y-4'>
+                {experiences.slice(0, 3).map((exp) => (
+                  <div key={exp.id} className='relative'>
+                    {/* Node */}
+                    <div className='absolute -left-0.5 top-2 h-3 w-3 rounded-full bg-primary-600 border-2 border-white shadow-neumorphic-sm' />
+
+                    <div
+                      className={cn(
+                        "group transition-all duration-300",
+                        "p-4 rounded-2xl shadow-neumorphic-md hover:shadow-neumorphic-lg",
+                        "bg-white border-2 border-primary-100/60 hover:border-primary-200/80"
+                      )}
+                    >
+                      <div className='space-y-2'>
+                        <div className='flex items-start justify-between gap-3'>
+                          <div className='space-y-1 flex-1'>
+                            <h4 className='font-bold text-primary-900 text-base'>{exp.title || "Professional Role"}</h4>
+                            {exp.company_name && (
+                              <p className='text-primary-700 font-medium text-sm'>{exp.company_name}</p>
+                            )}
+                            {exp.location && <p className='text-xs text-primary-600 font-medium'>{exp.location}</p>}
+                          </div>
+                          <div className='flex items-center gap-2 px-3 py-1 rounded-2xl shadow-neumorphic-inset-deep bg-white border-2 border-primary-100/60'>
+                            <CalendarIcon className='h-3 w-3 text-primary-600' weight='bold' />
+                            <span className='text-xs font-bold text-primary-800'>
+                              {exp.start_date && new Date(exp.start_date).getFullYear()} -{" "}
+                              {exp.is_current ? "Present" : exp.end_date && new Date(exp.end_date).getFullYear()}
+                            </span>
+                          </div>
+                        </div>
+
+                        {exp.description && (
+                          <p className='text-primary-800 text-xs leading-relaxed font-medium mt-2 p-2 rounded-2xl shadow-neumorphic-inset-deep bg-neutral-50 border-2 border-primary-100/60'>
+                            {exp.description.length > 160 ? `${exp.description.substring(0, 160)}...` : exp.description}
                           </p>
                         )}
-                        {exp.location && (
-                          <p className='text-xs text-primary-600 font-medium group-hover:text-primary-500 transition-colors duration-300'>
-                            {exp.location}
-                          </p>
-                        )}
-                      </div>
-                      <div
-                        className={cn(
-                          "flex items-center gap-2 px-3 py-1 rounded-2xl shadow-neumorphic-inset-deep",
-                          "bg-white/90 border-2 border-primary-200/40 group-hover:border-primary-300/60 transition-all duration-300"
-                        )}
-                      >
-                        <CalendarIcon className='h-3 w-3 text-primary-600' weight='bold' />
-                        <span className='text-xs font-bold text-primary-800'>
-                          {exp.start_date && new Date(exp.start_date).getFullYear()} -{" "}
-                          {exp.is_current ? "Present" : exp.end_date && new Date(exp.end_date).getFullYear()}
-                        </span>
                       </div>
                     </div>
-
-                    {exp.description && (
-                      <p className='text-primary-800 text-xs leading-relaxed font-medium mt-3 p-2 rounded-2xl shadow-neumorphic-inset-deep bg-white/60 border-2 border-primary-200/40 group-hover:bg-white/80 transition-all duration-300'>
-                        {exp.description.length > 120 ? `${exp.description.substring(0, 120)}...` : exp.description}
-                      </p>
-                    )}
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {/* Show more experiences indicator */}
-              {experiences.length > 3 && (
-                <div
-                  className={cn(
-                    "p-4 rounded-2xl shadow-neumorphic-inset-deep bg-gradient-to-br from-accent-50/50 to-accent-100/30",
-                    "border-2 border-accent-200/40 text-center relative overflow-hidden",
-                    "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/40 before:via-transparent before:to-accent-100/20 before:opacity-60 before:rounded-2xl"
-                  )}
-                >
-                  <p className='text-accent-700 font-semibold text-sm relative z-10'>
-                    + {experiences.length - 3} more position{experiences.length - 3 !== 1 ? "s" : ""} in career history
-                  </p>
-                </div>
-              )}
+                {experiences.length > 3 && (
+                  <div className='ml-0 relative'>
+                    <div className='absolute -left-0.5 top-1.5 h-3 w-3 rounded-full bg-accent-600 border-2 border-white shadow-neumorphic-sm' />
+                    <div className='p-4 rounded-2xl shadow-neumorphic-inset-deep bg-accent-50 border-2 border-accent-100 text-center'>
+                      <p className='text-accent-700 font-semibold text-sm'>
+                        + {experiences.length - 3} more position{experiences.length - 3 !== 1 ? "s" : ""} in career
+                        history
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
 
-        {/* Compact Metric Cards - Only show verification status */}
+        {/* Verification badge */}
         {isVerified && (
           <div className='flex justify-center'>
-            <div
-              className={cn(
-                "group cursor-default relative overflow-hidden transition-all duration-500 neumorphic-optimized",
-                "shadow-neumorphic-lg hover:shadow-neumorphic-accent-lg",
-                "transform hover:scale-110 active:scale-95",
-                "bg-gradient-to-br from-accent-50 via-accent-100/80 to-accent-200/60",
-                "border-2 border-accent-200/40 hover:border-accent-300/80",
-                "rounded-2xl p-4 max-w-xs",
-                "before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/60 before:via-transparent before:to-accent-100/30 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-500 before:rounded-2xl"
-              )}
-            >
-              <div className='flex items-center gap-3 relative z-10'>
-                <div
-                  className={cn(
-                    "p-3 rounded-2xl shadow-neumorphic-inset-deep bg-white/90 border-2 border-accent-200/40",
-                    "group-hover:shadow-neumorphic-inset-accent transition-all duration-300"
-                  )}
-                >
-                  <CheckCircleIcon
-                    className='h-5 w-5 text-accent-600 group-hover:text-accent-700 transition-colors duration-300'
-                    weight='fill'
-                  />
+            <div className='group cursor-default transition-all duration-300 neumorphic-optimized shadow-neumorphic-lg hover:shadow-neumorphic-accent-lg rounded-2xl p-4 max-w-xs bg-white border-2 border-accent-100/60'>
+              <div className='flex items-center gap-3'>
+                <div className='p-3 rounded-2xl shadow-neumorphic-inset-deep bg-white border-2 border-accent-100/60'>
+                  <CheckCircleIcon className='h-5 w-5 text-accent-600' weight='fill' />
                 </div>
                 <div>
-                  <div className='font-bold text-accent-900 text-lg group-hover:text-accent-800 transition-colors duration-300'>
-                    Verified CA
-                  </div>
-                  <div className='text-xs font-semibold text-accent-600 group-hover:text-accent-700 transition-colors duration-300'>
-                    ICAI Membership Verified
-                  </div>
+                  <div className='font-bold text-accent-900 text-lg'>Verified CA</div>
+                  <div className='text-xs font-semibold text-accent-600'>ICAI Membership Verified</div>
                 </div>
               </div>
             </div>
