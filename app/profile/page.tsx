@@ -9,6 +9,8 @@ import { Loader } from "@/src/components/common/Loader.component";
 import { LoadingAction } from "@/src/types/ui.type";
 import { ProfileStep } from "@/src/types/profile.type";
 import { UserRole } from "@/src/types/auth.type";
+import { ArrowLeftIcon } from "@phosphor-icons/react";
+import { cn } from "@/src/helpers/tailwind.helper";
 
 function ProfilePageContent() {
   const { user, profile, isAuthenticated, authLoading } = useAuth();
@@ -51,6 +53,25 @@ function ProfilePageContent() {
         <div className='max-w-4xl mx-auto'>
           {/* Page Header */}
           <div className='mb-6'>
+            <nav
+              role='navigation'
+              aria-label='Profile setup navigation'
+              className='mb-3 inline-flex items-center space-x-2 p-2 rounded-lg shadow-neumorphic-inset bg-neutral-50/80 border border-primary-100/50'
+            >
+              <button
+                onClick={() => router.back()}
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-200",
+                  "shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset focus:shadow-neumorphic-focus",
+                  "bg-white/80 text-primary-600 hover:text-primary-700 text-sm font-medium",
+                  "min-h-[44px] transition-neumorphic"
+                )}
+                aria-label='Go back'
+              >
+                <ArrowLeftIcon className='h-3.5 w-3.5' weight='bold' />
+                Back
+              </button>
+            </nav>
             <h1 className='text-2xl font-bold text-primary-900 mb-1'>Complete Your CA Profile</h1>
             <p className='text-sm text-neutral-600'>
               Build your professional presence and start connecting with clients

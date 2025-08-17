@@ -1,6 +1,8 @@
 "use client";
 
 import React, { Suspense } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { useAuth } from "@/src/hooks/useAuth";
 import { Loader } from "@/src/components/common/Loader.component";
 import { LoadingAction } from "@/src/types/ui.type";
@@ -36,6 +38,7 @@ export default function ContactRequestsPage() {
 
 function ContactRequestsContent() {
   const { profile, isAuthenticated, authLoading, isCA, isCustomer } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = React.useState<"ca" | "customer">("ca");
   const [filters, setFilters] = React.useState<ContactRequestFilters>(useDefaultFilters());
   const [page, setPage] = React.useState(1);
@@ -68,6 +71,25 @@ function ContactRequestsContent() {
       <main className='container mx-auto px-4 py-8 sm:px-6 lg:px-8'>
         <div className='max-w-6xl mx-auto space-y-6'>
           <div>
+            <nav
+              role='navigation'
+              aria-label='Contact Requests navigation'
+              className='mb-3 flex items-center space-x-2 p-2 rounded-lg shadow-neumorphic-inset bg-neutral-50/80 border border-primary-100/50'
+            >
+              <button
+                onClick={() => router.back()}
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all duration-200",
+                  "shadow-neumorphic-sm hover:shadow-neumorphic-md active:shadow-neumorphic-inset focus:shadow-neumorphic-focus",
+                  "bg-white/80 text-primary-600 hover:text-primary-700 text-sm font-medium",
+                  "min-h-[44px] transition-neumorphic"
+                )}
+                aria-label='Go back'
+              >
+                <ArrowLeftIcon className='h-3.5 w-3.5' weight='bold' />
+                Back
+              </button>
+            </nav>
             <h1 className='text-2xl font-bold text-neutral-900 mb-2'>Contact Requests</h1>
             <p className='text-neutral-600'>View, filter and manage your conversations.</p>
           </div>
