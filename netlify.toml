@@ -22,4 +22,4 @@
 
 [context.branch-deploy.environment]
   # Netlify-provided branch URL (e.g., https://feature-branch--site.netlify.app)
-  NEXT_PUBLIC_APP_URL = "${URL}"
+  NEXT_PUBLIC_APP_URL = "${DEPLOY_PRIME_URL}"

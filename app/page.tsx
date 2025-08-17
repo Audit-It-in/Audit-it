@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { APP_CONFIG } from "@/src/constants/app.constants";
 
 export const metadata: Metadata = {
   robots: (() => {
-    const isProd = (process.env.NEXT_PUBLIC_APP_URL || "").includes("auditit.in");
+    const isProd = APP_CONFIG.url.includes("auditit.in");
     return { index: isProd, follow: isProd } as const;
   })(),
 };

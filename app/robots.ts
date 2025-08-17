@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { APP_CONFIG } from "@/src/constants/app.constants";
 
 export default function robots(): MetadataRoute.Robots {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = APP_CONFIG.url;
   const isProd = appUrl.includes("auditit.in");
 
   return {
