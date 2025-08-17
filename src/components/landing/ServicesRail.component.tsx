@@ -45,7 +45,7 @@ export function ServicesRail() {
   );
 
   return (
-    <section role='region' aria-label='Popular services' className='py-12'>
+    <section role='region' aria-label='Popular services' className='py-4'>
       <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='text-center mb-6 sm:mb-8'>
           <h2 className='text-xl sm:text-2xl lg:text-3xl font-extrabold text-primary-900'>Popular Services</h2>

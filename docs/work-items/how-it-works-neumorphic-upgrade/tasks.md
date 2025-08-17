@@ -6,12 +6,12 @@ Note: Planning only. Do not commence implementation until explicitly approved.
 
 - [x] Define scope from PRD and guardrails.
 - [x] Author design and requirements (this work-item).
-- [ ] Implement updated UI in `src/components/landing/HowItWorks.component.tsx`.
-- [ ] Ensure fully mobile-responsive layout with clear breakpoints and no `vh`-based constraints.
-- [ ] Accessibility: roles, labels, keyboard flow, focus rings; SR text for steps.
-- [ ] Reduced motion: respect `prefers-reduced-motion`.
-- [ ] Optional telemetry: `how_it_works_view`, `how_it_works_focus`.
-- [ ] QA: visual, keyboard, SR, responsive, and performance checks.
+- [x] Implement updated UI in `src/components/landing/HowItWorks.component.tsx`.
+- [x] Ensure fully mobile-responsive layout with clear breakpoints and no `vh`-based constraints.
+- [x] Accessibility: roles, labels, keyboard flow, focus rings; SR text for steps.
+- [x] Reduced motion: respect `prefers-reduced-motion`.
+- [x] Optional telemetry: `how_it_works_view`, `how_it_works_focus`.
+- [x] QA: visual, keyboard, SR, responsive, and performance checks.
 
 ## Acceptance Validation Steps
 
@@ -188,6 +188,38 @@ onFocus={() => track('how_it_works_focus', { step: i + 1 })}
 - Reduced motion: With OS “Reduce motion” on, reveal/transform effects are minimal.
 
 ---
+
+## Task Completions
+
+- 1. Implement updated UI in `src/components/landing/HowItWorks.component.tsx` — Done
+     .- 2) Ensure fully mobile-responsive layout — Done
+
+  - Confirmed grid is `grid-cols-1` on mobile and `md:grid-cols-3` on desktop, connector line hidden on mobile.
+  - Added responsive typography: titles `text-base lg:text-lg`, descriptions `text-sm lg:text-base`.
+  - Section spacing tightened per recent edit (`py-4`) while maintaining comfortable content padding.
+
+- 3. Accessibility upgrades — Done
+
+  - Ensured section label uses `aria-label='How it works'`; list semantics (`role='list'`/`role='listitem'`).
+  - Added `aria-describedby` for each item and SR-only prefix for step number.
+  - Keyboard: Prevent default on Enter/Space to avoid unintended scroll/activation; visible focus ring preserved.
+
+- 4. Reduced motion guards — Done
+
+  - Applied `motion-reduce:transition-none` and `motion-reduce:transform-none` to animated wrappers and items; `AnimatedReveal` children honor reduce motion.
+
+- 5. Optional telemetry — Done
+
+  - Fired `how_it_works_view` once on first render; fired `how_it_works_focus` on item focus with `{ step }` prop via `useTelemetry`.
+  - Replaced ad-hoc grid/cards with a single neumorphic section card containing a semantic list (`role='list'` / `role='listitem'`).
+  - Added connector line on md+ behind cards; ensured `pointer-events-none` and proper stacking.
+  - Implemented focusable step items with branded focus rings; added SR-only "Step n:" for announcements.
+  - Added number badge in top-right corner; icon frame uses white surface with `shadow-neumorphic-md`.
+  - Wrapped items with `AnimatedReveal` and added `motion-reduce:*` guards to respect reduced motion.
+  - Avoided gradients entirely; used `shadow-neumorphic-*` and solid surfaces.
+
+- 6. QA — Done
+  - Verified keyboard flow, SR labeling, focus rings, reduced motion behavior, mobile/desktop layouts, and connector line z-index.
 
 ## Leverage Existing Code (verified)
 
