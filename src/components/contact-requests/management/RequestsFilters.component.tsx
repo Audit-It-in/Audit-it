@@ -76,14 +76,14 @@ export const RequestsFilters: React.FC<RequestsFiltersProps> = ({ value, onChang
         <div className='space-y-2'>
           <label className='text-xs font-semibold text-neutral-700'>Service Type</label>
           <Select
-            onValueChange={(v) => set({ serviceType: v ? [v] : [] })}
-            value={(value.serviceType && value.serviceType[0]) || ""}
+            onValueChange={(v) => set({ serviceType: v === "all" ? [] : [v] })}
+            value={value.serviceType?.[0] ?? "all"}
           >
             <SelectTrigger className='shadow-neumorphic-inset focus:shadow-neumorphic-focus'>
               <SelectValue placeholder='All services' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value=''>All</SelectItem>
+              <SelectItem value='all'>All</SelectItem>
               {specs.map((s) => (
                 <SelectItem key={s.code} value={s.code}>
                   {s.name}

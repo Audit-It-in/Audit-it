@@ -6,7 +6,7 @@ import { Button } from "@/src/components/ui/button";
 import type { ContactRequestDetails } from "@/src/types/contact-request.type";
 
 interface RequestsListProps {
-  role: "ca" | "customer";
+  role?: "ca" | "customer";
   loading: boolean;
   data: ContactRequestDetails[];
   total: number;
@@ -15,15 +15,7 @@ interface RequestsListProps {
   onSelect?: (r: ContactRequestDetails) => void;
 }
 
-export const RequestsList: React.FC<RequestsListProps> = ({
-  role: _,
-  loading,
-  data,
-  total,
-  page,
-  onPageChange,
-  onSelect,
-}) => {
+export const RequestsList: React.FC<RequestsListProps> = ({ loading, data, total, page, onPageChange, onSelect }) => {
   const totalPages = Math.max(1, Math.ceil(total / 10));
 
   if (loading) {

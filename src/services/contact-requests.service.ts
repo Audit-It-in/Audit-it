@@ -660,14 +660,11 @@ export async function fetchContactRequestStatsViaRPC(
   dateRange?: { start?: string; end?: string }
 ): Promise<ContactRequestAnalytics> {
   try {
-    const { data, error } = await supabase.rpc(
-      "get_contact_request_stats",
-      {
-        p_ca_profile_id: caProfileId,
-        p_start_date: dateRange?.start ?? null,
-        p_end_date: dateRange?.end ?? null,
-      }
-    );
+    const { data, error } = await supabase.rpc("get_contact_request_stats", {
+      p_ca_profile_id: caProfileId,
+      p_start_date: dateRange?.start ?? null,
+      p_end_date: dateRange?.end ?? null,
+    });
 
     if (error) throw error;
 
@@ -686,7 +683,7 @@ export async function fetchContactRequestStatsViaRPC(
     };
 
     return result;
-  } catch (_error) {
+  } catch {
     // Fallback to client-side analytics if RPC fails
     return fetchContactRequestAnalytics(caProfileId, dateRange as { start: string; end: string } | undefined);
   }

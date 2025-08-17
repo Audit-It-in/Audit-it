@@ -2,7 +2,6 @@
 
 import React from "react";
 import { AccountantProfileView } from "./AccountantProfileView.component";
-import type { ProfileDetails } from "@/src/types/profile.type";
 
 interface AccountantProfilePageClientProps {
   state: string;
