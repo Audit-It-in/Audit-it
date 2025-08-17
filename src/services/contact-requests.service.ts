@@ -654,6 +654,54 @@ export function useContactRequestAnalytics(caProfileId: string, dateRange?: { st
   });
 }
 
+// Prefer server-side analytics via RPC when available
+export async function fetchContactRequestStatsViaRPC(
+  caProfileId: string,
+  dateRange?: { start?: string; end?: string }
+): Promise<ContactRequestAnalytics> {
+  try {
+    const { data, error } = await supabase.rpc(
+      "get_contact_request_stats",
+      {
+        p_ca_profile_id: caProfileId,
+        p_start_date: dateRange?.start ?? null,
+        p_end_date: dateRange?.end ?? null,
+      }
+    );
+
+    if (error) throw error;
+
+    const row = Array.isArray(data) ? data[0] : data;
+    const result: ContactRequestAnalytics = {
+      totalRequests: Number(row?.total_requests ?? 0),
+      newRequests: Number(row?.new_requests ?? 0),
+      repliedRequests: Number(row?.replied_requests ?? 0),
+      closedRequests: Number(row?.closed_requests ?? 0),
+      responseRate: Number(row?.response_rate ?? 0),
+      averageResponseTime: Number(row?.avg_response_time_hours ?? 0),
+      // Provide minimal placeholders for fields not computed by RPC
+      requestTrends: [],
+      topServiceTypes: [],
+      monthlyBreakdown: [],
+    };
+
+    return result;
+  } catch (_error) {
+    // Fallback to client-side analytics if RPC fails
+    return fetchContactRequestAnalytics(caProfileId, dateRange as { start: string; end: string } | undefined);
+  }
+}
+
+export function useContactRequestStatsRPC(caProfileId: string, dateRange?: { start?: string; end?: string }) {
+  return useQuery({
+    queryKey: ["contact-request-analytics", "rpc", caProfileId, dateRange],
+    queryFn: () => fetchContactRequestStatsViaRPC(caProfileId, dateRange),
+    enabled: !!caProfileId,
+    staleTime: 15 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+}
+
 // === MUTATION HOOKS ===
 
 // Hook for creating a new contact request
@@ -742,7 +790,7 @@ export function useOptimisticContactRequestUpdate() {
 
       return { previousRequest };
     },
-    onError: (error, variables, context) => {
+    onError: (_error, variables, context) => {
       // Rollback on error
       if (context?.previousRequest) {
         queryClient.setQueryData(["contact-request", variables.id], context.previousRequest);

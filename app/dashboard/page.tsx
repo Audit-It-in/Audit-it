@@ -259,7 +259,7 @@ function DashboardContent() {
             <Card className='p-6 hover:shadow-lg transition-shadow'>
               <h4 className='font-semibold text-neutral-900 mb-2'>Contact Requests</h4>
               <p className='text-sm text-neutral-600 mb-4'>View and manage your contact requests.</p>
-              <Button variant='outline' size='sm'>
+              <Button variant='outline' size='sm' onClick={() => router.push("/dashboard/contact-requests")}>
                 View Requests
               </Button>
             </Card>

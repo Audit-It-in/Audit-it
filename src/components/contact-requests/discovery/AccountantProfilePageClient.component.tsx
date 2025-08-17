@@ -15,12 +15,8 @@ export const AccountantProfilePageClient: React.FC<AccountantProfilePageClientPr
   district,
   username,
 }) => {
-  const handleContactClick = (profile: ProfileDetails) => {
-    // This will be implemented when the contact form is created in a later task
-    // For now, we'll show a placeholder message
-    alert(
-      `Contact request functionality will be implemented in the next task. Profile: ${profile.first_name} ${profile.last_name}`
-    );
+  const handleContactClick = () => {
+    // Modal is wired inside AccountantProfileView; this callback is used to open it
   };
 
   return (
