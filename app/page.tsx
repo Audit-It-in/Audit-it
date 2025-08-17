@@ -8,17 +8,15 @@ export const metadata: Metadata = {
 };
 
 import { LandingHero } from "@/src/components/landing/LandingHero.component";
-import { TrustBar } from "@/src/components/landing/TrustBar.component";
 import { ServicesRail } from "@/src/components/landing/ServicesRail.component";
 import { HowItWorks } from "@/src/components/landing/HowItWorks.component";
 import { BottomCTA } from "@/src/components/landing/BottomCTA.component";
 
 export default function HomePage() {
   return (
-    <div className='min-h-screen bg-white'>
+    <div className='min-h-screen bg-primary-50'>
       <main>
         <LandingHero />
-        <TrustBar />
         <ServicesRail />
         <HowItWorks />
         <BottomCTA />

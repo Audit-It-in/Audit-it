@@ -128,6 +128,46 @@
   }
 }
 
+/* Float and caret animations */
+@keyframes float-y {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float-slow {
+  animation: float-y 6s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-y 3.5s ease-in-out infinite;
+}
+
+@keyframes caret-blink {
+  0%, 40% { opacity: 1; }
+  50%, 90% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.type-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: currentColor;
+  margin-left: 2px;
+  animation: caret-blink 1s step-start infinite;
+  vertical-align: text-bottom;
+}
+
+/* Spin utility for OrbitRing */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Animation classes for Tailwind */
 @layer utilities {
   .animate-scanning {
